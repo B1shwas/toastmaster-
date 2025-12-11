@@ -121,7 +121,7 @@ function BenefitSection() {
             viewport={{ once: true }}
             variants={ANIMATION_VARIANTS.container}
           >
-            <h2 className="text-5xl font-bold te xt-white mb-6">
+            <h2 className="text-5xl font-bold text-white mb-6">
               Focus on What Matters
             </h2>
             <p className="text-lg text-slate-300 mb-8">
