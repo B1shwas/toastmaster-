@@ -56,7 +56,7 @@ function Hero() {
               </span>
             </div>
 
-            <h1 className="text-5xl md:text-7xl font-bold mb-6">
+            <h1 className="text-5xl md:text-6xl font-bold mb-6">
               <span className="text-white">Manage Your</span>
               <br />
               <span className="bg-linear-to-r from-blue-500 to-cyan-400 bg-clip-text text-transparent">
@@ -66,7 +66,7 @@ function Hero() {
               <span className="text-white">Effortlessly</span>
             </h1>
 
-            <p className="text-xl text-slate-300 mb-8 max-w-xl">
+            <p className=" text-slate-300 mb-8 max-w-xl text-lg">
               The complete platform for Toastmasters club management. Schedule
               meetings, assign roles, track progress, and engage members - all
               in one place.

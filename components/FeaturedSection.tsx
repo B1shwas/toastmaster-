@@ -88,7 +88,7 @@ function FeaturedSection() {
           <h2 className="text-5xl font-bold text-white mb-4">
             Everything You Need
           </h2>
-          <p className="text-xl text-slate-300">
+          <p className="text-lg text-slate-300">
             Powerful features designed specifically for Toastmasters clubs
           </p>
         </motion.header>
