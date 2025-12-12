@@ -1,0 +1,118 @@
+import type { Meeting, Agenda, MeetingStatus } from "../types/meeting";
+
+export const DEFAULT_AGENDA_TEMPLATE: Omit<
+  Agenda,
+  "id" | "meetingId" | "clubId" | "memberId"
+>[] = [
+  { role: "Toastmaster of the Day", allottedTime: 5, sequence: 1 },
+  { role: "General Evaluator", allottedTime: 3, sequence: 2 },
+  { role: "Timer", allottedTime: 2, sequence: 3 },
+  { role: "Ah Counter", allottedTime: 2, sequence: 4 },
+  { role: "Grammarian", allottedTime: 2, sequence: 5 },
+  { role: "Table Topics Master", allottedTime: 10, sequence: 6 },
+  { role: "Speaker 1", allottedTime: 7, sequence: 7 },
+  { role: "Evaluator 1", allottedTime: 3, sequence: 8 },
+  { role: "Speaker 2", allottedTime: 7, sequence: 9 },
+  { role: "Evaluator 2", allottedTime: 3, sequence: 10 },
+];
+
+export const SAMPLE_MEETINGS: Meeting[] = [
+  {
+    id: "meeting-1",
+    clubId: "1",
+    meetingNo: 42,
+    theme: "Leadership Through Communication",
+    date: "2025-12-15",
+    startTime: "18:00",
+    venue: "Conference Room A",
+    tmodNotes: "Focus on vocal variety and body language",
+    status: "SCHEDULED" as MeetingStatus,
+    agendas: [
+      {
+        id: "a1",
+        meetingId: "meeting-1",
+        clubId: "1",
+        role: "Toastmaster of the Day",
+        memberId: "m1",
+        memberName: "John Smith",
+        allottedTime: 5,
+        sequence: 1,
+      },
+      {
+        id: "a2",
+        meetingId: "meeting-1",
+        clubId: "1",
+        role: "General Evaluator",
+        memberId: "m2",
+        memberName: "Sarah Johnson",
+        allottedTime: 3,
+        sequence: 2,
+      },
+      {
+        id: "a3",
+        meetingId: "meeting-1",
+        clubId: "1",
+        role: "Speaker 1",
+        memberId: "m3",
+        memberName: "Mike Chen",
+        allottedTime: 7,
+        sequence: 3,
+      },
+      {
+        id: "a4",
+        meetingId: "meeting-1",
+        clubId: "1",
+        role: "Evaluator 1",
+        memberId: null,
+        allottedTime: 3,
+        sequence: 4,
+      },
+    ],
+  },
+  {
+    id: "meeting-2",
+    clubId: "1",
+    meetingNo: 43,
+    theme: "The Power of Storytelling",
+    date: "2025-12-22",
+    startTime: "18:00",
+    venue: "Main Hall",
+    tmodNotes: null,
+    status: "DRAFT" as MeetingStatus,
+    agendas: [
+      {
+        id: "a5",
+        meetingId: "meeting-2",
+        clubId: "1",
+        role: "Toastmaster of the Day",
+        memberId: null,
+        allottedTime: 5,
+        sequence: 1,
+      },
+    ],
+  },
+  {
+    id: "meeting-3",
+    clubId: "1",
+    meetingNo: 41,
+    theme: "Effective Feedback",
+    date: "2025-12-08",
+    startTime: "18:30",
+    venue: "Conference Room B",
+    tmodNotes: "Great session with excellent participation",
+    status: "COMPLETED" as MeetingStatus,
+    agendas: [],
+  },
+];
+
+export {
+  getMeetingStatusConfig,
+  formatMeetingDate,
+  formatMeetingTime,
+  formatFullMeetingDate,
+  isMeetingToday,
+  isMeetingUpcoming,
+  sortMeetingsByDate,
+  filterUpcomingMeetings,
+  filterPastMeetings,
+} from "../utils/meeting";
