@@ -31,21 +31,30 @@ interface ClubStatsGridProps {
 export function ClubStatsGrid({ stats }: ClubStatsGridProps) {
   return (
     <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-      <StatsCard
-        value={stats.totalMembers}
-        label="Total Members"
-        colorClass="text-white"
-      />
-      <StatsCard
-        value={stats.linkedMembers}
-        label="Linked Accounts"
-        colorClass="text-emerald-400"
-      />
-      <StatsCard
-        value={stats.pendingMembers}
-        label="Pending Invites"
-        colorClass="text-orange-400"
-      />
+      {[
+        {
+          value: stats.totalMembers,
+          label: "Total Members",
+          colorClass: "text-white",
+        },
+        {
+          value: stats.linkedMembers,
+          label: "Linked Accounts",
+          colorClass: "text-emerald-400",
+        },
+        {
+          value: stats.pendingMembers,
+          label: "Pending Invites",
+          colorClass: "text-orange-400",
+        },
+      ].map((stat, index) => (
+        <StatsCard
+          key={index}
+          value={stat.value}
+          label={stat.label}
+          colorClass={stat.colorClass}
+        />
+      ))}
     </div>
   );
 }

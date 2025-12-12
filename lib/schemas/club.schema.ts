@@ -53,6 +53,34 @@ export const clubSettingsSchema = z.object({
 
 export type ClubSettingsInput = z.infer<typeof clubSettingsSchema>;
 
+export const createClubSchema = z.object({
+  name: z
+    .string()
+    .min(3, "Club name must be at least 3 characters")
+    .max(100, "Club name must be less than 100 characters"),
+  description: z
+    .string()
+    .max(255, "Description must be less than 255 characters")
+    .default(""),
+  district: z
+    .string()
+    .max(100, "District must be less than 100 characters")
+    .default(""),
+  area: z
+    .string()
+    .max(100, "Area must be less than 100 characters")
+    .default(""),
+  division: z
+    .string()
+    .max(100, "Division must be less than 100 characters")
+    .default(""),
+  meetingFrequency: z.enum(["WEEKLY", "BIWEEKLY", "MONTHLY"], {
+    message: "Please select a valid meeting frequency",
+  }),
+});
+
+export type CreateClubInput = z.infer<typeof createClubSchema>;
+
 export const joinClubSchema = z.object({
   clubCode: z
     .string()

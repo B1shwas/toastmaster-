@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useMemo, useCallback } from "react";
+import { motion } from "framer-motion";
 import type { Club, ClubMember, AddMemberInput } from "@/lib/types/club";
 import type { Meeting } from "@/lib/types/meeting";
 import { SAMPLE_CLUB } from "@/lib/constants/club";
@@ -17,6 +18,26 @@ import {
   AddMemberModal,
 } from "@/components/club";
 import { MeetingListSection } from "@/components/meeting";
+
+// Animation variants
+const containerVariants = {
+  hidden: { opacity: 0 },
+  visible: {
+    opacity: 1,
+    transition: {
+      staggerChildren: 0.1,
+    },
+  },
+};
+
+const itemVariants = {
+  hidden: { opacity: 0, y: 20 },
+  visible: {
+    opacity: 1,
+    y: 0,
+    transition: { duration: 0.5 },
+  },
+};
 
 interface ClubPageProps {
   params: Promise<{ id: string }>;
@@ -97,31 +118,44 @@ export default function ClubPage({ params }: ClubPageProps) {
 
   return (
     <div className="min-h-screen bg-linear-to-b from-slate-950 to-slate-900 pt-24 pb-12 px-4">
-      <div className="max-w-7xl mx-auto space-y-8">
+      <motion.div
+        variants={containerVariants}
+        initial="hidden"
+        animate="visible"
+        className="max-w-7xl mx-auto space-y-8"
+      >
         {/* Club Info Card */}
-        <ClubInfoCard club={club} onSettingsClick={handleSettingsClick} />
+        <motion.div variants={itemVariants}>
+          <ClubInfoCard club={club} onSettingsClick={handleSettingsClick} />
+        </motion.div>
 
         {/* Stats Grid */}
-        <ClubStatsGrid stats={stats} />
+        <motion.div variants={itemVariants}>
+          <ClubStatsGrid stats={stats} />
+        </motion.div>
 
         {/* Upcoming Meetings Section */}
-        <MeetingListSection
-          meetings={upcomingMeetings}
-          clubId={club.id}
-          maxDisplay={3}
-          onScheduleMeeting={handleScheduleMeeting}
-        />
+        <motion.div variants={itemVariants}>
+          <MeetingListSection
+            meetings={upcomingMeetings}
+            clubId={club.id}
+            maxDisplay={3}
+            onScheduleMeeting={handleScheduleMeeting}
+          />
+        </motion.div>
 
         {/* Members Section */}
-        <MemberListSection
-          members={club.members}
-          searchQuery={searchQuery}
-          onSearchChange={setSearchQuery}
-          onAddMember={() => setIsAddMemberOpen(true)}
-          onRemoveMember={handleRemoveMember}
-          ownerId={club.ownerId}
-        />
-      </div>
+        <motion.div variants={itemVariants}>
+          <MemberListSection
+            members={club.members}
+            searchQuery={searchQuery}
+            onSearchChange={setSearchQuery}
+            onAddMember={() => setIsAddMemberOpen(true)}
+            onRemoveMember={handleRemoveMember}
+            ownerId={club.ownerId}
+          />
+        </motion.div>
+      </motion.div>
 
       {/* Add Member Modal */}
       <AddMemberModal

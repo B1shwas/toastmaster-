@@ -16,11 +16,11 @@ export function ClubInfoCard({ club, onSettingsClick }: ClubInfoCardProps) {
     <div className="bg-slate-800/50 border border-slate-700 rounded-2xl p-6">
       <div className="flex items-start justify-between mb-4">
         <div className="flex-1 min-w-0">
-          <h1 className="text-3xl font-bold text-white mb-2 truncate">
+          <h1 className="text-3xl font-bold text-white mb-2 wrap-break-word">
             {club.name}
           </h1>
           {club.description && (
-            <p className="text-slate-400 max-w-2xl line-clamp-2">
+            <p className="text-slate-400 max-w-2xl line-clamp-5">
               {club.description}
             </p>
           )}
@@ -40,28 +40,25 @@ export function ClubInfoCard({ club, onSettingsClick }: ClubInfoCardProps) {
 
       {/* Club Details */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mt-6">
-        <div className="flex items-center gap-2 text-slate-400">
-          <MapPin className="w-4 h-4 text-cyan-400 shrink-0" />
-          <span className="text-sm truncate">
-            {club.district || "No District"}
-          </span>
-        </div>
-        <div className="flex items-center gap-2 text-slate-400">
-          <Hash className="w-4 h-4 text-cyan-400 shrink-0" />
-          <span className="text-sm truncate">
-            {club.area || "No Area"} / {club.division || "No Division"}
-          </span>
-        </div>
-        <div className="flex items-center gap-2 text-slate-400">
-          <Calendar className="w-4 h-4 text-cyan-400 shrink-0" />
-          <span className="text-sm">
-            {formatMeetingFrequency(club.meetingFrequency)}
-          </span>
-        </div>
-        <div className="flex items-center gap-2 text-slate-400">
-          <Users className="w-4 h-4 text-cyan-400 shrink-0" />
-          <span className="text-sm">{club.members.length} Members</span>
-        </div>
+        {[
+          { icon: MapPin, label: club.district || "No District" },
+          {
+            icon: Hash,
+            label: `${club.area || "No Area"} / ${
+              club.division || "No Division"
+            }`,
+          },
+          {
+            icon: Calendar,
+            label: formatMeetingFrequency(club.meetingFrequency),
+          },
+          { icon: Users, label: `${club.members.length} Members` },
+        ].map((item, idx) => (
+          <div key={idx} className="flex items-center gap-2 text-slate-400">
+            <item.icon className="w-4 h-4 text-cyan-400 shrink-0" />
+            <span className="text-sm truncate">{item.label}</span>
+          </div>
+        ))}
       </div>
 
       {/* Club Code */}

@@ -14,7 +14,7 @@ interface ClubCodeBadgeProps {
 export function ClubCodeBadge({
   code,
   showLabel = true,
-  showHint = true,
+  showHint = false,
 }: ClubCodeBadgeProps) {
   const [copied, setCopied] = useState(false);
 
