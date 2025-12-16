@@ -50,7 +50,9 @@ function EmptyState({ onScheduleMeeting }: { onScheduleMeeting?: () => void }) {
       <div className="mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-slate-800">
         <Calendar className="h-8 w-8 text-slate-500" />
       </div>
-      <h3 className="mb-2 text-lg font-semibold text-white">No meetings found</h3>
+      <h3 className="mb-2 text-lg font-semibold text-white">
+        No meetings found
+      </h3>
       <p className="mb-6 max-w-sm text-sm text-slate-400">
         No meetings match your current filters. Try adjusting your search or
         schedule a new meeting.
@@ -120,7 +122,8 @@ export default function MeetingsPage() {
             <div>
               <h1 className="text-3xl font-bold text-white">All Meetings</h1>
               <p className="text-slate-400 mt-1">
-                {meetings.length} total meeting{meetings.length !== 1 ? "s" : ""}
+                {meetings.length} total meeting
+                {meetings.length !== 1 ? "s" : ""}
               </p>
             </div>
             <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
