@@ -1,8 +1,5 @@
 import { Club, ClubMeetingFrequency } from "../types/club";
 
-// ============================================
-// Sample Data (for development only)
-// ============================================
 export const SAMPLE_CLUB: Club = {
   id: "1",
   name: "Sunrise Toastmasters",
@@ -84,9 +81,6 @@ export const SAMPLE_CLUB: Club = {
   updatedAt: "2024-12-01",
 };
 
-// ============================================
-// Re-export utilities for backward compatibility
-// ============================================
 export {
   formatMeetingFrequency,
   formatMemberDate,

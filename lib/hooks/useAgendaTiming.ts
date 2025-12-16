@@ -2,9 +2,6 @@ import { useState, useEffect, useMemo } from "react";
 import type { Agenda } from "@/lib/types/meeting";
 import { isMeetingToday } from "@/lib/utils/meeting";
 
-// ============================================
-// Types
-// ============================================
 export interface AgendaWithTiming extends Agenda {
   startTime: string;
   endTime: string;
@@ -26,9 +23,6 @@ interface UseAgendaTimingReturn {
   assignedCount: number;
 }
 
-// ============================================
-// Time Formatting Helper
-// ============================================
 function formatMinutesToTime(totalMins: number): string {
   const h = Math.floor(totalMins / 60) % 24;
   const m = totalMins % 60;
@@ -37,9 +31,6 @@ function formatMinutesToTime(totalMins: number): string {
   return `${hour12}:${m.toString().padStart(2, "0")} ${ampm}`;
 }
 
-// ============================================
-// Hook
-// ============================================
 export function useAgendaTiming({
   agendas,
   meetingStartTime,

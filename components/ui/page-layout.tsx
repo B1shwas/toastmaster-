@@ -4,9 +4,6 @@ import Link from "next/link";
 import { ArrowLeft } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
-// ============================================
-// Types
-// ============================================
 interface BackLinkProps {
   href: string;
   label?: string;
@@ -19,9 +16,6 @@ interface NotFoundStateProps {
   backLabel?: string;
 }
 
-// ============================================
-// Back Link Component
-// ============================================
 export function BackLink({ href, label = "Back" }: BackLinkProps) {
   return (
     <Link
@@ -34,9 +28,6 @@ export function BackLink({ href, label = "Back" }: BackLinkProps) {
   );
 }
 
-// ============================================
-// Page Wrapper Component
-// ============================================
 export function PageWrapper({ children }: { children: React.ReactNode }) {
   return (
     <div className="min-h-screen bg-linear-to-b from-slate-950 to-slate-900 px-4 pb-12 pt-24">
@@ -45,9 +36,6 @@ export function PageWrapper({ children }: { children: React.ReactNode }) {
   );
 }
 
-// ============================================
-// Not Found State Component
-// ============================================
 export function NotFoundState({
   title,
   message,

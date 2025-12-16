@@ -1,11 +1,8 @@
 "use client";
 
 import { forwardRef } from "react";
-import { cn } from "@/lib/utils";
+import { cn } from "@/lib/utils/cn";
 
-// ============================================
-// Base Input Styles
-// ============================================
 const baseInputStyles =
   "w-full px-4 py-3 bg-slate-800 border rounded-lg text-white placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:border-transparent transition-colors disabled:opacity-50 disabled:cursor-not-allowed";
 
@@ -19,9 +16,6 @@ const getInputStyles = (
   return cn(baseInputStyles, borderColor, focusRing);
 };
 
-// ============================================
-// Form Field Wrapper
-// ============================================
 interface FormFieldProps {
   label: string;
   error?: string;
@@ -49,9 +43,6 @@ export function FormField({
   );
 }
 
-// ============================================
-// Text Input
-// ============================================
 interface TextInputProps extends React.InputHTMLAttributes<HTMLInputElement> {
   error?: boolean;
   focusColor?: "blue" | "emerald";
@@ -70,9 +61,6 @@ export const TextInput = forwardRef<HTMLInputElement, TextInputProps>(
 );
 TextInput.displayName = "TextInput";
 
-// ============================================
-// Textarea
-// ============================================
 interface TextareaProps
   extends React.TextareaHTMLAttributes<HTMLTextAreaElement> {
   error?: boolean;
@@ -96,9 +84,6 @@ export const Textarea = forwardRef<HTMLTextAreaElement, TextareaProps>(
 );
 Textarea.displayName = "Textarea";
 
-// ============================================
-// Select
-// ============================================
 interface SelectOption {
   value: string;
   label: string;

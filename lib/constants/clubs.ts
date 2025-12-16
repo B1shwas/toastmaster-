@@ -1,6 +1,5 @@
 import { Club, ClubMeetingFrequency } from "../types/club";
 
-// Sample clubs data for explore page
 export const SAMPLE_CLUBS: Club[] = [
   {
     id: "1",

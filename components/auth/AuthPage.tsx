@@ -3,7 +3,7 @@ import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { LoginForm } from "@/components/auth/LoginForm";
 import { SignupForm } from "@/components/auth/SignupForm";
-import type { LoginFormData, SignupFormData } from "@/lib/validations/auth";
+import type { LoginFormData, SignupFormData } from "@/lib/schemas/auth.schema";
 
 export default function AuthPage() {
   const [isLogin, setIsLogin] = useState(true);

@@ -2,7 +2,7 @@
 import { motion } from "framer-motion";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { loginSchema, type LoginFormData } from "@/lib/validations/auth";
+import { loginSchema, type LoginFormData } from "@/lib/schemas/auth.schema";
 import { FormInput } from "./FormInput";
 import { PasswordInput } from "./PasswordInput";
 
