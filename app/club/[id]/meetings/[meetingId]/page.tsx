@@ -4,8 +4,8 @@ import { useMemo } from "react";
 import { useParams } from "next/navigation";
 import { motion } from "framer-motion";
 import type { Meeting } from "@/lib/types/meeting";
-import { SAMPLE_MEETINGS } from "@/lib/constants/meeting";
 import { useAgendaTiming } from "@/lib/hooks/useAgendaTiming";
+import { useMeeting } from "@/lib/api/hooks/use-meetings";
 import {
   MeetingHeader,
   MeetingDetailsCard,
@@ -50,7 +50,7 @@ function MeetingContent({
   const { agendaWithTimes, activeAgendaIndex, totalTime, assignedCount } =
     useAgendaTiming({
       agendas,
-      meetingStartTime: meeting.startTime,
+      meetingStartTime: meeting.time,
       meetingDate: meeting.date,
       meetingStatus: meeting.status,
     });
@@ -79,9 +79,9 @@ function MeetingContent({
           />
         </motion.div>
 
-        {meeting.tmodNotes && (
+        {meeting.notes && (
           <motion.div variants={itemVariants}>
-            <MeetingNotesCard notes={meeting.tmodNotes} />
+            <MeetingNotesCard notes={meeting.notes} />
           </motion.div>
         )}
 
@@ -99,10 +99,18 @@ function MeetingContent({
 
 export default function MeetingPage() {
   const params = useParams<{ id: string; meetingId: string }>();
+  const { data: meeting, isLoading } = useMeeting(params.meetingId);
 
-  const meeting = useMemo(() => {
-    return SAMPLE_MEETINGS.find((m) => m.id === params.meetingId) || null;
-  }, [params.meetingId]);
+  if (isLoading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-linear-to-b from-slate-950 to-slate-900">
+        <div className="flex flex-col items-center gap-4">
+          <div className="w-12 h-12 border-4 border-cyan-400 border-t-transparent rounded-full animate-spin" />
+          <p className="text-slate-400">Loading meeting...</p>
+        </div>
+      </div>
+    );
+  }
 
   if (!meeting) {
     return (

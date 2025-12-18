@@ -96,7 +96,7 @@ function MeetingDetailsCardComponent({
           {
             icon: Clock,
             label: "Time",
-            value: formatMeetingTime(meeting.startTime),
+            value: formatMeetingTime(meeting.time),
           },
           { icon: MapPin, label: "Venue", value: meeting.venue || "TBD" },
           { icon: Users, label: "Roles", value: rolesValue },

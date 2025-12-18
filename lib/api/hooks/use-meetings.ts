@@ -14,12 +14,22 @@ export const meetingKeys = {
   detail: (id: string) => [...meetingKeys.details(), id] as const,
 };
 
-export function useMeetings(clubId: string) {
+export function useMeetings(
+  clubId: string,
+  status?: string,
+  startDate?: string,
+  endDate?: string,
+  page = 1,
+  limit = 10
+) {
   return useQuery({
     queryKey: meetingKeys.listByClub(clubId),
     queryFn: async () => {
-      const { data } = await api.get<MeetingsResponse>(
-        `/clubs/${clubId}/meetings`
+      const { data } = await api.get<{ data: Meeting[] }>(
+        `/meetings/club/${clubId}`,
+        {
+          params: { status, startDate, endDate, page, limit },
+        }
       );
       return data.data;
     },
@@ -31,36 +41,33 @@ export function useMeeting(id: string) {
   return useQuery({
     queryKey: meetingKeys.detail(id),
     queryFn: async () => {
-      const { data } = await api.get<MeetingResponse>(`/meetings/${id}`);
+      const { data } = await api.get<{ data: Meeting }>(`/meetings/${id}`);
       return data.data;
     },
     enabled: !!id,
   });
 }
 
-interface CreateMeetingInput {
-  clubId: string;
+export interface CreateMeetingInput {
+  meetingNo: number;
   theme: string;
-  date: string;
-  startTime: string;
+  date: string; // ISO 8601 format
+  time: string; // HH:MM:SS
   venue: string;
-  tmodNotes?: string;
+  clubId: string;
 }
 
-export function useCreateMeeting(clubId: string) {
+export function useCreateMeeting() {
   const queryClient = useQueryClient();
 
   return useMutation({
     mutationFn: async (input: CreateMeetingInput) => {
-      const { data } = await api.post<MeetingResponse>(
-        `/clubs/${clubId}/meetings`,
-        input
-      );
+      const { data } = await api.post<{ data: Meeting }>(`/meetings`, input);
       return data.data;
     },
-    onSuccess: () => {
+    onSuccess: (data) => {
       queryClient.invalidateQueries({
-        queryKey: meetingKeys.listByClub(clubId),
+        queryKey: meetingKeys.listByClub(data.clubId),
       });
     },
   });
@@ -98,6 +105,47 @@ export function useDeleteMeeting(clubId: string) {
     onSuccess: () => {
       queryClient.invalidateQueries({
         queryKey: meetingKeys.listByClub(clubId),
+      });
+    },
+  });
+}
+
+export function useUpdateMeetingStatus(meetingId: string) {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async (input: { status: string }) => {
+      const { data } = await api.patch<{ data: Meeting }>(
+        `/meetings/${meetingId}/status`,
+        input
+      );
+      return data.data;
+    },
+    onSuccess: (data) => {
+      queryClient.invalidateQueries({
+        queryKey: meetingKeys.detail(meetingId),
+      });
+      queryClient.invalidateQueries({
+        queryKey: meetingKeys.listByClub(data.clubId),
+      });
+    },
+  });
+}
+
+export function useUpdateMeetingNotes(meetingId: string) {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async (input: { notes: string }) => {
+      const { data } = await api.patch<{ data: Meeting }>(
+        `/meetings/${meetingId}/notes`,
+        input
+      );
+      return data.data;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({
+        queryKey: meetingKeys.detail(meetingId),
       });
     },
   });

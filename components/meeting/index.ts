@@ -8,3 +8,4 @@ export {
   MeetingDetailsCard,
   MeetingNotesCard,
 } from "./MeetingDetails";
+export { ScheduleMeetingModal } from "./ScheduleMeetingModal";

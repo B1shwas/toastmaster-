@@ -22,11 +22,12 @@ export interface Meeting {
   clubId: string;
   meetingNo: number;
   theme: string;
-  date: string; // YYYY-MM-DD
-  startTime: string; // HH:MM
+  date: string; // ISO 8601 format
+  time: string; // HH:MM:SS
   venue: string;
-  tmodNotes: string | null;
+  notes: string | null;
   status: MeetingStatus;
+  isDeleted: boolean;
   createdAt?: string;
   updatedAt?: string;
   // Populated from relations

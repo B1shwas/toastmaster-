@@ -2,8 +2,7 @@
 
 import { use, useState, useMemo } from "react";
 import { motion } from "framer-motion";
-import type { Meeting } from "@/lib/types/meeting";
-import { SAMPLE_MEETINGS } from "@/lib/constants/meeting";
+import { MeetingStatus, type Meeting } from "@/lib/types/meeting";
 import {
   filterUpcomingMeetings,
   sortMeetingsByDate,
@@ -14,7 +13,7 @@ import {
   ClubStatsGrid,
   MemberListSection,
 } from "@/components/club";
-import { MeetingListSection } from "@/components/meeting";
+import { MeetingListSection, ScheduleMeetingModal } from "@/components/meeting";
 import {
   useClub,
   useClubMembers,
@@ -22,8 +21,11 @@ import {
   useClubStats,
   useAddMember,
 } from "@/lib/api";
+import { useCreateMeeting, useMeetings } from "@/lib/api/hooks/use-meetings";
+import type { CreateMeetingInput } from "@/lib/api/hooks/use-meetings";
 import { useAuth } from "@/lib/hooks/useAuth";
 import type { AddMemberInput } from "@/lib/schemas/club.schema";
+import { useRouter } from "next/navigation";
 
 const ANIMATION_CONFIG = {
   container: {
@@ -71,10 +73,20 @@ export default function ClubPage({ params }: ClubPageProps) {
     user?.id ?? ""
   );
   const { data: clubMembers } = useClubMembers(clubId);
+  const { data: meetings } = useMeetings(
+    clubId,
+    MeetingStatus.SCHEDULED,
+    undefined,
+    undefined,
+    1,
+    3
+  );
   const addMemberMutation = useAddMember(clubId);
+  const createMeetingMutation = useCreateMeeting();
+  const router = useRouter();
 
-  const [meetings] = useState<Meeting[]>(SAMPLE_MEETINGS);
   const [isAddMemberOpen, setIsAddMemberOpen] = useState(false);
+  const [isScheduleMeetingOpen, setIsScheduleMeetingOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
 
   const isLoading = isClubLoading || isStatsLoading || isRoleLoading;
@@ -87,10 +99,15 @@ export default function ClubPage({ params }: ClubPageProps) {
     [clubMembers]
   );
 
-  const upcomingMeetings = useMemo(
-    () => sortMeetingsByDate(filterUpcomingMeetings(meetings)),
-    [meetings]
-  );
+  const nextMeetingNo = useMemo(() => {
+    if (!meetings || meetings.length === 0) return 1;
+    return Math.max(...meetings.map((m) => m.meetingNo)) + 1;
+  }, [meetings]);
+
+  // const upcomingMeetings = useMemo(
+  //   () => sortMeetingsByDate(filterUpcomingMeetings(meetings ?? [])),
+  //   [meetings]
+  // );
 
   // Event handlers
   const handleSettingsClick = () => {
@@ -99,8 +116,21 @@ export default function ClubPage({ params }: ClubPageProps) {
   };
 
   const handleScheduleMeeting = () => {
-    console.log("Open schedule meeting modal");
-    // TODO: Implement meeting scheduling
+    setIsScheduleMeetingOpen(true);
+  };
+
+  const handleCreateMeeting = async (
+    data: Omit<CreateMeetingInput, "clubId">
+  ) => {
+    const meetingData: CreateMeetingInput = {
+      ...data,
+      clubId,
+      date: new Date(data.date).toISOString(),
+    };
+
+    const meeting = await createMeetingMutation.mutateAsync(meetingData);
+    // Navigate to the created meeting page
+    router.push(`/club/${clubId}/meetings/${meeting.id}`);
   };
 
   const handleRemoveMember = () => {
@@ -145,10 +175,12 @@ export default function ClubPage({ params }: ClubPageProps) {
         {/* Upcoming Meetings */}
         <motion.div variants={ANIMATION_CONFIG.item}>
           <MeetingListSection
-            meetings={upcomingMeetings}
+            meetings={meetings ?? []}
             clubId={club.id}
             maxDisplay={3}
-            onScheduleMeeting={handleScheduleMeeting}
+            onScheduleMeeting={
+              canManageMembers ? handleScheduleMeeting : undefined
+            }
           />
         </motion.div>
 
@@ -174,6 +206,17 @@ export default function ClubPage({ params }: ClubPageProps) {
           onSubmit={handleAddMember}
           isLoading={addMemberMutation.isPending}
           existingEmails={existingEmails}
+        />
+      )}
+
+      {/* Schedule Meeting Modal */}
+      {canManageMembers && (
+        <ScheduleMeetingModal
+          isOpen={isScheduleMeetingOpen}
+          onClose={() => setIsScheduleMeetingOpen(false)}
+          onSubmit={handleCreateMeeting}
+          isLoading={createMeetingMutation.isPending}
+          nextMeetingNo={nextMeetingNo}
         />
       )}
     </div>

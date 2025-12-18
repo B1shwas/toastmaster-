@@ -56,7 +56,7 @@ function MeetingCardComponent({ meeting, clubId }: MeetingCardProps) {
           <span>{formatMeetingDate(meeting.date)}</span>
           <span className="text-slate-600">•</span>
           <Clock className="h-4 w-4 text-slate-500" />
-          <span>{formatMeetingTime(meeting.startTime)}</span>
+          <span>{formatMeetingTime(meeting.time)}</span>
         </div>
 
         {meeting.venue && (

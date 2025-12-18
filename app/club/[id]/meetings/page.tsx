@@ -7,8 +7,8 @@ import { Calendar, PlusCircle, Search, Filter } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { MeetingCard } from "@/components/meeting";
 import { BackLink } from "@/components/ui/page-layout";
-import { SAMPLE_MEETINGS } from "@/lib/constants/meeting";
 import { MeetingStatus, type Meeting } from "@/lib/types/meeting";
+import { useMeetings } from "@/lib/api/hooks/use-meetings";
 
 // Animation variants
 const containerVariants = {
@@ -74,11 +74,19 @@ export default function MeetingsPage() {
   const params = useParams<{ id: string }>();
   const clubId = params.id;
 
-  const [meetings] = useState<Meeting[]>(SAMPLE_MEETINGS);
+  const { data: meetings, isLoading } = useMeetings(
+    clubId,
+    undefined,
+    undefined,
+    undefined,
+    1,
+    10
+  );
   const [searchQuery, setSearchQuery] = useState("");
   const [statusFilter, setStatusFilter] = useState<FilterStatus>("ALL");
 
   const filteredMeetings = useMemo(() => {
+    if (!meetings) return [];
     return meetings
       .filter((meeting) => {
         // Filter by status
@@ -122,8 +130,11 @@ export default function MeetingsPage() {
             <div>
               <h1 className="text-3xl font-bold text-white">All Meetings</h1>
               <p className="text-slate-400 mt-1">
-                {meetings.length} total meeting
-                {meetings.length !== 1 ? "s" : ""}
+                {isLoading
+                  ? "Loading..."
+                  : `${meetings?.length ?? 0} total meeting${
+                      (meetings?.length ?? 0) !== 1 ? "s" : ""
+                    }`}
               </p>
             </div>
             <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
