@@ -18,7 +18,6 @@ export {
   formatMeetingFrequency,
   formatMemberDate,
   getInitials,
-  calculateClubStats,
   filterMembers,
   copyToClipboard,
   isLinkedMember,

@@ -3,10 +3,7 @@
 import { use, useState, useMemo } from "react";
 import { motion } from "framer-motion";
 import { MeetingStatus, type Meeting } from "@/lib/types/meeting";
-import {
-  filterUpcomingMeetings,
-  sortMeetingsByDate,
-} from "@/lib/utils/meeting";
+
 import {
   AddMemberModal,
   ClubInfoCard,

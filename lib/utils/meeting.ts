@@ -100,17 +100,6 @@ export function isMeetingUpcoming(dateString: string): boolean {
   return meetingDate >= now;
 }
 
-export function sortMeetingsByDate(
-  meetings: Meeting[],
-  order: "asc" | "desc" = "asc"
-): Meeting[] {
-  return [...meetings].sort((a, b) => {
-    const dateA = new Date(a.date + "T" + a.startTime).getTime();
-    const dateB = new Date(b.date + "T" + b.startTime).getTime();
-    return order === "asc" ? dateA - dateB : dateB - dateA;
-  });
-}
-
 export function filterUpcomingMeetings(meetings: Meeting[]): Meeting[] {
   return meetings.filter(
     (m) =>
