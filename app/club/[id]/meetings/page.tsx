@@ -211,7 +211,7 @@ export default function MeetingsPage() {
             transition={{ delay: 0.4 }}
             className="mt-8 text-center text-slate-500 text-sm"
           >
-            Showing {filteredMeetings.length} of {meetings.length} meetings
+            Showing {filteredMeetings.length} of {meetings!.length} meetings
           </motion.div>
         )}
       </div>
