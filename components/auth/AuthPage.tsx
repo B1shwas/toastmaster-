@@ -4,30 +4,51 @@ import { motion, AnimatePresence } from "framer-motion";
 import { LoginForm } from "@/components/auth/LoginForm";
 import { SignupForm } from "@/components/auth/SignupForm";
 import type { LoginFormData, SignupFormData } from "@/lib/schemas/auth.schema";
+import { useLogin, useSignup } from "@/lib/api";
 
 export default function AuthPage() {
   const [isLogin, setIsLogin] = useState(true);
 
-  const handleLoginSubmit = (data: LoginFormData) => {
-    console.log("Login data:", data);
-    // TODO: Implement login logic
+  const login = useLogin();
+  const signup = useSignup();
+
+  const handleLoginSubmit = async (data: LoginFormData) => {
+    try {
+      await login.mutateAsync(data);
+      window.location.href = "/dashboard";
+    } catch (error) {
+      console.error("Login failed", error);
+
+      // we will add toast or anything needed later
+    }
   };
 
-  const handleSignupSubmit = (data: SignupFormData) => {
-    console.log("Signup data:", data);
-    // TODO: Implement signup logic
+  const handleSignupSubmit = async (data: SignupFormData) => {
+    try {
+      await signup.mutateAsync({
+        fullName: data.fullName,
+        email: data.email,
+        password: data.password,
+      });
+
+      await login.mutateAsync({ email: data.email, password: data.password });
+
+      window.location.href = "/dashboard";
+    } catch (err) {
+      console.error("Signup or login failed", err);
+      // here as well we will be adding toast or anything needed later
+    }
   };
 
   return (
     <div className="min-h-screen bg-linear-to-br from-slate-900 via-blue-900 to-slate-900 flex items-center justify-center p-6">
-      {/* Floating Background Elements */}
       <motion.div
         animate={{
           y: [0, -30, 0],
           x: [0, 20, 0],
         }}
         transition={{ duration: 8, repeat: Infinity, ease: "easeInOut" }}
-        className="absolute top-20 left-20 w-72 h-72 bg-linear-to-br from-blue-500 to-cyan-400 rounded-full opacity-10 blur-3xl"
+        className="absolute top-20 left-20 w-72 h-72 bg-linear-to-br from-blue-500 to-cyan-400 rounded-full opacity-10  blur-3xl"
         aria-hidden="true"
       />
       <motion.div
@@ -41,7 +62,6 @@ export default function AuthPage() {
       />
 
       <div className="w-full max-w-2xl relative z-10">
-        {/* Auth Form */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
@@ -58,29 +78,27 @@ export default function AuthPage() {
 
             {/* Toggle Buttons */}
             <div className="flex gap-2 mb-8 bg-slate-800/50 p-2 rounded-xl">
-              <button
-                onClick={() => setIsLogin(true)}
-                className={`flex-1 py-3 rounded-lg font-semibold transition ${
-                  isLogin
-                    ? "bg-linear-to-br from-blue-500 to-cyan-400 text-white shadow-lg"
-                    : "text-slate-400 hover:text-white"
-                }`}
-              >
-                Login
-              </button>
-              <button
-                onClick={() => setIsLogin(false)}
-                className={`flex-1 py-3 rounded-lg font-semibold transition ${
-                  !isLogin
-                    ? "bg-linear-to-br from-blue-500 to-cyan-400 text-white shadow-lg"
-                    : "text-slate-400 hover:text-white"
-                }`}
-              >
-                Sign Up
-              </button>
+              {[
+                { key: "login", label: "Login", value: true },
+                { key: "signup", label: "Sign Up", value: false },
+              ].map((opt) => {
+                const active = isLogin === opt.value;
+                return (
+                  <button
+                    key={opt.key}
+                    onClick={() => setIsLogin(opt.value)}
+                    className={`flex-1 py-3 rounded-lg font-semibold transition ${
+                      active
+                        ? "bg-linear-to-br from-blue-500 to-cyan-400 text-white shadow-lg"
+                        : "text-slate-400 hover:text-white"
+                    }`}
+                  >
+                    {opt.label}
+                  </button>
+                );
+              })}
             </div>
 
-            {/* Form */}
             <AnimatePresence mode="wait">
               <motion.div
                 key={isLogin ? "login" : "signup"}
@@ -98,7 +116,6 @@ export default function AuthPage() {
             </AnimatePresence>
           </div>
 
-          {/* Footer Text */}
           <p className="text-center text-slate-400 text-sm mt-6">
             {isLogin ? "Don't have an account? " : "Already have an account? "}
             <button

@@ -5,12 +5,12 @@ export enum ClubMeetingFrequency {
 }
 
 export interface ClubMember {
-  id: string;
-  userId: string | null;
-  clubId: string;
-  memberName: string;
-  memberEmail: string;
-  dateJoined: string;
+  member_id: string;
+  member_member_name: string;
+  member_member_email: string;
+  member_date_joined: string;
+  member_role: "OWNER" | "ADMIN" | "MEMBER";
+  isRegisteredUser: boolean;
 }
 
 export interface Club {
@@ -22,16 +22,14 @@ export interface Club {
   division: string | null;
   ownerId: string;
   meetingFrequency: ClubMeetingFrequency;
-  clubCode: string;
-  members: ClubMember[];
   createdAt?: string;
   updatedAt?: string;
 }
 
 export interface ClubStats {
   totalMembers: number;
-  linkedMembers: number;
-  pendingMembers: number;
+  registeredUsers: number;
+  guestMembers: number;
 }
 
 export interface ApiResponse<T> {
@@ -60,6 +58,7 @@ export interface MemberCardProps {
   onRemove?: (memberId: string) => void;
   onEdit?: (member: ClubMember) => void;
   isOwner?: boolean;
+  canViewEmail?: boolean;
 }
 
 export interface MemberListProps {
@@ -69,6 +68,7 @@ export interface MemberListProps {
   onAddMember: () => void;
   onRemoveMember?: (memberId: string) => void;
   isLoading?: boolean;
+  canManageMembers?: boolean;
 }
 
 export type {

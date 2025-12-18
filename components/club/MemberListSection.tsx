@@ -15,6 +15,7 @@ interface MemberListSectionProps {
   onRemoveMember?: (memberId: string) => void;
   ownerId?: string;
   isLoading?: boolean;
+  canManageMembers?: boolean;
 }
 
 function MemberListSectionComponent({
@@ -25,6 +26,7 @@ function MemberListSectionComponent({
   onRemoveMember,
   ownerId,
   isLoading = false,
+  canManageMembers = false,
 }: MemberListSectionProps) {
   const filteredMembers = useMemo(
     () => filterMembers(members, searchQuery),
@@ -47,32 +49,34 @@ function MemberListSectionComponent({
           </div>
         </div>
 
-        <div className="flex items-center gap-3 w-full sm:w-auto">
-          {/* Search */}
-          <div className="relative flex-1 sm:flex-none">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-500" />
-            <input
-              type="text"
-              value={searchQuery}
-              onChange={(e) => onSearchChange(e.target.value)}
-              placeholder="Search members..."
-              className="w-full sm:w-64 pl-10 pr-4 py-2 bg-slate-800/50 border border-slate-700 rounded-xl text-white text-sm placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-blue-500"
-              aria-label="Search members"
-            />
-          </div>
+        {canManageMembers && (
+          <div className="flex items-center gap-3 w-full sm:w-auto">
+            {/* Search */}
+            <div className="relative flex-1 sm:flex-none">
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-500" />
+              <input
+                type="text"
+                value={searchQuery}
+                onChange={(e) => onSearchChange(e.target.value)}
+                placeholder="Search members..."
+                className="w-full sm:w-64 pl-10 pr-4 py-2 bg-slate-800/50 border border-slate-700 rounded-xl text-white text-sm placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                aria-label="Search members"
+              />
+            </div>
 
-          {/* Add Member Button */}
-          <motion.button
-            whileHover={{ scale: 1.05 }}
-            whileTap={{ scale: 0.95 }}
-            onClick={onAddMember}
-            disabled={isLoading}
-            className="bg-linear-to-br from-blue-500 to-cyan-400 text-white font-bold px-4 py-2 rounded-xl shadow-lg flex items-center gap-2 shrink-0 disabled:opacity-50 disabled:cursor-not-allowed"
-          >
-            <UserPlus className="w-4 h-4" />
-            <span className="hidden sm:inline">Add Member</span>
-          </motion.button>
-        </div>
+            {/* Add Member Button */}
+            <motion.button
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
+              onClick={onAddMember}
+              disabled={isLoading}
+              className="bg-linear-to-br from-blue-500 to-cyan-400 text-white font-bold px-4 py-2 rounded-xl shadow-lg flex items-center gap-2 shrink-0 disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              <UserPlus className="w-4 h-4" />
+              <span className="hidden sm:inline">Add Member</span>
+            </motion.button>
+          </div>
+        )}
       </div>
 
       {/* Members Grid */}
@@ -81,10 +85,10 @@ function MemberListSectionComponent({
           {filteredMembers.length > 0 ? (
             filteredMembers.map((member) => (
               <MemberCard
-                key={member.id}
+                key={member.member_id}
                 member={member}
-                onRemove={onRemoveMember}
-                isOwner={member.userId === ownerId}
+                onRemove={canManageMembers ? onRemoveMember : undefined}
+                canViewEmail={canManageMembers}
               />
             ))
           ) : (

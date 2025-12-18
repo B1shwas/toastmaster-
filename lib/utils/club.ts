@@ -21,7 +21,7 @@ export function formatMemberDate(dateString: string): string {
   if (!dateString) return "Unknown";
 
   try {
-    const date = new Date(dateString + "T00:00:00");
+    const date = new Date(dateString);
 
     if (isNaN(date.getTime())) {
       return "Invalid date";
@@ -41,7 +41,7 @@ export function formatFullDate(dateString: string): string {
   if (!dateString) return "Unknown";
 
   try {
-    const date = new Date(dateString + "T00:00:00");
+    const date = new Date(dateString);
 
     if (isNaN(date.getTime())) {
       return "Invalid date";
@@ -78,20 +78,8 @@ export function truncateText(text: string, maxLength: number): string {
   return text.slice(0, maxLength).trim() + "...";
 }
 
-export function calculateClubStats(members: ClubMember[]): ClubStats {
-  if (!Array.isArray(members)) {
-    return { totalMembers: 0, linkedMembers: 0, pendingMembers: 0 };
-  }
-
-  const totalMembers = members.length;
-  const linkedMembers = members.filter((m) => m.userId !== null).length;
-  const pendingMembers = totalMembers - linkedMembers;
-
-  return { totalMembers, linkedMembers, pendingMembers };
-}
-
 export function isLinkedMember(member: ClubMember): boolean {
-  return member.userId !== null;
+  return member.isRegisteredUser;
 }
 
 export function filterMembers(
@@ -104,8 +92,8 @@ export function filterMembers(
 
   return members.filter(
     (member) =>
-      member.memberName.toLowerCase().includes(normalizedQuery) ||
-      member.memberEmail.toLowerCase().includes(normalizedQuery)
+      member.member_member_name.toLowerCase().includes(normalizedQuery) ||
+      member.member_member_email.toLowerCase().includes(normalizedQuery)
   );
 }
 
@@ -114,8 +102,8 @@ export function sortMembersByDate(
   order: "asc" | "desc" = "desc"
 ): ClubMember[] {
   return [...members].sort((a, b) => {
-    const dateA = new Date(a.dateJoined).getTime();
-    const dateB = new Date(b.dateJoined).getTime();
+    const dateA = new Date(a.member_date_joined).getTime();
+    const dateB = new Date(b.member_date_joined).getTime();
     return order === "desc" ? dateB - dateA : dateA - dateB;
   });
 }
@@ -154,6 +142,6 @@ export function isDuplicateMember(
   email: string
 ): boolean {
   return members.some(
-    (m) => m.memberEmail.toLowerCase() === email.toLowerCase()
+    (m) => m.member_member_email.toLowerCase() === email.toLowerCase()
   );
 }

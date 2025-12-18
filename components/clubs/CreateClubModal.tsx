@@ -75,13 +75,11 @@ export function CreateClubModal({
   };
 
   const onSubmit = async (data: CreateClubInput) => {
-    try {
-      await onCreate(data);
-      reset();
-      onClose();
-    } catch {
-      // Error handling is done in the parent component
-    }
+    await onCreate(data);
+    // Only reset and close if the mutation was successful
+    // The parent component will handle errors
+    reset();
+    onClose();
   };
 
   return (

@@ -21,8 +21,11 @@ function MemberCardComponent({
   onRemove,
   onEdit,
   isOwner = false,
+  canViewEmail = false,
 }: MemberCardProps) {
-  const isLinked = isLinkedMember(member);
+  const isLinked = member.isRegisteredUser;
+  const memberIsOwner = member.member_role === "OWNER";
+  console.log("memememe", member.member_date_joined);
 
   return (
     <motion.div
@@ -41,34 +44,36 @@ function MemberCardComponent({
               : "bg-slate-600"
           }`}
         >
-          {getInitials(member.memberName)}
+          {getInitials(member.member_member_name)}
         </div>
 
         {/* Info */}
         <div className="flex-1 min-w-0">
           <div className="flex items-center gap-2">
             <h4 className="text-white font-semibold truncate">
-              {member.memberName}
+              {member.member_member_name}
             </h4>
             {isLinked && (
               <UserCheck className="w-4 h-4 text-emerald-400 shrink-0" />
             )}
-            {isOwner && (
+            {memberIsOwner && (
               <span className="text-xs bg-cyan-500/20 text-cyan-400 px-2 py-0.5 rounded-full">
                 Owner
               </span>
             )}
           </div>
-          <div className="flex items-center gap-1 text-slate-400 text-sm">
-            <Mail className="w-3 h-3 shrink-0" />
-            <span className="truncate">{member.memberEmail}</span>
-          </div>
+          {canViewEmail && (
+            <div className="flex items-center gap-1 text-slate-400 text-sm">
+              <Mail className="w-3 h-3 shrink-0" />
+              <span className="truncate">{member.member_member_email}</span>
+            </div>
+          )}
         </div>
 
         {/* Joined Date */}
         <div className="hidden sm:flex items-center gap-1 text-slate-500 text-xs shrink-0">
           <Calendar className="w-3 h-3" />
-          <span>{formatMemberDate(member.dateJoined)}</span>
+          <span>{formatMemberDate(member.member_date_joined)}</span>
         </div>
 
         {/* Actions Dropdown */}
@@ -85,7 +90,7 @@ function MemberCardComponent({
             >
               {onRemove && (
                 <DropdownMenuItem
-                  onClick={() => onRemove(member.id)}
+                  onClick={() => onRemove(member.member_id)}
                   className="text-red-400 focus:text-red-400 focus:bg-red-500/10 cursor-pointer"
                 >
                   <Trash2 className="w-4 h-4 mr-2" />

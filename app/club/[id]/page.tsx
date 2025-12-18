@@ -1,141 +1,149 @@
 "use client";
 
-import { useState, useMemo, useCallback } from "react";
+import { use, useState, useMemo } from "react";
 import { motion } from "framer-motion";
-import type { Club, ClubMember, AddMemberInput } from "@/lib/types/club";
 import type { Meeting } from "@/lib/types/meeting";
-import { SAMPLE_CLUB } from "@/lib/constants/club";
 import { SAMPLE_MEETINGS } from "@/lib/constants/meeting";
-import { calculateClubStats } from "@/lib/utils/club";
 import {
   filterUpcomingMeetings,
   sortMeetingsByDate,
 } from "@/lib/utils/meeting";
 import {
+  AddMemberModal,
   ClubInfoCard,
   ClubStatsGrid,
   MemberListSection,
-  AddMemberModal,
 } from "@/components/club";
 import { MeetingListSection } from "@/components/meeting";
+import {
+  useClub,
+  useClubMembers,
+  useClubRole,
+  useClubStats,
+  useAddMember,
+} from "@/lib/api";
+import { useAuth } from "@/lib/hooks/useAuth";
+import type { AddMemberInput } from "@/lib/schemas/club.schema";
 
-// Animation variants
-const containerVariants = {
-  hidden: { opacity: 0 },
-  visible: {
-    opacity: 1,
-    transition: {
-      staggerChildren: 0.1,
+const ANIMATION_CONFIG = {
+  container: {
+    hidden: { opacity: 0 },
+    visible: {
+      opacity: 1,
+      transition: {
+        staggerChildren: 0.1,
+      },
     },
   },
-};
-
-const itemVariants = {
-  hidden: { opacity: 0, y: 20 },
-  visible: {
-    opacity: 1,
-    y: 0,
-    transition: { duration: 0.5 },
+  item: {
+    hidden: { opacity: 0, y: 20 },
+    visible: {
+      opacity: 1,
+      y: 0,
+      transition: { duration: 0.5 },
+    },
   },
-};
+} as const;
 
 interface ClubPageProps {
   params: Promise<{ id: string }>;
 }
 
-export default function ClubPage({ params }: ClubPageProps) {
-  // In real app, fetch club data using the id from params
-  // const { id } = use(params);
-  // const { data: club, isLoading } = useClub(id);
+export function LoadingState() {
+  return (
+    <div className="min-h-screen flex justify-center items-center text-white bg-linear-to-b from-slate-950 to-slate-900">
+      <div className="flex flex-col items-center gap-4">
+        <div className="w-12 h-12 border-4 border-cyan-400 border-t-transparent rounded-full animate-spin" />
+        <p className="text-slate-400">Loading...</p>
+      </div>
+    </div>
+  );
+}
 
-  const [club, setClub] = useState<Club>(SAMPLE_CLUB);
+export default function ClubPage({ params }: ClubPageProps) {
+  const { id: clubId } = use(params);
+  const { user } = useAuth();
+
+  const { data: club, isLoading: isClubLoading } = useClub(clubId);
+  const { data: clubStats, isLoading: isStatsLoading } = useClubStats(clubId);
+  const { data: roleData, isLoading: isRoleLoading } = useClubRole(
+    clubId,
+    user?.id ?? ""
+  );
+  const { data: clubMembers } = useClubMembers(clubId);
+  const addMemberMutation = useAddMember(clubId);
+
   const [meetings] = useState<Meeting[]>(SAMPLE_MEETINGS);
   const [isAddMemberOpen, setIsAddMemberOpen] = useState(false);
-  const [isAddingMember, setIsAddingMember] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
 
-  // Memoized stats calculation
-  const stats = useMemo(() => calculateClubStats(club.members), [club.members]);
+  const isLoading = isClubLoading || isStatsLoading || isRoleLoading;
+  const role = roleData?.role;
+  const canSeeCode = role === "OWNER" || role === "ADMIN";
+  const canManageMembers = role === "OWNER" || role === "ADMIN";
 
-  // Memoized upcoming meetings (sorted by date)
+  const existingEmails = useMemo(
+    () => clubMembers?.map((m) => m.member_member_email) ?? [],
+    [clubMembers]
+  );
+
   const upcomingMeetings = useMemo(
     () => sortMeetingsByDate(filterUpcomingMeetings(meetings)),
     [meetings]
   );
 
-  // Existing emails for duplicate validation
-  const existingEmails = useMemo(
-    () => club.members.map((m) => m.memberEmail),
-    [club.members]
-  );
+  // Event handlers
+  const handleSettingsClick = () => {
+    console.log("Navigate to settings");
+    // TODO: Implement settings navigation
+  };
 
-  // Handlers
-  const handleAddMember = useCallback(
-    async (data: AddMemberInput) => {
-      setIsAddingMember(true);
+  const handleScheduleMeeting = () => {
+    console.log("Open schedule meeting modal");
+    // TODO: Implement meeting scheduling
+  };
 
-      try {
-        // Simulate API call
-        await new Promise((resolve) => setTimeout(resolve, 500));
+  const handleRemoveMember = () => {
+    console.log("Remove member");
+  };
 
-        const newMember: ClubMember = {
-          id: `m${Date.now()}`,
-          userId: null,
-          clubId: club.id,
-          memberName: data.memberName,
-          memberEmail: data.memberEmail,
-          dateJoined: new Date().toISOString().split("T")[0],
-        };
+  const handleAddMember = async (data: AddMemberInput) => {
+    await addMemberMutation.mutateAsync(data);
+    // Modal will close automatically after successful addition
+  };
 
-        setClub((prev) => ({
-          ...prev,
-          members: [...prev.members, newMember],
-        }));
-      } finally {
-        setIsAddingMember(false);
-      }
-    },
-    [club.id]
-  );
+  // Loading state
+  if (isLoading || !club || !clubStats) {
+    return <LoadingState />;
+  }
 
-  const handleRemoveMember = useCallback((memberId: string) => {
-    // In real app, show confirmation dialog first
-    setClub((prev) => ({
-      ...prev,
-      members: prev.members.filter((m) => m.id !== memberId),
-    }));
-  }, []);
-
-  const handleSettingsClick = useCallback(() => {
-    // Navigate to settings or open settings modal
-    console.log("Settings clicked");
-  }, []);
-
-  const handleScheduleMeeting = useCallback(() => {
-    // Navigate to meeting creation or open modal
-    console.log("Schedule meeting clicked");
-  }, []);
+  console.log("Club Members:", clubMembers);
 
   return (
     <div className="min-h-screen bg-linear-to-b from-slate-950 to-slate-900 pt-24 pb-12 px-4">
       <motion.div
-        variants={containerVariants}
+        variants={ANIMATION_CONFIG.container}
         initial="hidden"
         animate="visible"
         className="max-w-7xl mx-auto space-y-8"
       >
-        {/* Club Info Card */}
-        <motion.div variants={itemVariants}>
-          <ClubInfoCard club={club} onSettingsClick={handleSettingsClick} />
+        {/* Club Information */}
+        <motion.div variants={ANIMATION_CONFIG.item}>
+          <ClubInfoCard
+            club={club}
+            onSettingsClick={handleSettingsClick}
+            totalMembers={clubStats.totalMembers}
+            canSeeCode={canSeeCode}
+          />
         </motion.div>
 
-        {/* Stats Grid */}
-        <motion.div variants={itemVariants}>
-          <ClubStatsGrid stats={stats} />
+        {/* Statistics Grid */}
+        <motion.div variants={ANIMATION_CONFIG.item}>
+          <ClubStatsGrid stats={clubStats} />
         </motion.div>
 
-        {/* Upcoming Meetings Section */}
-        <motion.div variants={itemVariants}>
+        {/* Upcoming Meetings */}
+        <motion.div variants={ANIMATION_CONFIG.item}>
           <MeetingListSection
             meetings={upcomingMeetings}
             clubId={club.id}
@@ -145,26 +153,29 @@ export default function ClubPage({ params }: ClubPageProps) {
         </motion.div>
 
         {/* Members Section */}
-        <motion.div variants={itemVariants}>
+        <motion.div variants={ANIMATION_CONFIG.item}>
           <MemberListSection
-            members={club.members}
+            members={clubMembers ?? []}
             searchQuery={searchQuery}
             onSearchChange={setSearchQuery}
             onAddMember={() => setIsAddMemberOpen(true)}
             onRemoveMember={handleRemoveMember}
             ownerId={club.ownerId}
+            canManageMembers={canManageMembers}
           />
         </motion.div>
       </motion.div>
 
       {/* Add Member Modal */}
-      <AddMemberModal
-        isOpen={isAddMemberOpen}
-        onClose={() => setIsAddMemberOpen(false)}
-        onSubmit={handleAddMember}
-        isLoading={isAddingMember}
-        existingEmails={existingEmails}
-      />
+      {canManageMembers && (
+        <AddMemberModal
+          isOpen={isAddMemberOpen}
+          onClose={() => setIsAddMemberOpen(false)}
+          onSubmit={handleAddMember}
+          isLoading={addMemberMutation.isPending}
+          existingEmails={existingEmails}
+        />
+      )}
     </div>
   );
 }

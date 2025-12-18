@@ -26,8 +26,8 @@ export function SignupForm({ onSubmit }: SignupFormProps) {
         label="Full Name"
         type="text"
         placeholder="John Doe"
-        error={errors.name?.message}
-        {...register("name")}
+        error={errors.fullName?.message}
+        {...register("fullName")}
       />
 
       <FormInput

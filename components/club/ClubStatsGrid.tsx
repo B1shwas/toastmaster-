@@ -38,12 +38,12 @@ export function ClubStatsGrid({ stats }: ClubStatsGridProps) {
           colorClass: "text-white",
         },
         {
-          value: stats.linkedMembers,
+          value: stats.registeredUsers,
           label: "Linked Accounts",
           colorClass: "text-emerald-400",
         },
         {
-          value: stats.pendingMembers,
+          value: stats.guestMembers,
           label: "Pending Invites",
           colorClass: "text-orange-400",
         },

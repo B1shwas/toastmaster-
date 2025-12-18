@@ -1,0 +1,217 @@
+import {
+  useQuery,
+  useMutation,
+  useQueryClient,
+  keepPreviousData,
+} from "@tanstack/react-query";
+import { api, getErrorMessage } from "@/lib/api";
+import type {
+  Club,
+  ClubMember,
+  ClubResponse,
+  ClubMembersResponse,
+  ClubStats,
+} from "@/lib/types/club";
+import type {
+  AddMemberInput,
+  CreateClubInput,
+  JoinClubInput,
+} from "@/lib/schemas/club.schema";
+
+export const clubKeys = {
+  all: ["clubs"] as const,
+  lists: () => [...clubKeys.all, "list"] as const,
+  list: (page: number, limit: number) =>
+    [...clubKeys.lists(), page, limit] as const,
+  details: () => [...clubKeys.all, "detail"] as const,
+  detail: (id: string) => [...clubKeys.details(), id] as const,
+  members: (clubId: string) => [...clubKeys.detail(clubId), "members"] as const,
+  stats: (clubId: string) => ["club-stats", clubId] as const,
+  role: (clubId: string, userId: string) =>
+    ["club-role", clubId, userId] as const,
+  code: (clubId: string) => ["club-code", clubId] as const,
+};
+
+export function useClubs(page = 1, limit = 6) {
+  return useQuery({
+    queryKey: clubKeys.list(page, limit),
+    queryFn: async () => {
+      const { data } = await api.get<{ data: Club[] }>("/club/all/list", {
+        params: { page, limit },
+      });
+      return data.data;
+    },
+    placeholderData: keepPreviousData,
+    staleTime: 5 * 60 * 1000,
+  });
+}
+
+export function useClub(id: string) {
+  return useQuery({
+    queryKey: clubKeys.detail(id),
+    queryFn: async () => {
+      const { data } = await api.get<ClubResponse>(`/club/${id}`);
+      return data.data;
+    },
+    enabled: !!id,
+  });
+}
+
+export function useClubMembers(clubId: string) {
+  return useQuery({
+    queryKey: clubKeys.members(clubId),
+    queryFn: async () => {
+      const { data } = await api.get<{ data: ClubMember[] }>(
+        `/club/${clubId}/members`
+      );
+      return data.data;
+    },
+    enabled: !!clubId,
+  });
+}
+
+export function useCreateClub() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async (input: CreateClubInput) => {
+      const { data } = await api.post<ClubResponse>("/club/create", input);
+      return data.data;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({
+        queryKey: clubKeys.lists(),
+        exact: false,
+      });
+      queryClient.invalidateQueries({
+        queryKey: ["user-clubs"],
+        exact: false,
+      });
+    },
+    onError: (error) => {
+      console.error("Failed to create club:", getErrorMessage(error));
+    },
+  });
+}
+
+export function useJoinClub() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async (input: JoinClubInput) => {
+      const { data } = await api.post<ClubResponse>("/club/join", input);
+      return data.data;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({
+        queryKey: clubKeys.lists(),
+        exact: false,
+      });
+      queryClient.invalidateQueries({
+        queryKey: ["user-clubs"],
+        exact: false,
+      });
+    },
+  });
+}
+
+export function useAddMember(clubId: string) {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async (input: AddMemberInput) => {
+      const { data } = await api.post<{ data: ClubMember }>(
+        `/club/${clubId}/member/add`,
+        input
+      );
+      return data.data;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: clubKeys.detail(clubId) });
+      queryClient.invalidateQueries({ queryKey: clubKeys.members(clubId) });
+      queryClient.invalidateQueries({ queryKey: clubKeys.stats(clubId) });
+    },
+    onError: (error) => {
+      console.error("Failed to add member:", getErrorMessage(error));
+    },
+  });
+}
+
+export function useRemoveMember(clubId: string) {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async (memberId: string) => {
+      await api.delete(`/clubs/${clubId}/members/${memberId}`);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: clubKeys.detail(clubId) });
+      queryClient.invalidateQueries({ queryKey: clubKeys.members(clubId) });
+    },
+  });
+}
+
+export function useClubStats(clubId: string) {
+  return useQuery({
+    queryKey: clubKeys.stats(clubId),
+    queryFn: async () => {
+      const { data } = await api.get<{ data: ClubStats }>(`/club/stats`, {
+        params: { clubId },
+      });
+      return data.data;
+    },
+    enabled: !!clubId,
+  });
+}
+
+export function useClubRole(clubId: string, userId: string) {
+  return useQuery({
+    queryKey: clubKeys.role(clubId, userId),
+    queryFn: async () => {
+      const { data } = await api.get<{
+        data: {
+          member: boolean;
+          role: "OWNER" | "ADMIN" | "MEMBER";
+        };
+      }>("/club/member/role", {
+        params: { clubId, userId },
+      });
+      return data.data;
+    },
+    enabled: !!clubId && !!userId,
+  });
+}
+
+export function useClubCode(clubId: string, enabled: boolean) {
+  return useQuery({
+    queryKey: clubKeys.code(clubId),
+    queryFn: async () => {
+      const { data } = await api.get<{ data: { code: string } }>("/club/code", {
+        params: { clubId },
+      });
+      return data.data;
+    },
+    enabled: enabled && !!clubId,
+  });
+}
+
+export function useRegenerateClubCode() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async (clubId: string) => {
+      const { data } = await api.post<{ data: { code: string } }>(
+        "/club/code/regenerate",
+        {},
+        { params: { clubId } }
+      );
+      return data.data;
+    },
+    onSuccess: (data, variables) => {
+      queryClient.setQueryData(clubKeys.code(variables), data);
+    },
+    onError: (error) => {
+      console.error("Failed to regenerate club code:", getErrorMessage(error));
+    },
+  });
+}
