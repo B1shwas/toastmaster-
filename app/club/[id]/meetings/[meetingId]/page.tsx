@@ -1,11 +1,12 @@
 "use client";
 
-import { useMemo } from "react";
 import { useParams } from "next/navigation";
 import { motion } from "framer-motion";
 import type { Meeting } from "@/lib/types/meeting";
 import { useAgendaTiming } from "@/lib/hooks/useAgendaTiming";
 import { useMeeting } from "@/lib/api/hooks/use-meetings";
+import { useClubRole } from "@/lib/api/hooks/use-clubs";
+import { useAuthStore } from "@/lib/stores/useAuthStore";
 import {
   MeetingHeader,
   MeetingDetailsCard,
@@ -41,9 +42,11 @@ const itemVariants = {
 function MeetingContent({
   meeting,
   clubId,
+  canManageNotes,
 }: {
   meeting: Meeting;
   clubId: string;
+  canManageNotes: boolean;
 }) {
   const agendas = meeting.agendas || [];
 
@@ -79,11 +82,14 @@ function MeetingContent({
           />
         </motion.div>
 
-        {meeting.notes && (
-          <motion.div variants={itemVariants}>
-            <MeetingNotesCard notes={meeting.notes} />
-          </motion.div>
-        )}
+        <motion.div variants={itemVariants}>
+          <MeetingNotesCard
+            notes={meeting.notes}
+            meetingId={meeting.id}
+            clubId={clubId}
+            canManageNotes={canManageNotes}
+          />
+        </motion.div>
 
         <motion.div variants={itemVariants}>
           <AgendaList
@@ -99,11 +105,16 @@ function MeetingContent({
 
 export default function MeetingPage() {
   const params = useParams<{ id: string; meetingId: string }>();
+  const { user } = useAuthStore();
   const { data: meeting, isLoading } = useMeeting(params.meetingId);
+  const { data: roleData } = useClubRole(params.id, user?.id || "");
+
+  const canManageNotes =
+    roleData?.role === "OWNER" || roleData?.role === "ADMIN";
 
   if (isLoading) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-linear-to-b from-slate-950 to-slate-900">
+      <div className="min-h-screen flex items-center justify-center bg-gradient-to-b from-slate-950 to-slate-900">
         <div className="flex flex-col items-center gap-4">
           <div className="w-12 h-12 border-4 border-cyan-400 border-t-transparent rounded-full animate-spin" />
           <p className="text-slate-400">Loading meeting...</p>
@@ -123,5 +134,11 @@ export default function MeetingPage() {
     );
   }
 
-  return <MeetingContent meeting={meeting} clubId={params.id} />;
+  return (
+    <MeetingContent
+      meeting={meeting}
+      clubId={params.id}
+      canManageNotes={canManageNotes}
+    />
+  );
 }

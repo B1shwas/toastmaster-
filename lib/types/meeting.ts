@@ -22,7 +22,7 @@ export interface Meeting {
   clubId: string;
   meetingNo: number;
   theme: string;
-  date: string; // ISO 8601 format
+  date: Date; // ISO 8601 format
   time: string; // HH:MM:SS
   venue: string;
   notes: string | null;

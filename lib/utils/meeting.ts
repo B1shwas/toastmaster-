@@ -35,11 +35,12 @@ export function getMeetingStatusConfig(status: MeetingStatus) {
   return STATUS_CONFIG[status] || STATUS_CONFIG.DRAFT;
 }
 
-export function formatMeetingDate(dateString: string): string {
+export function formatMeetingDate(dateString: Date): string {
   if (!dateString) return "TBD";
 
+  const date = new Date(dateString);
+
   try {
-    const date = new Date(dateString + "T00:00:00");
     if (isNaN(date.getTime())) return "Invalid date";
 
     return date.toLocaleDateString("en-US", {
@@ -66,14 +67,15 @@ export function formatMeetingTime(time24: string): string {
   }
 }
 
-export function formatFullMeetingDate(dateString: string): string {
-  if (!dateString) return "TBD";
+export function formatFullMeetingDate(date: Date): string {
+  if (!date) return "TBD";
+
+  const dateObj = new Date(date);
 
   try {
-    const date = new Date(dateString + "T00:00:00");
-    if (isNaN(date.getTime())) return "Invalid date";
+    if (isNaN(dateObj.getTime())) return "Invalid date";
 
-    return date.toLocaleDateString("en-US", {
+    return dateObj.toLocaleDateString("en-US", {
       weekday: "long",
       year: "numeric",
       month: "long",
@@ -84,19 +86,25 @@ export function formatFullMeetingDate(dateString: string): string {
   }
 }
 
-export function isMeetingToday(dateString: string): boolean {
+export function isMeetingToday(date: Date): boolean {
   const now = new Date();
-  const today = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(
-    2,
-    "0"
-  )}-${String(now.getDate()).padStart(2, "0")}`;
-  return dateString === today;
+  const dateObj = new Date(date);
+  return (
+    dateObj.getDate() === now.getDate() &&
+    dateObj.getMonth() === now.getMonth() &&
+    dateObj.getFullYear() === now.getFullYear()
+  );
 }
 
-export function isMeetingUpcoming(dateString: string): boolean {
+export function isMeetingUpcoming(date: Date): boolean {
   const now = new Date();
+  const dateObj = new Date(date);
   now.setHours(0, 0, 0, 0);
-  const meetingDate = new Date(dateString + "T00:00:00");
+  const meetingDate = new Date(
+    dateObj.getFullYear(),
+    dateObj.getMonth(),
+    dateObj.getDate()
+  );
   return meetingDate >= now;
 }
 

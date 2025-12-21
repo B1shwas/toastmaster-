@@ -63,7 +63,11 @@ export default function ClubPage({ params }: ClubPageProps) {
   const { id: clubId } = use(params);
   const { user } = useAuth();
 
-  const { data: club, isLoading: isClubLoading } = useClub(clubId);
+  const {
+    data: club,
+    isLoading: isClubLoading,
+    isError: isClubError,
+  } = useClub(clubId);
   const { data: clubStats, isLoading: isStatsLoading } = useClubStats(clubId);
   const { data: roleData, isLoading: isRoleLoading } = useClubRole(
     clubId,
@@ -138,6 +142,17 @@ export default function ClubPage({ params }: ClubPageProps) {
     await addMemberMutation.mutateAsync(data);
     // Modal will close automatically after successful addition
   };
+
+  if (isClubError) {
+    return (
+      <div className="min-h-screen flex flex-col justify-center items-center text-white bg-linear-to-b from-slate-950 to-slate-900">
+        <h1 className="text-2xl font-bold mb-4">Club Not Found</h1>
+        <p className="text-slate-400">
+          The club you are looking for does not exist or has been removed.
+        </p>
+      </div>
+    );
+  }
 
   // Loading state
   if (isLoading || !club || !clubStats) {

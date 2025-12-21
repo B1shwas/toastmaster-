@@ -132,20 +132,27 @@ export function useUpdateMeetingStatus(meetingId: string) {
   });
 }
 
-export function useUpdateMeetingNotes(meetingId: string) {
+export function useUpdateMeetingNotes() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: async (input: { notes: string }) => {
+    mutationFn: async (input: {
+      meetingId: string;
+      notes: string;
+      clubId: string;
+    }) => {
       const { data } = await api.patch<{ data: Meeting }>(
-        `/meetings/${meetingId}/notes`,
-        input
+        `/meetings/${input.meetingId}/notes`,
+        { notes: input.notes, clubId: input.clubId }
       );
       return data.data;
     },
-    onSuccess: () => {
+    onSuccess: (data, variables) => {
       queryClient.invalidateQueries({
-        queryKey: meetingKeys.detail(meetingId),
+        queryKey: meetingKeys.detail(variables.meetingId),
+      });
+      queryClient.invalidateQueries({
+        queryKey: meetingKeys.listByClub(variables.clubId),
       });
     },
   });

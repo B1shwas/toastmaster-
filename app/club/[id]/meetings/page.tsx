@@ -203,7 +203,6 @@ export default function MeetingsPage() {
           <EmptyState onScheduleMeeting={handleScheduleMeeting} />
         )}
 
-        {/* Results count */}
         {filteredMeetings.length > 0 && (
           <motion.div
             initial={{ opacity: 0 }}

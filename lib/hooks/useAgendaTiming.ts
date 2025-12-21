@@ -12,7 +12,7 @@ export interface AgendaWithTiming extends Agenda {
 interface UseAgendaTimingOptions {
   agendas: Agenda[];
   meetingStartTime: string;
-  meetingDate: string;
+  meetingDate: Date;
   meetingStatus: string;
 }
 
