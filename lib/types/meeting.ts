@@ -8,13 +8,18 @@ export enum MeetingStatus {
 
 export interface Agenda {
   id: string;
-  meetingId: string;
-  clubId: string;
-  role: string;
-  memberId: string | null;
-  memberName?: string;
-  allottedTime: number;
+  title: string;
+  description: string | null;
+  date: string;
+  roleName: string;
+  duration: number;
   sequence: number;
+  meetingId: string;
+  memberId: string | null;
+  memberName: string | null;
+  notes: string | null;
+  createdAt?: string;
+  updatedAt?: string;
 }
 
 export interface Meeting {

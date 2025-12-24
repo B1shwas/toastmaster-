@@ -20,7 +20,6 @@ interface UseAgendaTimingReturn {
   agendaWithTimes: AgendaWithTiming[];
   activeAgendaIndex: number;
   totalTime: number;
-  assignedCount: number;
 }
 
 function formatMinutesToTime(totalMins: number): string {
@@ -31,37 +30,62 @@ function formatMinutesToTime(totalMins: number): string {
   return `${hour12}:${m.toString().padStart(2, "0")} ${ampm}`;
 }
 
+export function calculateAgendaTimes<T extends { duration: number }>(
+  agendas: T[],
+  meetingStartTime: string
+): (T & { startTime: string; endTime: string })[] {
+  const [hours, minutes] = meetingStartTime.split(":").map(Number);
+  let cumulativeMinutes = 0;
+
+  return agendas.map((agenda) => {
+    const startMinutes = hours * 60 + minutes + cumulativeMinutes;
+    const endMinutes = startMinutes + agenda.duration;
+
+    const startHours = Math.floor(startMinutes / 60) % 24;
+    const startMins = startMinutes % 60;
+    const endHours = Math.floor(endMinutes / 60) % 24;
+    const endMins = endMinutes % 60;
+
+    const startTime = `${String(startHours).padStart(2, "0")}:${String(
+      startMins
+    ).padStart(2, "0")}`;
+    const endTime = `${String(endHours).padStart(2, "0")}:${String(
+      endMins
+    ).padStart(2, "0")}`;
+
+    cumulativeMinutes += agenda.duration;
+
+    return {
+      ...agenda,
+      startTime,
+      endTime,
+    };
+  });
+}
+
 export function useAgendaTiming({
   agendas,
   meetingStartTime,
   meetingDate,
   meetingStatus,
 }: UseAgendaTimingOptions): UseAgendaTimingReturn {
-  // Sort agendas by sequence
   const sortedAgendas = useMemo(
     () => [...agendas].sort((a, b) => a.sequence - b.sequence),
     [agendas]
   );
 
-  // Calculate totals
   const totalTime = useMemo(
-    () => agendas.reduce((sum, a) => sum + a.allottedTime, 0),
+    () => agendas.reduce((sum, a) => sum + a.duration, 0),
     [agendas]
   );
 
-  const assignedCount = useMemo(
-    () => agendas.filter((a) => a.memberId).length,
-    [agendas]
-  );
-
-  // Calculate start/end times for each agenda item
   const agendaWithTimes = useMemo(() => {
     const [startHour, startMinute] = meetingStartTime.split(":").map(Number);
     let currentMinutes = startHour * 60 + startMinute;
 
     return sortedAgendas.map((agenda) => {
       const startMins = currentMinutes;
-      const endMins = currentMinutes + agenda.allottedTime;
+      const endMins = currentMinutes + agenda.duration;
       currentMinutes = endMins;
 
       return {
@@ -74,7 +98,6 @@ export function useAgendaTiming({
     });
   }, [sortedAgendas, meetingStartTime]);
 
-  // Track current time for active agenda detection
   const [currentMinutes, setCurrentMinutes] = useState(() => {
     const now = new Date();
     return now.getHours() * 60 + now.getMinutes();
@@ -84,7 +107,6 @@ export function useAgendaTiming({
   const meetingIsLive = meetingStatus === "IN_PROGRESS";
   const shouldTrackTime = isToday || meetingIsLive;
 
-  // Update current time every minute, only if needed
   useEffect(() => {
     if (!shouldTrackTime) return;
 
@@ -96,7 +118,6 @@ export function useAgendaTiming({
     return () => clearInterval(interval);
   }, [shouldTrackTime]);
 
-  // Find active agenda index
   const activeAgendaIndex = useMemo(() => {
     if (!shouldTrackTime) return -1;
 
@@ -109,6 +130,5 @@ export function useAgendaTiming({
     agendaWithTimes,
     activeAgendaIndex,
     totalTime,
-    assignedCount,
   };
 }

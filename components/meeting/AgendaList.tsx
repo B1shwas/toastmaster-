@@ -1,62 +1,280 @@
 "use client";
 
-import { memo } from "react";
-import { Users } from "lucide-react";
-import { AgendaRow } from "./AgendaRow";
-import type { AgendaWithTiming } from "@/lib/hooks/useAgendaTiming";
+import { useState, useEffect } from "react";
+import { Reorder, useDragControls, motion } from "framer-motion";
+import { GripVertical, Clock, User, Trash2, Edit2, Save } from "lucide-react";
+import { toast } from "@/hooks/use-toast";
+import { useDeleteAgenda, useReorderAgendas } from "@/lib/api/hooks/use-agenda";
+import type { Agenda } from "@/lib/types/agenda";
+import type { Meeting } from "@/lib/types/meeting";
+import { calculateAgendaTimes } from "@/lib/hooks/useAgendaTiming";
 
 interface AgendaListProps {
-  agendas: AgendaWithTiming[];
-  activeIndex: number;
-  totalTime: number;
+  agendas: Agenda[];
+  meeting: Meeting;
+  meetingId: string;
+  clubId: string;
+  isEditMode: boolean;
+  onEditAgenda: (agenda: Agenda) => void;
 }
 
-function EmptyAgendaState() {
+interface AgendaWithTiming extends Agenda {
+  startTime: string;
+  endTime: string;
+}
+
+type AgendaItemProps = {
+  item: AgendaWithTiming;
+  index: number;
+  isEditMode: boolean;
+  onDelete?: (id: string) => void;
+  onEdit?: (agenda: AgendaWithTiming) => void;
+  isDeletingId?: string | null;
+};
+
+function AgendaItem({
+  item,
+  index,
+  isEditMode,
+  onDelete,
+  onEdit,
+  isDeletingId,
+}: AgendaItemProps) {
+  const controls = useDragControls();
+  const isDeleting = isDeletingId === item.id;
+
+  if (!isEditMode) {
+    return (
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ delay: index * 0.05 }}
+        className="bg-slate-800/50 border border-cyan-500/20 rounded-xl p-4 hover:bg-slate-800/70 transition-all"
+      >
+        <div className="flex items-center gap-4">
+          <div className="w-10 h-10 bg-slate-700 rounded-lg flex items-center justify-center text-cyan-400 font-bold shrink-0">
+            {item.sequence}
+          </div>
+
+          <div className="flex-1 min-w-0">
+            <h4 className="text-white font-medium mb-1">{item.title}</h4>
+            <div className="flex items-center gap-3 flex-wrap">
+              <span className="text-cyan-400 text-xs px-2 py-1 bg-cyan-500/10 rounded inline-flex items-center gap-1">
+                <User size={12} />
+                {item.roleName}
+              </span>
+              <span className="text-slate-400 text-xs inline-flex items-center gap-1">
+                <Clock size={12} />
+                {item.startTime} - {item.endTime}
+              </span>
+              <span className="text-slate-500 text-xs">
+                ({item.duration} min)
+              </span>
+            </div>
+          </div>
+
+          <div className="flex items-center gap-2 px-3 py-2 bg-green-500/10 border border-green-500/20 rounded-lg">
+            <User className="w-4 h-4 text-green-400" />
+            <span className="text-green-400 text-sm font-medium">
+              {item.memberName || "Unassigned"}
+            </span>
+          </div>
+        </div>
+      </motion.div>
+    );
+  }
+
   return (
-    <div className="rounded-xl border-2 border-dashed border-slate-700 bg-slate-800/20 px-6 py-10 text-center">
-      <Users className="mx-auto mb-3 h-8 w-8 text-slate-600" />
-      <p className="text-slate-400">No agenda items yet</p>
-      <p className="mt-1 text-sm text-slate-500">
-        Add roles to build your meeting agenda
-      </p>
+    <Reorder.Item
+      value={item}
+      dragListener={false}
+      dragControls={controls}
+      whileDrag={{
+        scale: 1.02,
+        boxShadow: "0 10px 40px rgba(0,0,0,0.3)",
+        zIndex: 10,
+      }}
+      className="group"
+    >
+      <div className="bg-slate-800/50 border border-cyan-500/20 rounded-xl p-4 hover:bg-slate-800/70 transition-all">
+        <div className="flex items-center gap-4">
+          <button
+            className="cursor-grab active:cursor-grabbing text-slate-500 hover:text-cyan-400 transition-colors touch-none"
+            onPointerDown={(e) => controls.start(e)}
+          >
+            <GripVertical size={20} />
+          </button>
+
+          <div className="w-10 h-10 bg-slate-700 rounded-lg flex items-center justify-center text-cyan-400 font-bold shrink-0">
+            {item.sequence}
+          </div>
+
+          <div className="flex-1 min-w-0">
+            <h4 className="text-white font-medium mb-1">{item.title}</h4>
+            <div className="flex items-center gap-3 flex-wrap">
+              <span className="text-cyan-400 text-xs px-2 py-1 bg-cyan-500/10 rounded inline-flex items-center gap-1">
+                <User size={12} />
+                {item.roleName}
+              </span>
+              <span className="text-slate-500 text-xs inline-flex items-center gap-1">
+                <Clock size={12} />
+                {item.duration} min
+              </span>
+            </div>
+          </div>
+
+          <button
+            onClick={() => onEdit?.(item)}
+            onPointerDown={(e) => e.stopPropagation()}
+            className="opacity-0 group-hover:opacity-100 transition-opacity p-2 hover:bg-green-500/20 rounded-lg text-slate-400 hover:text-green-400"
+          >
+            <Edit2 size={18} />
+          </button>
+          <button
+            onClick={() => onDelete?.(item.id)}
+            onPointerDown={(e) => e.stopPropagation()}
+            disabled={isDeleting}
+            className="opacity-0 group-hover:opacity-100 transition-opacity p-2 hover:bg-red-500/20 rounded-lg text-slate-400 hover:text-red-400 disabled:opacity-50"
+          >
+            <Trash2 size={18} />
+          </button>
+        </div>
+      </div>
+    </Reorder.Item>
+  );
+}
+
+export default function AgendaList({
+  agendas,
+  meeting,
+  meetingId,
+  clubId,
+  isEditMode,
+  onEditAgenda,
+}: AgendaListProps) {
+  const sortedAgendas = agendas.sort((a, b) => a.sequence - b.sequence);
+  const agendasWithTimes = calculateAgendaTimes(
+    sortedAgendas,
+    meeting.time
+  ) as AgendaWithTiming[];
+
+  const [items, setItems] = useState<AgendaWithTiming[]>(agendasWithTimes);
+  const [isDirty, setIsDirty] = useState(false);
+  const [isDeletingId, setIsDeletingId] = useState<string | null>(null);
+
+  const deleteMutation = useDeleteAgenda(meetingId);
+  const reorderMutation = useReorderAgendas(meetingId);
+
+  useEffect(() => {
+    const updatedAgendas = calculateAgendaTimes(
+      agendas.sort((a, b) => a.sequence - b.sequence),
+      meeting.time
+    ) as AgendaWithTiming[];
+    setItems(updatedAgendas);
+    setIsDirty(false);
+  }, [agendas, meeting.time]);
+
+  const handleReorder = (newOrder: AgendaWithTiming[]) => {
+    setItems(newOrder);
+    setIsDirty(true);
+  };
+
+  const handleSaveOrder = async () => {
+    try {
+      const agendaIds = items.map((item) => item.id);
+      await reorderMutation.mutateAsync({ agendaIds, clubId });
+      toast({
+        title: "Success",
+        description: "Agenda order saved successfully",
+        variant: "success",
+      });
+      setIsDirty(false);
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Failed to save agenda order",
+        variant: "destructive",
+      });
+    }
+  };
+
+  const handleDelete = async (id: string) => {
+    if (!confirm("Are you sure you want to delete this agenda item?")) return;
+
+    try {
+      setIsDeletingId(id);
+      await deleteMutation.mutateAsync({ agendaId: id, clubId });
+      toast({
+        title: "Success",
+        description: "Agenda item deleted successfully",
+        variant: "success",
+      });
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Failed to delete agenda item",
+        variant: "destructive",
+      });
+    } finally {
+      setIsDeletingId(null);
+    }
+  };
+
+  if (!isEditMode) {
+    return (
+      <div className="space-y-3">
+        {items.map((item, index) => (
+          <AgendaItem
+            key={item.id}
+            item={item}
+            index={index}
+            isEditMode={false}
+          />
+        ))}
+      </div>
+    );
+  }
+
+  return (
+    <div className="space-y-4">
+      {isDirty && (
+        <motion.div
+          initial={{ opacity: 0, y: -10 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="flex items-center justify-between p-4 bg-cyan-500/10 border border-cyan-500/30 rounded-xl"
+        >
+          <p className="text-cyan-400 text-sm font-medium">
+            You have unsaved changes to the agenda order
+          </p>
+          <button
+            onClick={handleSaveOrder}
+            disabled={reorderMutation.isPending}
+            className="px-4 py-2 bg-cyan-500 hover:bg-cyan-600 text-white rounded-lg font-medium transition-all flex items-center gap-2 disabled:opacity-50"
+          >
+            <Save className="w-4 h-4" />
+            {reorderMutation.isPending ? "Saving..." : "Save Order"}
+          </button>
+        </motion.div>
+      )}
+
+      <Reorder.Group
+        axis="y"
+        values={items}
+        onReorder={handleReorder}
+        className="space-y-3"
+      >
+        {items.map((item, index) => (
+          <AgendaItem
+            key={item.id}
+            item={item}
+            index={index}
+            isEditMode={true}
+            onDelete={handleDelete}
+            onEdit={onEditAgenda}
+            isDeletingId={isDeletingId}
+          />
+        ))}
+      </Reorder.Group>
     </div>
   );
 }
-
-function AgendaListComponent({
-  agendas,
-  activeIndex,
-  totalTime,
-}: AgendaListProps) {
-  const hasAgendas = agendas.length > 0;
-
-  return (
-    <section className="space-y-4">
-      {/* Header */}
-      <div className="flex items-center justify-between">
-        <h2 className="text-lg font-semibold text-white">Agenda</h2>
-        {hasAgendas && (
-          <span className="text-sm text-slate-400">Total: {totalTime} min</span>
-        )}
-      </div>
-
-      {/* Content */}
-      {!hasAgendas ? (
-        <EmptyAgendaState />
-      ) : (
-        <div className="space-y-2">
-          {agendas.map((agenda, index) => (
-            <AgendaRow
-              key={agenda.id}
-              agenda={agenda}
-              index={index}
-              isActive={index === activeIndex}
-            />
-          ))}
-        </div>
-      )}
-    </section>
-  );
-}
-
-export const AgendaList = memo(AgendaListComponent);

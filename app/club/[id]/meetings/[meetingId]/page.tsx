@@ -3,7 +3,6 @@
 import { useParams } from "next/navigation";
 import { motion } from "framer-motion";
 import type { Meeting } from "@/lib/types/meeting";
-import { useAgendaTiming } from "@/lib/hooks/useAgendaTiming";
 import { useMeeting } from "@/lib/api/hooks/use-meetings";
 import { useClubRole } from "@/lib/api/hooks/use-clubs";
 import { useAuthStore } from "@/lib/stores/useAuthStore";
@@ -11,7 +10,7 @@ import {
   MeetingHeader,
   MeetingDetailsCard,
   MeetingNotesCard,
-  AgendaList,
+  MeetingAgendaManager,
 } from "@/components/meeting";
 import {
   PageWrapper,
@@ -43,20 +42,15 @@ function MeetingContent({
   meeting,
   clubId,
   canManageNotes,
+  userRole,
 }: {
   meeting: Meeting;
   clubId: string;
   canManageNotes: boolean;
+  userRole: "OWNER" | "ADMIN" | "MEMBER";
 }) {
   const agendas = meeting.agendas || [];
-
-  const { agendaWithTimes, activeAgendaIndex, totalTime, assignedCount } =
-    useAgendaTiming({
-      agendas,
-      meetingStartTime: meeting.time,
-      meetingDate: meeting.date,
-      meetingStatus: meeting.status,
-    });
+  const assignedCount = agendas.filter((a) => a.memberId).length;
 
   return (
     <PageWrapper>
@@ -92,10 +86,10 @@ function MeetingContent({
         </motion.div>
 
         <motion.div variants={itemVariants}>
-          <AgendaList
-            agendas={agendaWithTimes}
-            activeIndex={activeAgendaIndex}
-            totalTime={totalTime}
+          <MeetingAgendaManager
+            meeting={meeting}
+            clubId={clubId}
+            userRole={userRole}
           />
         </motion.div>
       </motion.div>
@@ -111,10 +105,11 @@ export default function MeetingPage() {
 
   const canManageNotes =
     roleData?.role === "OWNER" || roleData?.role === "ADMIN";
+  const userRole = (roleData?.role || "MEMBER") as "OWNER" | "ADMIN" | "MEMBER";
 
   if (isLoading) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gradient-to-b from-slate-950 to-slate-900">
+      <div className="min-h-screen flex items-center justify-center bg-linear-to-b from-slate-950 to-slate-900">
         <div className="flex flex-col items-center gap-4">
           <div className="w-12 h-12 border-4 border-cyan-400 border-t-transparent rounded-full animate-spin" />
           <p className="text-slate-400">Loading meeting...</p>
@@ -139,6 +134,7 @@ export default function MeetingPage() {
       meeting={meeting}
       clubId={params.id}
       canManageNotes={canManageNotes}
+      userRole={userRole}
     />
   );
 }
