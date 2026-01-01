@@ -9,6 +9,7 @@ type AuthState = {
   clearAuth: () => void;
   isAuthenticated: () => boolean;
   userClubs?: any[];
+  upcomingMeetings?: any[];
 };
 
 const getInitialToken = () => {
