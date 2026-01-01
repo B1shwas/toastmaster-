@@ -7,7 +7,7 @@ import { Calendar, PlusCircle, Search, Filter } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { MeetingCard } from "@/components/meeting";
 import { BackLink } from "@/components/ui/page-layout";
-import { MeetingStatus, type Meeting } from "@/lib/types/meeting";
+import { MeetingStatus } from "@/lib/types/meeting";
 import { useMeetings } from "@/lib/api/hooks/use-meetings";
 
 // Animation variants
@@ -132,9 +132,8 @@ export default function MeetingsPage() {
               <p className="text-slate-400 mt-1">
                 {isLoading
                   ? "Loading..."
-                  : `${meetings?.length ?? 0} total meeting${
-                      (meetings?.length ?? 0) !== 1 ? "s" : ""
-                    }`}
+                  : `${meetings?.length ?? 0} total meeting${(meetings?.length ?? 0) !== 1 ? "s" : ""
+                  }`}
               </p>
             </div>
             <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
