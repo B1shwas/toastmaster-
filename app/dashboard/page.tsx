@@ -3,7 +3,6 @@
 import { useState, useEffect } from "react";
 import { JoinClubModal, CreateClubModal } from "@/components/clubs";
 import type { CreateClubInput } from "@/components/clubs/CreateClubModal";
-import type { Club } from "@/lib/types/club";
 import type { JoinClubInput } from "@/lib/schemas/club.schema";
 import {
   WelcomeSection,
@@ -13,7 +12,7 @@ import {
   UnauthenticatedView,
 } from "@/components/dashboard";
 import { useAuth } from "@/lib/hooks/useAuth";
-import { useCreateClub, useJoinClub, useUserClub } from "@/lib/api";
+import { useCreateClub, useJoinClub, useUserClub, useUpcomingMeetings } from "@/lib/api";
 import useAuthStore from "@/lib/stores/useAuthStore";
 
 export default function DashboardPage() {
@@ -23,6 +22,7 @@ export default function DashboardPage() {
 
   const { user, isAuthenticated, isLoading: isAuthLoading } = useAuth();
   const { data: clubs = [], isLoading: isUserClubsLoading } = useUserClub();
+  const { data: meetings = [], isLoading: isMeetingsLoading } = useUpcomingMeetings();
   const createClubMutation = useCreateClub();
   const joinClubMutation = useJoinClub();
 
@@ -34,7 +34,8 @@ export default function DashboardPage() {
     useAuthStore.setState({ userClubs: clubs });
   }, [clubs]);
 
-  const isAnyLoading = isAuthLoading || isUserClubsLoading;
+
+  const isAnyLoading = isAuthLoading || isUserClubsLoading || isMeetingsLoading;
 
   if (!isMounted) return null;
 
@@ -62,7 +63,7 @@ export default function DashboardPage() {
         <WelcomeSection
           name={user.name}
           clubsCount={clubs.length}
-          meetingsCount={5}
+          meetingsCount={meetings.length}
         />
 
         <QuickActions
@@ -76,7 +77,7 @@ export default function DashboardPage() {
           onCreateClick={() => setIsCreateModalOpen(true)}
         />
 
-        <UpcomingMeetingsSection />
+        <UpcomingMeetingsSection meetings={meetings} />
       </div>
 
       {isAnyLoading && (
