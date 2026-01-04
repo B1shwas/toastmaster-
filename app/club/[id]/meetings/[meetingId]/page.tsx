@@ -17,6 +17,7 @@ import {
   BackLink,
   NotFoundState,
 } from "@/components/ui/page-layout";
+import { ListAllAgendas } from "@/components/agendaReport/ListAllAgendas";
 
 // Animation variants
 const containerVariants = {
@@ -85,6 +86,8 @@ function MeetingContent({
           />
         </motion.div>
 
+              <ListAllAgendas club_id={clubId}  meeting_id={meeting?.id} />
+        
         <motion.div variants={itemVariants}>
           <MeetingAgendaManager
             meeting={meeting}

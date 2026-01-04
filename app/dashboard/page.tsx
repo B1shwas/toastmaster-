@@ -15,6 +15,8 @@ import {
 import { useAuth } from "@/lib/hooks/useAuth";
 import { useCreateClub, useJoinClub, useUserClub } from "@/lib/api";
 import useAuthStore from "@/lib/stores/useAuthStore";
+import { useAgendaReport } from "@/lib/api/hooks/use-agenda-report";
+import { ListAllAgendas } from "@/components/agendaReport/ListAllAgendas";
 
 export default function DashboardPage() {
   const [isMounted, setIsMounted] = useState(false);
@@ -29,6 +31,8 @@ export default function DashboardPage() {
   useEffect(() => {
     setIsMounted(true);
   }, []);
+  
+  useAgendaReport();
 
   useEffect(() => {
     useAuthStore.setState({ userClubs: clubs });
@@ -69,7 +73,9 @@ export default function DashboardPage() {
           onJoinClick={() => setIsJoinModalOpen(true)}
           onCreateClick={() => setIsCreateModalOpen(true)}
         />
-
+        
+        <ListAllAgendas/>
+        
         <YourClubsSection
           clubs={clubs || []}
           onJoinClick={() => setIsJoinModalOpen(true)}

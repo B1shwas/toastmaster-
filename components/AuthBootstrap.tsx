@@ -3,6 +3,6 @@
 import { useProfile } from "@/lib/api";
 
 export function AuthBootstrap() {
-  useProfile();
-  return null;
+    useProfile();
+    return null;
 }

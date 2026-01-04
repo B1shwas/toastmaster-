@@ -1,4 +1,5 @@
 import { create } from "zustand";
+import { REPORT } from "../types/agendaReport";
 
 type User = any;
 
@@ -9,6 +10,8 @@ type AuthState = {
   clearAuth: () => void;
   isAuthenticated: () => boolean;
   userClubs?: any[];
+    agendaReport?: REPORT[];
+    setAgendaReport: (report: REPORT[]) => void;
 };
 
 const getInitialToken = () => {
@@ -31,6 +34,12 @@ export const useAuthStore = create<AuthState>((set, get) => ({
     set({ token: null, user: null });
   },
   isAuthenticated: () => Boolean(get().token),
+  
+  
+  agendaReport : [],
+  setAgendaReport: (reports: REPORT[]) => {
+      set({ agendaReport: reports });
+  },
 }));
 
 export default useAuthStore;
