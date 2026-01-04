@@ -3,101 +3,102 @@
 import { useState, useEffect } from "react";
 import { JoinClubModal, CreateClubModal } from "@/components/clubs";
 import type { CreateClubInput } from "@/components/clubs/CreateClubModal";
-import type { Club } from "@/lib/types/club";
 import type { JoinClubInput } from "@/lib/schemas/club.schema";
 import {
-  WelcomeSection,
-  QuickActions,
-  YourClubsSection,
-  UpcomingMeetingsSection,
-  UnauthenticatedView,
+	WelcomeSection,
+	QuickActions,
+	YourClubsSection,
+	UpcomingMeetingsSection,
+	UnauthenticatedView,
 } from "@/components/dashboard";
 import { useAuth } from "@/lib/hooks/useAuth";
-import { useCreateClub, useJoinClub, useUserClub } from "@/lib/api";
+import { useCreateClub, useJoinClub, useUserClub, useUpcomingMeetings } from "@/lib/api";
 import useAuthStore from "@/lib/stores/useAuthStore";
 
 export default function DashboardPage() {
-  const [isMounted, setIsMounted] = useState(false);
-  const [isJoinModalOpen, setIsJoinModalOpen] = useState(false);
-  const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
+	const [isMounted, setIsMounted] = useState(false);
+	const [isJoinModalOpen, setIsJoinModalOpen] = useState(false);
+	const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
 
-  const { user, isAuthenticated, isLoading: isAuthLoading } = useAuth();
-  const { data: clubs = [], isLoading: isUserClubsLoading } = useUserClub();
-  const createClubMutation = useCreateClub();
-  const joinClubMutation = useJoinClub();
+	const { user, isAuthenticated, isLoading: isAuthLoading } = useAuth();
+	const { data: clubs = [], isLoading: isUserClubsLoading } = useUserClub();
+	const { data: meetings = [], isLoading: isMeetingsLoading } = useUpcomingMeetings();
+	const createClubMutation = useCreateClub();
+	const joinClubMutation = useJoinClub();
 
-  useEffect(() => {
-    setIsMounted(true);
-  }, []);
+	useEffect(() => {
+		setIsMounted(true);
+	}, []);
 
-  useEffect(() => {
-    useAuthStore.setState({ userClubs: clubs });
-  }, [clubs]);
+	useEffect(() => {
+		useAuthStore.setState({ userClubs: clubs });
+	}, [clubs]);
 
-  const isAnyLoading = isAuthLoading || isUserClubsLoading;
 
-  if (!isMounted) return null;
+	const isAnyLoading = isAuthLoading || isUserClubsLoading || isMeetingsLoading;
 
-  if (!isAuthenticated) return <UnauthenticatedView />;
+	if (!isMounted) return null;
 
-  const handleCreate = async (data: CreateClubInput) => {
-    await createClubMutation.mutateAsync(data);
-  };
+	if (!isAuthenticated) return <UnauthenticatedView />;
 
-  const handleJoinClub = async (data: JoinClubInput) => {
-    await joinClubMutation.mutateAsync(data);
-  };
+	const handleCreate = async (data: CreateClubInput) => {
+		await createClubMutation.mutateAsync(data);
+	};
 
-  if (isAnyLoading) {
-    return (
-      <div className="min-h-screen bg-linear-to-b from-slate-950 to-slate-900 pt-24 pb-12 px-4 flex justify-center items-center">
-        <p className="text-white">Loading...</p>
-      </div>
-    );
-  }
+	const handleJoinClub = async (data: JoinClubInput) => {
+		await joinClubMutation.mutateAsync(data);
+	};
 
-  return (
-    <div className="min-h-screen bg-linear-to-b from-slate-950 to-slate-900 pt-24 pb-12 px-4">
-      <div className="max-w-7xl mx-auto">
-        <WelcomeSection
-          name={user.name}
-          clubsCount={clubs.length}
-          meetingsCount={5}
-        />
+	if (isAnyLoading) {
+		return (
+			<div className="min-h-screen bg-linear-to-b from-slate-950 to-slate-900 pt-24 pb-12 px-4 flex justify-center items-center">
+				<p className="text-white">Loading...</p>
+			</div>
+		);
+	}
 
-        <QuickActions
-          onJoinClick={() => setIsJoinModalOpen(true)}
-          onCreateClick={() => setIsCreateModalOpen(true)}
-        />
+	return (
+		<div className="min-h-screen bg-linear-to-b from-slate-950 to-slate-900 pt-24 pb-12 px-4">
+			<div className="max-w-7xl mx-auto">
+				<WelcomeSection
+					name={user.name}
+					clubsCount={clubs.length}
+					meetingsCount={meetings.length}
+				/>
 
-        <YourClubsSection
-          clubs={clubs || []}
-          onJoinClick={() => setIsJoinModalOpen(true)}
-          onCreateClick={() => setIsCreateModalOpen(true)}
-        />
+				<QuickActions
+					onJoinClick={() => setIsJoinModalOpen(true)}
+					onCreateClick={() => setIsCreateModalOpen(true)}
+				/>
 
-        <UpcomingMeetingsSection />
-      </div>
+				<YourClubsSection
+					clubs={clubs || []}
+					onJoinClick={() => setIsJoinModalOpen(true)}
+					onCreateClick={() => setIsCreateModalOpen(true)}
+				/>
 
-      {isAnyLoading && (
-        <div className="fixed inset-0 flex items-center justify-center bg-black/50 z-50">
-          <p className="text-white text-lg">Loading...</p>
-        </div>
-      )}
+				<UpcomingMeetingsSection meetings={meetings} />
+			</div>
 
-      <JoinClubModal
-        isOpen={isJoinModalOpen}
-        onClose={() => setIsJoinModalOpen(false)}
-        onJoin={handleJoinClub}
-        isLoading={joinClubMutation.isPending}
-      />
+			{isAnyLoading && (
+				<div className="fixed inset-0 flex items-center justify-center bg-black/50 z-50">
+					<p className="text-white text-lg">Loading...</p>
+				</div>
+			)}
 
-      <CreateClubModal
-        isOpen={isCreateModalOpen}
-        onClose={() => setIsCreateModalOpen(false)}
-        onCreate={handleCreate}
-        isLoading={createClubMutation.isPending}
-      />
-    </div>
-  );
+			<JoinClubModal
+				isOpen={isJoinModalOpen}
+				onClose={() => setIsJoinModalOpen(false)}
+				onJoin={handleJoinClub}
+				isLoading={joinClubMutation.isPending}
+			/>
+
+			<CreateClubModal
+				isOpen={isCreateModalOpen}
+				onClose={() => setIsCreateModalOpen(false)}
+				onCreate={handleCreate}
+				isLoading={createClubMutation.isPending}
+			/>
+		</div>
+	);
 }

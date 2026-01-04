@@ -117,8 +117,24 @@ export function filterUpcomingMeetings(meetings: Meeting[]): Meeting[] {
   );
 }
 
+
 export function filterPastMeetings(meetings: Meeting[]): Meeting[] {
   return meetings.filter(
     (m) => !isMeetingUpcoming(m.date) || m.status === "COMPLETED"
   );
 }
+
+// Schedule View Helpers
+export const START_HOUR = 8; // 8 AM
+export const END_HOUR = 20; // 8 PM
+export const TOTAL_HOURS = END_HOUR - START_HOUR;
+
+export function formatTimeRange(startHour: number, endHour: number): string {
+  const formatHour = (hour: number) => {
+    const h = hour % 12 || 12;
+    const ampm = hour >= 12 && hour < 24 ? 'PM' : 'AM';
+    return `${h}${ampm}`;
+  };
+  return `${formatHour(startHour)} - ${formatHour(endHour)}`;
+}
+
