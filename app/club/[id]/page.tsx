@@ -96,12 +96,12 @@ export default function ClubPage({ params }: ClubPageProps) {
   const canManageMembers = role === "OWNER" || role === "ADMIN";
 
   const existingEmails = useMemo(
-    () => clubMembers?.map((m) => m.member_member_email) ?? [],
+    () => (Array.isArray(clubMembers) ? clubMembers.map((m) => m.member_member_email) : []),
     [clubMembers]
   );
 
   const nextMeetingNo = useMemo(() => {
-    if (!meetings || meetings.length === 0) return 1;
+    if (!Array.isArray(meetings) || meetings.length === 0) return 1;
     return Math.max(...meetings.map((m) => m.meetingNo)) + 1;
   }, [meetings]);
 

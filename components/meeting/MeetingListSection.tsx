@@ -46,7 +46,9 @@ function MeetingListSectionComponent({
   maxDisplay = 3,
   onScheduleMeeting,
 }: MeetingListSectionProps) {
-  const displayMeetings = meetings.slice(0, maxDisplay);
+  const isMeetingsArray = Array.isArray(meetings);
+  const displayMeetings = isMeetingsArray ? meetings.slice(0, maxDisplay) : [];
+  const meetingCount = isMeetingsArray ? meetings.length : 0;
 
   return (
     <section className="space-y-4">
@@ -57,15 +59,16 @@ function MeetingListSectionComponent({
             Upcoming Meetings
           </h2>
           <p className="text-sm text-slate-400">
-            {meetings.length === 0
-              ? "No meetings scheduled"
-              : `${meetings.length} meeting${
-                  meetings.length === 1 ? "" : "s"
+            {!isMeetingsArray
+              ? "Failed to load meetings"
+              : meetingCount === 0
+                ? "No meetings scheduled"
+                : `${meetingCount} meeting${meetingCount === 1 ? "" : "s"
                 } scheduled`}
           </p>
         </div>
         <div className="flex items-center gap-2">
-          {onScheduleMeeting && meetings.length > 0 && (
+          {onScheduleMeeting && meetingCount > 0 && (
             <Button
               onClick={onScheduleMeeting}
               size="sm"
@@ -89,7 +92,7 @@ function MeetingListSectionComponent({
       </div>
 
       {/* Meeting Cards */}
-      {meetings.length === 0 ? (
+      {!isMeetingsArray || meetingCount === 0 ? (
         <EmptyState onScheduleMeeting={onScheduleMeeting} />
       ) : (
         <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
@@ -100,7 +103,7 @@ function MeetingListSectionComponent({
       )}
 
       {/* Mobile Schedule Button */}
-      {onScheduleMeeting && meetings.length > 0 && (
+      {onScheduleMeeting && meetingCount > 0 && (
         <div className="sm:hidden">
           <Button
             onClick={onScheduleMeeting}

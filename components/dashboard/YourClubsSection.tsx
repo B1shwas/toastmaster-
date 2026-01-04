@@ -53,7 +53,7 @@ export function YourClubsSection({
         </Link>
       </div>
 
-      {clubs.length > 0 ? (
+      {Array.isArray(clubs) && clubs.length > 0 ? (
         <motion.div
           variants={containerVariants}
           initial="hidden"
@@ -69,9 +69,13 @@ export function YourClubsSection({
       ) : (
         <div className="bg-slate-800/30 border border-slate-700/50 rounded-2xl p-12 text-center">
           <Users className="h-16 w-16 text-slate-600 mx-auto mb-4" />
-          <h3 className="text-xl font-medium text-white mb-2">No Clubs Yet</h3>
+          <h3 className="text-xl font-medium text-white mb-2">
+            {!Array.isArray(clubs) ? "Failed to Load Clubs" : "No Clubs Yet"}
+          </h3>
           <p className="text-slate-400 mb-6">
-            Join or create your first club to get started
+            {!Array.isArray(clubs)
+              ? "There was an error fetching your clubs. Please try again later."
+              : "Join or create your first club to get started"}
           </p>
           <div className="flex gap-3 justify-center">
             <Button

@@ -29,7 +29,7 @@ function MemberListSectionComponent({
   canManageMembers = false,
 }: MemberListSectionProps) {
   const filteredMembers = useMemo(
-    () => filterMembers(members, searchQuery),
+    () => filterMembers(Array.isArray(members) ? members : [], searchQuery),
     [members, searchQuery]
   );
 

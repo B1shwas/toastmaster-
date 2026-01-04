@@ -31,7 +31,7 @@ export default function ClubsPage() {
 
   const { data, isLoading, isError, isFetching } = useClubs(page, limit);
 
-  const clubs: Club[] = data ?? [];
+  const clubs: Club[] = Array.isArray(data) ? data : [];
 
   const filteredClubs = clubs.filter((club) => {
     const query = searchQuery.toLowerCase();

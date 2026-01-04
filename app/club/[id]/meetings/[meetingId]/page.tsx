@@ -49,7 +49,7 @@ function MeetingContent({
   canManageNotes: boolean;
   userRole: "OWNER" | "ADMIN" | "MEMBER";
 }) {
-  const agendas = meeting.agendas || [];
+  const agendas = Array.isArray(meeting.agendas) ? meeting.agendas : [];
   const assignedCount = agendas.filter((a) => a.memberId).length;
 
   return (

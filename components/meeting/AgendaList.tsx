@@ -152,7 +152,8 @@ export default function AgendaList({
   isEditMode,
   onEditAgenda,
 }: AgendaListProps) {
-  const sortedAgendas = agendas.sort((a, b) => a.sequence - b.sequence);
+  const agendasArray = Array.isArray(agendas) ? agendas : [];
+  const sortedAgendas = [...agendasArray].sort((a, b) => a.sequence - b.sequence);
   const agendasWithTimes = calculateAgendaTimes(
     sortedAgendas,
     meeting.time
@@ -166,8 +167,9 @@ export default function AgendaList({
   const reorderMutation = useReorderAgendas(meetingId);
 
   useEffect(() => {
+    const currentAgendas = Array.isArray(agendas) ? agendas : [];
     const updatedAgendas = calculateAgendaTimes(
-      agendas.sort((a, b) => a.sequence - b.sequence),
+      [...currentAgendas].sort((a, b) => a.sequence - b.sequence),
       meeting.time
     ) as AgendaWithTiming[];
     setItems(updatedAgendas);
