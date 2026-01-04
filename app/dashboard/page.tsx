@@ -1,5 +1,4 @@
 "use client";
-
 import { useState, useEffect } from "react";
 import { JoinClubModal, CreateClubModal } from "@/components/clubs";
 import type { CreateClubInput } from "@/components/clubs/CreateClubModal";
@@ -14,7 +13,6 @@ import {
 import { useAuth } from "@/lib/hooks/useAuth";
 import { useCreateClub, useJoinClub, useUserClub, useUpcomingMeetings } from "@/lib/api";
 import useAuthStore from "@/lib/stores/useAuthStore";
-
 export default function DashboardPage() {
 	const [isMounted, setIsMounted] = useState(false);
 	const [isJoinModalOpen, setIsJoinModalOpen] = useState(false);
