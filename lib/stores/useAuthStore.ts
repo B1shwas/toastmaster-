@@ -10,12 +10,9 @@ type AuthState = {
   clearAuth: () => void;
   isAuthenticated: () => boolean;
   userClubs?: any[];
-<<<<<<< HEAD
   upcomingMeetings?: any[];
-=======
     agendaReport?: REPORT[];
     setAgendaReport: (report: REPORT[]) => void;
->>>>>>> feature/grammerian-ah_counter
 };
 
 const getInitialToken = () => {
