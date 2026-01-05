@@ -14,7 +14,7 @@ export const ListAllAgendas = ({
     meeting_id?: string;
 }) => {
     const { data, isLoading, isError } = useAgendaReport();
-    console.log(meeting_id);
+    // console.log(meeting_id);
     if (isLoading) {
         <div className="fixed inset-0 flex items-center justify-center bg-black/50 z-50">
             <p className="text-white text-lg">Loading...</p>
@@ -92,7 +92,7 @@ export const ListAllAgendas = ({
                                 >
                                     <AccordionTrigger className=" flex gap-y-1 md:text-base">
                                         {d?.member_evaluation[0]?.examples && (
-                                            <p>Member Evaluation Examples</p>
+                                            <p>Member Evaluations</p>
                                         )}
                                         {d?.filler_word_counts?.length > 0 && (
                                             <p>Filler Words</p>
