@@ -23,6 +23,7 @@ import type { CreateMeetingInput } from "@/lib/api/hooks/use-meetings";
 import { useAuth } from "@/lib/hooks/useAuth";
 import type { AddMemberInput } from "@/lib/schemas/club.schema";
 import { useRouter } from "next/navigation";
+import { ListAllAgendas } from "@/components/agendaReport/ListAllAgendas";
 
 const ANIMATION_CONFIG = {
   container: {
@@ -195,7 +196,9 @@ export default function ClubPage({ params }: ClubPageProps) {
             }
           />
         </motion.div>
-
+        
+        <ListAllAgendas club_id={clubId} />
+        
         {/* Members Section */}
         <motion.div variants={ANIMATION_CONFIG.item}>
           <MemberListSection
