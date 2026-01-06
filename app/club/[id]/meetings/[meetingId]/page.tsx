@@ -92,7 +92,7 @@ function MeetingContent({
                 {meeting?.status == "COMPLETED" ? (
                     <ListAllAgendas club_id={clubId} meeting_id={meeting?.id} />
                 ) : null}
-                {["IN_PROGRESS", "COMPLETED"].includes(meeting?.status) &&
+                {["SCHEDULED", "COMPLETED"].includes(meeting?.status) &&
                 ["Grammarian", "Ah Counter"].includes(
                     canUserCreateIt?.roleName,
                 ) ? (

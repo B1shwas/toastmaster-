@@ -16,22 +16,28 @@ export const ListAllAgendas = ({
     const { data, isLoading, isError } = useAgendaReport();
     // console.log(meeting_id);
     if (isLoading) {
-        <div className="fixed inset-0 flex items-center justify-center bg-black/50 z-50">
-            <p className="text-white text-lg">Loading...</p>
-        </div>;
+        return (
+            <div className="fixed inset-0 flex items-center justify-center bg-black/50 z-50">
+                <p className="text-white text-lg">Loading...</p>
+            </div>
+        );
     }
-
+    
     if (isError) {
-        <div className="fixed inset-0 flex items-center justify-center bg-black/50 z-50">
-            <p className="text-white text-lg">
-                Look like you dont have report attend meeting if you want to see
-                your repor.
-            </p>
-        </div>;
+        return (
+            <div className="fixed inset-0 flex items-center justify-center bg-black/50 z-50">
+                <p className="text-white text-lg">
+                    Look like you dont have report attend meeting if you want to see
+                    your report.
+                </p>
+            </div>
+        );
     }
     return (
         <div className="flex flex-col gap-y-3 md:gap-y-6 my-4 md:my-8">
-            <h1 className="text-white text-xl md:text-2xl font-bold">Your Reports</h1>
+            <h1 className="text-white text-xl md:text-2xl font-bold">
+                Your Reports
+            </h1>
             <div className="flex flex-col text-white border border-neutral-700 rounded-xl p-4 md:p-8">
                 <Accordion
                     type="single"
@@ -47,7 +53,11 @@ export const ListAllAgendas = ({
                         );
 
                         if (filteredData.length === 0) {
-                            return <p className="flex w-full justify-center text-neutral-500">No items found.</p>;
+                            return (
+                                <p className="flex w-full justify-center text-neutral-500">
+                                    No items found.
+                                </p>
+                            );
                         }
                         return filteredData.map((d) => (
                             <div
@@ -91,7 +101,8 @@ export const ListAllAgendas = ({
                                     value="item-1"
                                 >
                                     <AccordionTrigger className=" flex gap-y-1 md:text-base">
-                                        {d?.member_evaluation[0]?.examples && (
+                                        {d?.member_evaluation?.[0]
+                                            ?.examples && (
                                             <p>Member Evaluations</p>
                                         )}
                                         {d?.filler_word_counts?.length > 0 && (
@@ -106,7 +117,45 @@ export const ListAllAgendas = ({
                                             : null}
                                         {d?.filler_word_counts
                                             ? d?.filler_word_counts?.map(
-                                                  (i) => <p key={i}>{i}</p>,
+                                                  (i, index) => (
+                                                      <div
+                                                          key={index}
+                                                          className="flex flex-col gap-y-1"
+                                                      >
+                                                          <p>
+                                                              <span className="font-bold">
+                                                                  Ahs:
+                                                              </span>{" "}
+                                                              {i.ahs}
+                                                          </p>
+                                                          <p>
+                                                              <span className="font-bold">
+                                                                  Ums:
+                                                              </span>{" "}
+                                                              {i.ums}
+                                                          </p>
+                                                          <p>
+                                                              <span className="font-bold">
+                                                                  Likes:
+                                                              </span>{" "}
+                                                              {i.likes}
+                                                          </p>
+                                                          <p>
+                                                              <span className="font-bold">
+                                                                  Other:
+                                                              </span>{" "}
+                                                              {i.other}
+                                                          </p>
+                                                          {i.notes && (
+                                                              <p>
+                                                                  <span className="font-bold">
+                                                                      Notes:
+                                                                  </span>{" "}
+                                                                  {i.notes}
+                                                              </p>
+                                                          )}
+                                                      </div>
+                                                  ),
                                               )
                                             : null}
                                     </AccordionContent>

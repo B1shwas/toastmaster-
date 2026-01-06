@@ -45,6 +45,7 @@ export interface USERS_IN_MEETING {
 
 export interface CAN_CREATE {
     roleName: string;
+    status: string;
     meeting: USERS_IN_MEETING[];
 }
 
