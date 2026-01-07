@@ -12,6 +12,8 @@ import {
 } from "@/components/dashboard";
 import { useAuth } from "@/lib/hooks/useAuth";
 import { useCreateClub, useJoinClub, useUserClub, useUpcomingMeetings } from "@/lib/api";
+import { useToast } from "@/hooks/use-toast";
+import { getErrorMessage } from "@/lib/api";
 import useAuthStore from "@/lib/stores/useAuthStore";
 export default function DashboardPage() {
 	const [isMounted, setIsMounted] = useState(false);
@@ -21,6 +23,7 @@ export default function DashboardPage() {
 	const { user, isAuthenticated, isLoading: isAuthLoading } = useAuth();
 	const { data: clubs = [], isLoading: isUserClubsLoading } = useUserClub();
 	const { data: meetings = [], isLoading: isMeetingsLoading } = useUpcomingMeetings();
+	const { toast } = useToast();
 	const createClubMutation = useCreateClub();
 	const joinClubMutation = useJoinClub();
 
@@ -40,11 +43,35 @@ export default function DashboardPage() {
 	if (!isAuthenticated) return <UnauthenticatedView />;
 
 	const handleCreate = async (data: CreateClubInput) => {
-		await createClubMutation.mutateAsync(data);
+		try {
+			await createClubMutation.mutateAsync(data);
+			toast({
+				title: "Success",
+				description: "Successfully created the club!",
+			});
+		} catch (error) {
+			toast({
+				title: "Error",
+				description: getErrorMessage(error),
+				variant: "destructive",
+			});
+		}
 	};
 
 	const handleJoinClub = async (data: JoinClubInput) => {
-		await joinClubMutation.mutateAsync(data);
+		try {
+			await joinClubMutation.mutateAsync(data);
+			toast({
+				title: "Success",
+				description: "Successfully joined the club!",
+			});
+		} catch (error) {
+			toast({
+				title: "Error",
+				description: getErrorMessage(error),
+				variant: "destructive",
+			});
+		}
 	};
 
 	if (isAnyLoading) {
