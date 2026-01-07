@@ -153,11 +153,15 @@ export default function ClubPage({ params }: ClubPageProps) {
 
 	const handleJoinClub = async (data: JoinClubInput) => {
 		try {
-			await joinClubMutation.mutateAsync(data);
+			const data_data = await joinClubMutation.mutateAsync(data);
 			toast({
 				title: "Success",
 				description: "Successfully joined the club!",
 			});
+			console.log(data_data);
+			window.location.reload(); //TODO: Support the query reload not hard reload 
+
+
 		} catch (error) {
 			toast({
 				title: "Error",
