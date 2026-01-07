@@ -34,9 +34,6 @@ export default function DashboardPage() {
 		setIsMounted(true);
 	}, []);
 
-  
-  useAgendaReport();
-
 	useEffect(() => {
 		useAuthStore.setState({ userClubs: clubs });
 	}, [clubs]);
@@ -101,14 +98,14 @@ export default function DashboardPage() {
 					onJoinClick={() => setIsJoinModalOpen(true)}
 					onCreateClick={() => setIsCreateModalOpen(true)}
 				/>
-        
-        <ListAllAgendas/>
-        
-        <YourClubsSection
-          clubs={clubs || []}
-          onJoinClick={() => setIsJoinModalOpen(true)}
-          onCreateClick={() => setIsCreateModalOpen(true)}
-        />
+
+				{//<ListAllAgendas />
+				}
+				<YourClubsSection
+					clubs={clubs || []}
+					onJoinClick={() => setIsJoinModalOpen(true)}
+					onCreateClick={() => setIsCreateModalOpen(true)}
+				/>
 
 				<UpcomingMeetingsSection meetings={meetings} />
 			</div>

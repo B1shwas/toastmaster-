@@ -1,3 +1,4 @@
+import useAuthStore from "@/lib/stores/useAuthStore";
 import {
 	useQuery,
 	useMutation,
@@ -96,13 +97,14 @@ export function useCreateClub() {
 
 export function useJoinClub() {
 	const queryClient = useQueryClient();
+	const { user } = useAuthStore.getState();
 
 	return useMutation({
 		mutationFn: async (input: JoinClubInput) => {
 			const { data } = await api.post<ClubResponse>("/club/join", input);
 			return data.data;
 		},
-		onSuccess: () => {
+		onSuccess: (data) => {
 			queryClient.invalidateQueries({
 				queryKey: clubKeys.lists(),
 				exact: false,
@@ -111,6 +113,11 @@ export function useJoinClub() {
 				queryKey: ["user-clubs"],
 				exact: false,
 			});
+			if (user?.id) {
+				queryClient.invalidateQueries({
+					queryKey: clubKeys.role(data.id, user.id),
+				});
+			}
 		},
 	});
 }
