@@ -2,6 +2,8 @@
 
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { useState, type ReactNode } from "react";
+import { ReactQueryDevtools } from '@tanstack/react-query-devtools'
+import {Toaster as ReactToaster} from "react-hot-toast"
 
 function makeQueryClient() {
   return new QueryClient({
@@ -45,6 +47,13 @@ export function QueryProvider({ children }: QueryProviderProps) {
   const [queryClient] = useState(() => getQueryClient());
 
   return (
-    <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>
+    <QueryClientProvider client={queryClient}>
+      <ReactToaster
+        position="bottom-right"
+        reverseOrder={false}
+      />
+      {children}
+      <ReactQueryDevtools initialIsOpen={false} />
+    </QueryClientProvider>
   );
 }
