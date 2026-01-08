@@ -99,8 +99,8 @@ export default function DashboardPage() {
 					onCreateClick={() => setIsCreateModalOpen(true)}
 				/>
 
-				{//<ListAllAgendas />
-				}
+				<ListAllAgendas />
+				
 				<YourClubsSection
 					clubs={clubs || []}
 					onJoinClick={() => setIsJoinModalOpen(true)}

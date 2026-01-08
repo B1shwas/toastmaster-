@@ -49,13 +49,14 @@ export function useAgendaReport() {
 
 export function useCanUserCreateReport(meetingId: string) {
     return useQuery({
-        queryKey: ["can-user-create-report"],
+        queryKey: ["can-user-create-report",meetingId],
         queryFn: async () => {
             const { data } = await api.get(
                 `/agenda-report/can-edit/${meetingId}`,
             );
             return data.data;
         },
+        enabled: !!meetingId,
     });
 }
 

@@ -156,7 +156,7 @@ export const CreateAgendaReport = ({
             <div className="flex flex-col gap-y-2 border border-stone-600 rounded-xl p-2">
                 <h2 className="text-xl font-bold p-2">Member Evaluations</h2>
                 {canUserCreateIt?.meeting
-                    .filter((m) => m.userId !== data?.user_id)
+                    ?.filter((m) => m.userId !== data?.user_id)
                     .map((member) => {
                         const hasReport = memberReports.find(
                             (r) => r.memberId === member.memberId,
@@ -216,7 +216,7 @@ export const CreateAgendaReport = ({
                 onClick={handleFinalSubmit}
                 disabled={
                     memberReports.length !==
-                    canUserCreateIt?.meeting.filter(
+                    canUserCreateIt?.meeting?.filter(
                         (m) => m.userId !== data?.user_id,
                     ).length
                 }
@@ -224,9 +224,9 @@ export const CreateAgendaReport = ({
             >
                 Submit Report ({memberReports.length}/
                 {
-                    canUserCreateIt?.meeting.filter(
+                    canUserCreateIt?.meeting?.filter(
                         (m) => m.userId !== data?.user_id,
-                    ).length
+                    )?.length
                 }{" "}
                 completed)
             </Button>
