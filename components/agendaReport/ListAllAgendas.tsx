@@ -48,7 +48,7 @@ export const ListAllAgendas = ({
         );
     }
 
-    const filteredData = (data ?? []).filter(
+    const filteredData = (data ?? [])?.filter(
         (d) =>
             (!club_id || d?.club_id === club_id) &&
             (!meeting_id || d?.meeting_id === meeting_id),
@@ -61,13 +61,13 @@ export const ListAllAgendas = ({
                     Your Reports
                 </h1>
                 <p className="text-neutral-400 text-sm md:text-base">
-                    {filteredData.length === 0
+                    {filteredData?.length === 0
                         ? "No reports found"
-                        : `${filteredData.length} ${filteredData.length === 1 ? "report" : "reports"} available`}
+                        : `${filteredData?.length} ${filteredData?.length === 1 ? "report" : "reports"} available`}
                 </p>
             </div>
 
-            {filteredData.length === 0 ? (
+            {filteredData?.length === 0 ? (
                 <div className="flex flex-col items-center justify-center py-16 md:py-24 border border-dashed border-neutral-700 rounded-2xl">
                     <div className="w-16 h-16 rounded-full bg-neutral-800 flex items-center justify-center mb-4">
                         <svg
@@ -94,7 +94,7 @@ export const ListAllAgendas = ({
                 </div>
             ) : (
                 <div className="flex flex-col gap-4 md:gap-5">
-                    {filteredData.map((d, index) => (
+                    {filteredData?.map((d, index) => (
                         <div
                             key={d?.id}
                             className="group bg-gradient-to-br from-neutral-900 to-neutral-900/50 border border-neutral-800 hover:border-neutral-700 rounded-2xl overflow-hidden transition-all duration-300 hover:shadow-xl hover:shadow-black/20"
@@ -209,7 +209,7 @@ export const ListAllAgendas = ({
                                                                 Evaluations
                                                             </h4>
                                                             <div className="flex flex-col gap-2">
-                                                                {d.member_evaluation[0].examples.map(
+                                                              {d?.member_evaluation?.[0]?.examples?.map(
                                                                     (
                                                                         example,
                                                                         idx,
@@ -242,7 +242,7 @@ export const ListAllAgendas = ({
                                                                 Analysis
                                                             </h4>
                                                             <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                                                                {d.filler_word_counts.map(
+                                                                {d?.filler_word_counts?.map(
                                                                     (
                                                                         count,
                                                                         idx,
@@ -260,7 +260,7 @@ export const ListAllAgendas = ({
                                                                                     </p>
                                                                                     <p className="text-white font-bold text-lg">
                                                                                         {
-                                                                                            count.ahs
+                                                                                            count?.ahs
                                                                                         }
                                                                                     </p>
                                                                                 </div>
@@ -270,7 +270,7 @@ export const ListAllAgendas = ({
                                                                                     </p>
                                                                                     <p className="text-white font-bold text-lg">
                                                                                         {
-                                                                                            count.ums
+                                                                                            count?.ums
                                                                                         }
                                                                                     </p>
                                                                                 </div>
@@ -280,7 +280,7 @@ export const ListAllAgendas = ({
                                                                                     </p>
                                                                                     <p className="text-white font-bold text-lg">
                                                                                         {
-                                                                                            count.likes
+                                                                                            count?.likes
                                                                                         }
                                                                                     </p>
                                                                                 </div>
@@ -290,19 +290,19 @@ export const ListAllAgendas = ({
                                                                                     </p>
                                                                                     <p className="text-white font-bold text-lg">
                                                                                         {
-                                                                                            count.other
+                                                                                            count?.other
                                                                                         }
                                                                                     </p>
                                                                                 </div>
                                                                             </div>
-                                                                            {count.notes && (
+                                                                            {count?.notes && (
                                                                                 <div className="pt-3 border-t border-neutral-700/50">
                                                                                     <p className="text-neutral-400 text-xs mb-1">
                                                                                         Notes
                                                                                     </p>
                                                                                     <p className="text-neutral-300 text-sm">
                                                                                         {
-                                                                                            count.notes
+                                                                                            count?.notes
                                                                                         }
                                                                                     </p>
                                                                                 </div>
