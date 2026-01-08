@@ -5,6 +5,7 @@ import {
     AccordionItem,
     AccordionTrigger,
 } from "../ui/accordion";
+import { FORDREPORT } from "@/lib/types/agendaReport";
 
 export const ListAllAgendas = ({
     club_id,
@@ -30,26 +31,8 @@ export const ListAllAgendas = ({
         );
     }
 
-    if (isError) {
-        return (
-            <div className="fixed inset-0 flex items-center justify-center bg-black/60 backdrop-blur-sm z-50">
-                <div className="bg-neutral-900 border border-red-900/50 rounded-2xl px-8 py-6 shadow-2xl max-w-md mx-4">
-                    <div className="flex items-start gap-3">
-                        <div className="w-5 h-5 rounded-full bg-red-500/20 flex items-center justify-center flex-shrink-0 mt-0.5">
-                            <span className="text-red-500 text-sm">!</span>
-                        </div>
-                        <p className="text-neutral-200 text-base leading-relaxed">
-                            It looks like you haven't attended any meetings yet.
-                            Please attend a meeting to view your reports.
-                        </p>
-                    </div>
-                </div>
-            </div>
-        );
-    }
-
-    const filteredData = (data ?? [])?.filter(
-        (d) =>
+    const filteredData = (data as FORDREPORT[] ?? [])?.filter(
+        (d:FORDREPORT) =>
             (!club_id || d?.club_id === club_id) &&
             (!meeting_id || d?.meeting_id === meeting_id),
     );
@@ -167,7 +150,7 @@ export const ListAllAgendas = ({
 
                                 {/* Expandable Details */}
                                 {(d?.member_evaluation?.[0]?.examples ||
-                                    d?.filler_word_counts?.length > 0) && (
+                                    (d?.filler_word_counts?.length ?? 0) > 0) && (
                                     <Accordion
                                         type="single"
                                         collapsible
@@ -233,8 +216,8 @@ export const ListAllAgendas = ({
                                                     )}
 
                                                     {/* Filler Words */}
-                                                    {d?.filler_word_counts
-                                                        ?.length > 0 && (
+                                                    {(d?.filler_word_counts
+                                                        ?.length ?? 0) > 0 && (
                                                         <div className="bg-neutral-800/30 rounded-xl p-4 border border-neutral-700/30">
                                                             <h4 className="text-white font-semibold text-sm mb-3 flex items-center gap-2">
                                                                 <span className="w-1.5 h-1.5 rounded-full bg-purple-500" />

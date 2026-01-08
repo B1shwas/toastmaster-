@@ -20,6 +20,7 @@ import {
 import { ListAllAgendas } from "@/components/agendaReport/ListAllAgendas";
 import { CreateAgendaReport } from "@/components/agendaReport/CreateAgendaReport";
 import { useCanUserCreateReport } from "@/lib/api/hooks/use-agenda-report";
+import { ViewAgendaReport } from "@/components/agendaReport/EditAgendaReport";
 
 // Animation variants
 const containerVariants = {
@@ -92,12 +93,23 @@ function MeetingContent({
                 {meeting?.status == "COMPLETED" ? (
                     <ListAllAgendas club_id={clubId} meeting_id={meeting?.id} />
                 ) : null}
+                
                 {["SCHEDULED", "COMPLETED"].includes(meeting?.status) &&
                 ["Grammarian", "Ah Counter"].includes(
                     canUserCreateIt?.roleName,
-                ) ? (
+                ) &&
+                canUserCreateIt?.report === null ? (
                     <CreateAgendaReport canUserCreateIt={canUserCreateIt} />
                 ) : null}
+                
+                {
+                    // meeting?.status === "COMPLETED"
+                      ["SCHEDULED", "COMPLETED"].includes(meeting?.status)
+                    &&
+                ["Grammarian", "Ah Counter"].includes(
+                    canUserCreateIt?.roleName,
+                ) &&
+                canUserCreateIt?.report !== null ? <ViewAgendaReport reportData={canUserCreateIt} /> : null}
 
                 <motion.div variants={itemVariants}>
                     <MeetingAgendaManager

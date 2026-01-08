@@ -36,6 +36,21 @@ export interface REPORT {
     filler_word_counts: FILLER_WORD_COUNT | null;
 }
 
+export interface FORDREPORT {
+  id: string;
+     agenda_id: string;
+     club_id: string;
+     meeting_id: string;
+     report_type: REPORT_TYPE | string;
+     word_of_the_day: string | null;
+     member_id: string | null;
+     word_of_the_day_definition: string | null;
+     grammar_notes: string | null;
+     overall_notes: string | null;
+     member_evaluation: MEMBER_EVALUATION[] | null;
+     filler_word_counts: FILLER_WORD_COUNT[] | null; 
+}
+
 export interface USERS_IN_MEETING {
     memberId: string;
     memberName: string;
