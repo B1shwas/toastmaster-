@@ -38,7 +38,6 @@ export function UpcomingMeetingsSection({ meetings }: UpcomingMeetingsSectionPro
 			</ScrollableListFrame>
 		);
 	}
-
 	return (
 		<div className="space-y-4 my-8">
 			<h2 className="text-2xl font-semibold text-white px-2 ">Upcoming Meetings of Clubs</h2>
@@ -47,21 +46,21 @@ export function UpcomingMeetingsSection({ meetings }: UpcomingMeetingsSectionPro
 					<Link
 						key={meeting.id}
 						href={`/club/${meeting.clubId}/meetings/${meeting.id}`}
-						className="block"
+						className="block "
 					>
 						<motion.div
 
 							transition={transitionVariants.transition as Transition<unknown>}
 							className={cn(
-								"group relative overflow-hidden rounded-lg bg-slate-800/50 p-4 border border-transparent hover:border-blue-500/30 transition-all duration-300 ease-minor-spring",
+								"group relative overflow-hidden  rounded-lg bg-slate-800/50 p-4 border border-transparent hover:border-blue-500/30 transition-all duration-300 ease-minor-spring",
 								"animate-in slide-in-from-bottom-2 fade-in duration-500 fill-mode-backwards",
-								"hover:bg-slate-800 hover:shadow-lg hover:scale-[1.01] hover:shadow-blue-900/10"
+								"hover:bg-slate-800 hover:shadow-lg hover:scale-[1.01]  shrink-0 hover:shadow-blue-900/10"
 							)}
 							style={{ animationDelay: `${index * 100}ms` }}
 						>
-							<div className="flex items-start gap-4">
-								{/* Date Box */}
-								<div className="flex-shrink-0 flex flex-col items-center justify-center w-16 h-16 rounded-lg bg-blue-500/10 border border-blue-500/20 text-blue-400 group-hover:bg-blue-500/20 group-hover:border-blue-500/40 transition-colors">
+							<div className="flex flex-col sm:flex-row xs:place-items-center-safe   sm:place-items-start gap-4">
+								{/* Date Box  Left one */}
+								<div className=" flex flex-col items-center justify-center w-16 h-16 rounded-lg bg-blue-500/10 border border-blue-500/20 text-blue-400 group-hover:bg-blue-500/20 group-hover:border-blue-500/40 transition-colors">
 									<span className="text-xs font-semibold uppercase">
 										{new Date(meeting.date).toLocaleDateString('en-US', { month: 'short' })}
 									</span>
@@ -69,20 +68,21 @@ export function UpcomingMeetingsSection({ meetings }: UpcomingMeetingsSectionPro
 										{new Date(meeting.date).getDate()}
 									</span>
 								</div>
-
 								{/* Content */}
-								<div className="flex-1 min-w-0">
+								<div className="flex-1 shrink-0 min-w-0">
 									<div className="flex items-start justify-between gap-2">
 										<div>
 											<h3 className="text-base font-medium text-white group-hover:text-blue-200 transition-colors truncate">
 												{meeting.theme || `Meeting #${meeting.meetingNo}`}
 											</h3>
-											<div className="flex items-center gap-2 mt-1 text-xs text-slate-400">
+											<div className="flex  flex-col sm:flex-row items-start gap-2 mt-1 text-xs text-slate-400">
 												<span className="flex items-center gap-1">
 													<Clock className="w-3 h-3" />
 													{formatMeetingTime(meeting.time)}
 												</span>
-												<span className="w-1 h-1 rounded-full bg-slate-600" />
+												<div className="sm:opacity-100 opacity-0">
+													<span className="w-1 h-1 rounded-full bg-slate-600" />
+												</div>
 												<span className="flex items-center gap-1 truncate">
 													<MapPin className="w-3 h-3" />
 													{meeting.venue || "TBD"}
