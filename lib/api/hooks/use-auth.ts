@@ -1,8 +1,10 @@
-  import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+"use client";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { api } from "@/lib/api";
 import type { LoginFormData, SignupFormData } from "@/lib/schemas/auth.schema";
 import { ResponseFormat } from "../../types/response.format";
 import { useAuthStore } from "@/lib/stores/useAuthStore";
+import { useRouter } from "next/navigation";
 
 interface LoginResponse {
   token: string;
@@ -28,9 +30,7 @@ export function useLogin() {
 
 export function useSignup() {
   return useMutation({
-    mutationFn: async (
-      input: Omit<SignupFormData, "confirmPassword" | "agreeToTerms">
-    ) => {
+    mutationFn: async (input: Omit<SignupFormData, "confirmPassword">) => {
       await api.post("/user/register", input);
       return true;
     },
@@ -39,6 +39,7 @@ export function useSignup() {
 
 // i don't have created a logupt api in backend as jwt are stateless, so handling by just removing the token from ls
 export function useLogout() {
+  const router = useRouter();
   const queryClient = useQueryClient();
 
   return useMutation({
@@ -46,7 +47,7 @@ export function useLogout() {
     onSuccess: () => {
       useAuthStore.getState().clearAuth();
       queryClient.clear();
-      if (typeof window !== "undefined") window.location.href = "/auth";
+      router.push("/auth");
     },
   });
 }

@@ -52,23 +52,6 @@ export function SignupForm({ onSubmit }: SignupFormProps) {
         {...register("confirmPassword")}
       />
 
-      <FormCheckbox
-        label={
-          <>
-            I agree to the{" "}
-            <a href="#" className="text-cyan-400 hover:text-cyan-300">
-              Terms of Service
-            </a>{" "}
-            and{" "}
-            <a href="#" className="text-cyan-400 hover:text-cyan-300">
-              Privacy Policy
-            </a>
-          </>
-        }
-        error={errors.agreeToTerms?.message}
-        {...register("agreeToTerms")}
-      />
-
       <motion.button
         type="submit"
         disabled={isSubmitting}

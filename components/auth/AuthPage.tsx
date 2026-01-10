@@ -5,9 +5,14 @@ import { LoginForm } from "@/components/auth/LoginForm";
 import { SignupForm } from "@/components/auth/SignupForm";
 import type { LoginFormData, SignupFormData } from "@/lib/schemas/auth.schema";
 import { useLogin, useSignup } from "@/lib/api";
+import { toast } from "@/hooks/use-toast";
+import { useRouter } from "next/navigation";
+import { getErrorMessage } from "@/lib/api/error";
 
 export default function AuthPage() {
   const [isLogin, setIsLogin] = useState(true);
+
+  const router = useRouter();
 
   const login = useLogin();
   const signup = useSignup();
@@ -15,11 +20,21 @@ export default function AuthPage() {
   const handleLoginSubmit = async (data: LoginFormData) => {
     try {
       await login.mutateAsync(data);
-      window.location.href = "/dashboard";
-    } catch (error) {
-      console.error("Login failed", error);
 
-      // we will add toast or anything needed later
+      toast({
+        title: "Login successful",
+        description: "You have been logged in successfully.",
+        variant: "success",
+      });
+      router.push("/dashboard");
+    } catch (error) {
+      const errorMessage = getErrorMessage(error);
+      toast({
+        title: "Login failed",
+        description:
+          errorMessage || "Please check your credentials and try again.",
+        variant: "destructive",
+      });
     }
   };
 
@@ -33,10 +48,22 @@ export default function AuthPage() {
 
       await login.mutateAsync({ email: data.email, password: data.password });
 
-      window.location.href = "/dashboard";
+      toast({
+        title: "Account created successfully",
+        description: "Welcome to Toastmaster Manager!",
+        variant: "success",
+      });
+
+      router.push("/dashboard");
     } catch (err) {
       console.error("Signup or login failed", err);
-      // here as well we will be adding toast or anything needed later
+      const errorMessage = getErrorMessage(err);
+      toast({
+        title: "Signup failed",
+        description:
+          errorMessage || "Failed to create account. Please try again.",
+        variant: "destructive",
+      });
     }
   };
 
