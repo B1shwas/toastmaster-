@@ -62,26 +62,30 @@ export const ViewAgendaReport = ({ reportData }: ViewAgendaReportProps) => {
             <h1 className="text-2xl font-extrabold">{roleName} Report</h1>
 
             {/* Word of the Day Section */}
-            <div className="flex flex-col gap-y-2 border border-stone-600 rounded-xl p-4">
-                <h2 className="text-xl font-bold">Word of the Day</h2>
-                <div className="flex flex-col gap-y-2">
-                    <label className="text-sm font-semibold">Word</label>
-                    <p className="text-neutral-300">{report?.wordOfTheDay}</p>
-                </div>
-                <div className="flex flex-col gap-y-2">
-                    <label className="text-sm font-semibold">Definition</label>
-                    <p className="text-neutral-300">
-                        {report?.wordOfTheDayDefinition}
+            <div className="bg-neutral-800/50 rounded-xl p-4 border border-neutral-700/50">
+                <p className="text-neutral-400 text-xs uppercase tracking-wider font-medium mb-2">
+                    Word of the Day
+                </p>
+                <p className="text-white font-semibold text-lg mb-2">
+                    {report?.wordOfTheDay}
+                </p>
+                {report?.wordOfTheDayDefinition && (
+                    <p className="text-neutral-300 text-sm leading-relaxed">
+                        {
+                            report?.wordOfTheDayDefinition
+                        }
                     </p>
-                </div>
+                )}
             </div>
 
             {/* Statistics */}
-            <div className="flex flex-col gap-y-2 border border-stone-600 rounded-xl p-4">
-                <h2 className="text-xl font-bold">Summary</h2>
+            <div className="flex flex-col gap-y-2 border border-neutral-700/50 rounded-xl bg-neutral-800/50 p-4">
+              <p className="text-neutral-400 text-xs uppercase tracking-wider font-medium mb-2">
+                  Summary
+              </p>
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                     <div>
-                        <p className="text-sm font-semibold text-neutral-400">
+                        <p className="text-neutral-300 font-semibold text-lg mb-2">
                             Members Evaluated
                         </p>
                         <p className="text-2xl font-bold">
@@ -91,7 +95,7 @@ export const ViewAgendaReport = ({ reportData }: ViewAgendaReportProps) => {
                         </p>
                     </div>
                     <div>
-                        <p className="text-sm font-semibold text-neutral-400">
+                        <p className="text-neutral-300 font-semibold text-lg mb-2">
                             {isGrammarian
                                 ? "Total Word Usage"
                                 : "Total Filler Words"}
@@ -101,7 +105,7 @@ export const ViewAgendaReport = ({ reportData }: ViewAgendaReportProps) => {
                         </p>
                     </div>
                     <div>
-                        <p className="text-sm font-semibold text-neutral-400">
+                        <p className="text-neutral-300 font-semibold text-lg mb-2">
                             Average per Member
                         </p>
                         <p className="text-2xl font-bold">
@@ -121,29 +125,29 @@ export const ViewAgendaReport = ({ reportData }: ViewAgendaReportProps) => {
 
             {/* Grammar Notes (Grammarian only) */}
             {isGrammarian && report?.grammarNotes && (
-                <div className="flex flex-col gap-y-2 border border-stone-600 rounded-xl p-4">
-                    <h2 className="text-xl font-bold">Grammar Notes</h2>
-                    <p className="text-neutral-300">{report?.grammarNotes}</p>
+                <div className="flex flex-col gap-y-2 border bg-neutral-800/50 border-neutral-700/50 rounded-xl p-4">
+                    <h2 className="text-neutral-400 text-xs uppercase tracking-wider font-medium mb-2">Grammar Notes</h2>
+                    <p className="">{report?.grammarNotes}</p>
                 </div>
             )}
 
             {/* Member Evaluations */}
-            <div className="flex flex-col gap-y-2 border border-stone-600 rounded-xl p-2">
-                <h2 className="text-xl font-bold p-2">Member Evaluations</h2>
+            <div className="flex flex-col gap-y-2 border border-stone-600 bg-neutral-800/50 rounded-xl p-2">
+                <h2 className="text-neutral-400 text-xs uppercase tracking-wider font-medium mb-2 m-2">Member Evaluations</h2>
                 <ScrollArea className="h-[500px]">
                     <div className="flex flex-col gap-y-2 p-2">
                         {isGrammarian &&
                             report?.memberEvaluations?.map((member) => (
                                 <div
                                     key={member?.memberId}
-                                    className="border border-stone-400 p-2 md:p-4 rounded-xl"
+                                    className="border border-stone-400 bg-black p-2 md:p-4 rounded-xl"
                                 >
                                     <div className="flex justify-between items-start mb-3">
                                         <div>
                                             <p className="font-bold text-white">
                                                 {member?.memberName}
                                             </p>
-                                            <p className="text-sm text-neutral-500">
+                                            <p className="text-sm ">
                                                 Word Usage:{" "}
                                                 <span className="font-bold text-white">
                                                     {member?.wordUsageCount}
@@ -156,7 +160,7 @@ export const ViewAgendaReport = ({ reportData }: ViewAgendaReportProps) => {
                                     {member?.examples &&
                                         member?.examples?.length > 0 && (
                                             <div className="mb-3">
-                                                <p className="text-sm font-semibold mb-2">
+                                                <p className="text-neutral-400 text-xs uppercase tracking-wider font-medium mb-2">
                                                     Examples:
                                                 </p>
                                                 <div className="flex flex-col gap-y-1">
@@ -164,9 +168,10 @@ export const ViewAgendaReport = ({ reportData }: ViewAgendaReportProps) => {
                                                         (example, idx) => (
                                                             <p
                                                                 key={idx}
-                                                                className="text-sm text-neutral-400"
+                                                                className="text-sm"
                                                             >
-                                                                • "{example}"
+                                                                • &quot;
+                                                                {example}&quot;
                                                             </p>
                                                         ),
                                                     )}
@@ -177,10 +182,10 @@ export const ViewAgendaReport = ({ reportData }: ViewAgendaReportProps) => {
                                     {/* Grammar Issues */}
                                     {member?.grammarIssues && (
                                         <div>
-                                            <p className="text-sm font-semibold mb-1">
+                                            <p className="text-neutral-400 text-xs uppercase tracking-wider font-medium mb-2">
                                                 Grammar Notes:
                                             </p>
-                                            <p className="text-sm text-neutral-400">
+                                            <p className="">
                                                 {member?.grammarIssues}
                                             </p>
                                         </div>
@@ -263,9 +268,13 @@ export const ViewAgendaReport = ({ reportData }: ViewAgendaReportProps) => {
             </div>
 
             {/* Overall Notes */}
-            <div className="flex flex-col gap-y-2 border border-stone-600 rounded-xl p-4">
-                <h2 className="text-xl font-bold">Overall Notes</h2>
-                <p className="text-neutral-300">{report?.overallNotes}</p>
+            <div className="bg-neutral-800/50 rounded-xl p-4 border border-neutral-700/50">
+                <p className="text-neutral-400 text-xs uppercase tracking-wider font-medium mb-2">
+                    Grammar Notes
+                </p>
+                <p className="text-neutral-300 text-sm leading-relaxed">
+                    {report?.grammarNotes}
+                </p>
             </div>
         </div>
     );

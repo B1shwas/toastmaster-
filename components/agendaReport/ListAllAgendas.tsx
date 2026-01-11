@@ -14,7 +14,7 @@ export const ListAllAgendas = ({
 	club_id?: string;
 	meeting_id?: string;
 }) => {
-    const { data, isLoading, isError } = useAgendaReport();
+    const { data, isLoading } = useAgendaReport();
 
     if (isLoading) {
         return (
@@ -80,13 +80,13 @@ export const ListAllAgendas = ({
                     {filteredData?.map((d, index) => (
                         <div
                             key={d?.id}
-                            className="group bg-gradient-to-br from-neutral-900 to-neutral-900/50 border border-neutral-800 hover:border-neutral-700 rounded-2xl overflow-hidden transition-all duration-300 hover:shadow-xl hover:shadow-black/20"
+                            className="group `bg-linear-to-br from-neutral-900 to-neutral-900/50 border border-neutral-800 hover:border-neutral-700 rounded-2xl overflow-hidden transition-all duration-300 hover:shadow-xl hover:shadow-black/20"
                         >
-                            <div className="p-5 md:p-7">
+                            <div className="p-5 md:p-7">bg-linear-to-br
                                 {/* Header Section */}
                                 <div className="flex items-start justify-between mb-5 pb-5 border-b border-neutral-800">
                                     <div className="flex items-center gap-3">
-                                        <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-blue-500/20 to-purple-500/20 flex items-center justify-center border border-blue-500/20">
+                                        <div className="w-10 h-10 rounded-xl bg-linear-to-br from-blue-500/20 to-purple-500/20 flex items-center justify-center border border-blue-500/20">
                                             <span className="text-blue-400 font-bold text-sm">
                                                 #{index + 1}
                                             </span>
