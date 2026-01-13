@@ -100,3 +100,9 @@ export const ROLE_LABELS: Record<SystemRole, string> = {
   [SystemRole.TOPICSPEAKER]: "Topic Speaker",
   [SystemRole.GUEST]: "Guest",
 };
+
+export interface RoleCount {
+  role: string;
+  memberName: string;
+  count: number;
+}

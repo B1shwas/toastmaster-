@@ -1,0 +1,130 @@
+"use client";
+
+import { motion, AnimatePresence } from "framer-motion";
+import { X, Award, Loader2, User } from "lucide-react";
+import { useRoleCounts } from "@/lib/api/hooks/use-agenda";
+import type { ClubMember } from "@/lib/types/club";
+import { useMemo } from "react";
+
+interface MemberRoleReportModalProps {
+    isOpen: boolean;
+    onClose: () => void;
+    member: ClubMember | null;
+    clubId: string;
+}
+
+export function MemberRoleReportModal({
+    isOpen,
+    onClose,
+    member,
+    clubId,
+}: MemberRoleReportModalProps) {
+    const { data: roleCountsResponse, isLoading } = useRoleCounts(clubId);
+
+    const memberRoles = useMemo(() => {
+        if (!roleCountsResponse?.data || !member) return [];
+        return roleCountsResponse.data.filter(
+            (rc) => rc.memberName === member.member_member_name
+        );
+    }, [roleCountsResponse, member]);
+
+    if (!isOpen || !member) return null;
+
+    return (
+        <AnimatePresence>
+            <motion.div
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4"
+                onClick={onClose}
+            >
+                <motion.div
+                    initial={{ scale: 0.9, opacity: 0 }}
+                    animate={{ scale: 1, opacity: 1 }}
+                    exit={{ scale: 0.9, opacity: 0 }}
+                    onClick={(e) => e.stopPropagation()}
+                    className="bg-slate-900 border border-white/10 rounded-2xl w-full max-w-md overflow-hidden"
+                >
+                    {/* Header */}
+                    <div className="p-6 border-b border-white/5 bg-linear-to-br from-slate-800 to-slate-900">
+                        <div className="flex items-center justify-between mb-4">
+                            <div className="flex items-center gap-3">
+                                <div className="w-10 h-10 rounded-full bg-linear-to-br from-cyan-500 to-blue-600 flex items-center justify-center">
+                                    <Award className="w-5 h-5 text-white" />
+                                </div>
+                                <h2 className="text-xl font-bold text-white">Member Report</h2>
+                            </div>
+                            <button
+                                onClick={onClose}
+                                className="text-slate-400 hover:text-white transition"
+                            >
+                                <X className="w-5 h-5" />
+                            </button>
+                        </div>
+
+                        <div className="flex items-center gap-4">
+                            <div className="w-12 h-12 rounded-full bg-slate-700 flex items-center justify-center text-white font-bold text-lg">
+                                <User className="w-6 h-6" />
+                            </div>
+                            <div>
+                                <h3 className="text-white font-semibold text-lg">
+                                    {member.member_member_name}
+                                </h3>
+                                <p className="text-slate-400 text-sm italic">
+                                    Role engagement summary
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+
+                    {/* Content */}
+                    <div className="p-6 max-h-[60vh] overflow-y-auto custom-scrollbar">
+                        {isLoading ? (
+                            <div className="flex flex-col items-center justify-center py-12 gap-4">
+                                <Loader2 className="w-8 h-8 text-cyan-400 animate-spin" />
+                                <p className="text-slate-400 text-sm">Fetching report data...</p>
+                            </div>
+                        ) : memberRoles.length > 0 ? (
+                            <div className="space-y-3">
+                                {memberRoles.map((rc, index) => (
+                                    <motion.div
+                                        key={index}
+                                        initial={{ opacity: 0, x: -20 }}
+                                        animate={{ opacity: 1, x: 0 }}
+                                        transition={{ delay: index * 0.05 }}
+                                        className="flex items-center justify-between p-4 bg-slate-800/40 border border-slate-700/50 rounded-xl hover:bg-slate-800/60 transition group"
+                                    >
+                                        <span className="text-slate-200 font-medium truncate pr-4">
+                                            {rc.role}
+                                        </span>
+                                        <div className="flex items-center gap-2 shrink-0">
+                                            <span className="text-cyan-400 font-bold bg-cyan-400/10 px-3 py-1 rounded-full text-sm">
+                                                {rc.count} {rc.count === 1 ? "time" : "times"}
+                                            </span>
+                                        </div>
+                                    </motion.div>
+                                ))}
+                            </div>
+                        ) : (
+                            <div className="text-center py-12">
+                                <User className="w-12 h-12 text-slate-700 mx-auto mb-3" />
+                                <p className="text-slate-400">No meeting roles recorded yet.</p>
+                            </div>
+                        )}
+                    </div>
+
+                    {/* Footer */}
+                    <div className="p-4 border-t border-white/5 bg-slate-900/50">
+                        <button
+                            onClick={onClose}
+                            className="w-full py-3 bg-slate-800 hover:bg-slate-700 text-white font-semibold rounded-xl transition"
+                        >
+                            Close Report
+                        </button>
+                    </div>
+                </motion.div>
+            </motion.div>
+        </AnimatePresence>
+    );
+}

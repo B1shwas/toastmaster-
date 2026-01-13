@@ -27,7 +27,8 @@ function MemberListSectionComponent({
 	ownerId,
 	isLoading = false,
 	canManageMembers = false,
-}: MemberListSectionProps) {
+	onMemberClick,
+}: MemberListSectionProps & { onMemberClick?: (member: ClubMember) => void }) {
 	const filteredMembers = useMemo(
 		() => filterMembers(Array.isArray(members) ? members : [], searchQuery),
 		[members, searchQuery]
@@ -88,6 +89,7 @@ function MemberListSectionComponent({
 								key={member.member_id}
 								member={member}
 								onRemove={canManageMembers ? onRemoveMember : undefined}
+								onClick={onMemberClick}
 								canViewEmail={canManageMembers}
 							/>
 						))
