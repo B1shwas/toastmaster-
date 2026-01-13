@@ -1,4 +1,4 @@
-import { PlusIcon } from "lucide-react";
+import { PlusIcon, TrashIcon } from "lucide-react";
 import { Button } from "../ui/button";
 import {
     Field,
@@ -43,7 +43,7 @@ export const CreateAgendaReport = ({
     const [memberReports, setMemberReports] = useState<MemberReportData[]>([]);
 
     const { meetingId } = useParams<{ meetingId: string }>();
-        const createReport = useCreateReport(meetingId!);
+    const createReport = useCreateReport(meetingId!);
 
     const handleMemberReportSubmit = (data: MemberReportData) => {
         setMemberReports((prev) => {
@@ -61,7 +61,10 @@ export const CreateAgendaReport = ({
 
     const handleFinalSubmit = () => {
         const payload: AgendaReportPayload = {
-            reportType: canUserCreateIt?.roleName as REPORT_TYPE,
+            reportType: canUserCreateIt?.roleName
+                .toUpperCase()
+                .split(" ")
+                .join("_") as REPORT_TYPE,
             wordOfTheDay,
             wordOfTheDayDefinition,
             grammarNotes,
@@ -91,7 +94,16 @@ export const CreateAgendaReport = ({
         };
 
         // console.log("Final Payload:", payload);
-        createReport.mutate(payload)
+        // console.log(memberReports)
+        createReport.mutate(payload, {
+            onSuccess: () => {
+                setWordOfTheDay("");
+                setWordOfTheDayDefinition("");
+                setGrammarNotes("");
+                setOverallNotes("");
+                setMemberReports([]);
+            },
+        });
     };
 
     return (
@@ -258,9 +270,14 @@ const MemberReportForm = ({
         notes: existingData?.notes || "",
     });
 
+    const [examples, setExamples] = useState<string[]>(
+        existingData?.examples || [],
+    );
+    const [currentInput, setCurrentInput] = useState("");
+
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
-        onSubmit(formData);
+        onSubmit({ ...formData, examples: examples });
     };
 
     const isGrammarian = reportType === REPORT_TYPE?.GRAMMARIAN;
@@ -290,10 +307,12 @@ const MemberReportForm = ({
                                             onChange={(e) =>
                                                 setFormData((prev) => ({
                                                     ...prev,
-                                                    wordUsageCount:
-                                                        parseInt(
+                                                    wordUsageCount: Math.max(
+                                                        0,
+                                                        Number(
                                                             e.target.value,
                                                         ) || 0,
+                                                    ),
                                                 }))
                                             }
                                         />
@@ -301,25 +320,72 @@ const MemberReportForm = ({
 
                                     <Field>
                                         <FieldLabel htmlFor="examples">
-                                            Examples (comma-separated)
+                                            Examples
                                         </FieldLabel>
-                                        <Input
-                                            id="examples"
-                                            value={
-                                                formData.examples?.join(", ") ||
-                                                ""
-                                            }
-                                            onChange={(e) =>
-                                                setFormData((prev) => ({
-                                                    ...prev,
-                                                    examples: e.target.value
-                                                        .split(",")
-                                                        .map((s) => s.trim())
-                                                        .filter(Boolean),
-                                                }))
-                                            }
-                                            placeholder="Example 1, Example 2"
-                                        />
+                                        <div className="flex w-full items-center gap-2 justify-between">
+                                            <Textarea
+                                                id="examples"
+                                                value={currentInput}
+                                                onChange={(e) =>
+                                                    setCurrentInput(
+                                                        e.target.value,
+                                                    )
+                                                }
+                                                placeholder="Example 1"
+                                            />
+                                            <Button
+                                                type="button"
+                                                onClick={() => {
+                                                    if (currentInput.trim()) {
+                                                        setExamples((prev) => [
+                                                            ...prev,
+                                                            currentInput.trim(),
+                                                        ]);
+                                                        setCurrentInput("");
+                                                    }
+                                                }}
+                                                className="bg-white border hover:bg-neutral-300"
+                                            >
+                                                <PlusIcon className="text-black" />
+                                            </Button>
+                                        </div>
+                                        <div className="flex flex-col bg-neutral-300 rounded">
+                                            {examples.length > 0 ? (
+                                                examples?.map((ex, index) => (
+                                                    <div
+                                                        key={index}
+                                                        className="flex  border border-neutral-400 rounded px-4 m-2"
+                                                    >
+                                                        <p>{ex}</p>
+                                                        <button
+                                                            type="button"
+                                                            onClick={() => {
+                                                                setExamples(
+                                                                    (prev) =>
+                                                                        prev?.filter(
+                                                                            (
+                                                                                _,
+                                                                                i,
+                                                                            ) =>
+                                                                                i !=
+                                                                                index,
+                                                                        ),
+                                                                );
+                                                            }}
+                                                        >
+                                                            <TrashIcon className="text-red-800 hover:text-red-400 cursor-pointer" />
+                                                        </button>
+                                                    </div>
+                                                ))
+                                            ) : (
+                                                <div className="flex  border border-neutral-400 rounded px-4 m-2">
+                                                    <p>
+                                                        Enter example and click
+                                                        &apos;+&apos; button
+                                                    </p>
+                                                </div>
+                                            )}
+                                        </div>
                                     </Field>
 
                                     <Field>
@@ -355,10 +421,12 @@ const MemberReportForm = ({
                                             onChange={(e) =>
                                                 setFormData((prev) => ({
                                                     ...prev,
-                                                    ahs:
-                                                        parseInt(
+                                                    ahs: Math.max(
+                                                        0,
+                                                        Number(
                                                             e.target.value,
                                                         ) || 0,
+                                                    ),
                                                 }))
                                             }
                                         />
@@ -375,10 +443,12 @@ const MemberReportForm = ({
                                             onChange={(e) =>
                                                 setFormData((prev) => ({
                                                     ...prev,
-                                                    ums:
-                                                        parseInt(
+                                                    ums: Math.max(
+                                                        0,
+                                                        Number(
                                                             e.target.value,
                                                         ) || 0,
+                                                    ),
                                                 }))
                                             }
                                         />
@@ -395,10 +465,12 @@ const MemberReportForm = ({
                                             onChange={(e) =>
                                                 setFormData((prev) => ({
                                                     ...prev,
-                                                    likes:
-                                                        parseInt(
+                                                    likes: Math.max(
+                                                        0,
+                                                        Number(
                                                             e.target.value,
                                                         ) || 0,
+                                                    ),
                                                 }))
                                             }
                                         />
@@ -415,10 +487,12 @@ const MemberReportForm = ({
                                             onChange={(e) =>
                                                 setFormData((prev) => ({
                                                     ...prev,
-                                                    other:
-                                                        parseInt(
+                                                    other: Math.max(
+                                                        0,
+                                                        Number(
                                                             e.target.value,
                                                         ) || 0,
+                                                    ),
                                                 }))
                                             }
                                         />

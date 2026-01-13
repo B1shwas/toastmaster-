@@ -49,7 +49,7 @@ export function useAgendaReport() {
 
 export function useCanUserCreateReport(meetingId: string) {
     return useQuery({
-        queryKey: ["can-user-create-report",meetingId],
+        queryKey: ["can-user-create-report", meetingId],
         queryFn: async () => {
             const { data } = await api.get(
                 `/agenda-report/can-edit/${meetingId}`,
@@ -61,7 +61,7 @@ export function useCanUserCreateReport(meetingId: string) {
 }
 
 export function useCreateReport(meetingId: string) {
-    // const queryClient = useQueryClient();
+    const queryClient = useQueryClient();
 
     return useMutation({
         mutationFn: async (input: AgendaReportPayload) => {
@@ -72,6 +72,9 @@ export function useCreateReport(meetingId: string) {
             return data.data;
         },
         onSuccess: () => {
+            queryClient.invalidateQueries({
+                queryKey: ["can-user-create-report", meetingId],
+            });
             reactToast.success("Report Created Successfully");
         },
         onError: (error) => {
