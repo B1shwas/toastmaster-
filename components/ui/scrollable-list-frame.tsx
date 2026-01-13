@@ -4,12 +4,16 @@ import { BorderBeam } from "./border-beam";
 
 interface ScrollableListFrameProps extends React.HTMLAttributes<HTMLDivElement> {
     maxHeight?: string;
+    hideScrollbar?: boolean;
+    showPrettyScrollbar?: boolean;
 }
 
 export function ScrollableListFrame({
     className,
     children,
     maxHeight = "max-h-[500px]",
+    hideScrollbar = false,
+    showPrettyScrollbar = false,
     ...props
 }: ScrollableListFrameProps) {
     return (
@@ -24,7 +28,10 @@ export function ScrollableListFrame({
         >
             <div
                 className={cn(
-                    "overflow-y-auto w-full scrollbar-thin scrollbar-track-transparent scrollbar-thumb-slate-700/50 hover:scrollbar-thumb-slate-600 transition-colors",
+                    "overflow-y-scroll w-full transition-colors",
+                    !hideScrollbar && !showPrettyScrollbar && "scrollbar-thin scrollbar-track-transparent scrollbar-thumb-slate-700/50 hover:scrollbar-thumb-slate-600",
+                    hideScrollbar && "hide-scrollbar",
+                    showPrettyScrollbar && "pretty-scrollbar",
                     maxHeight
                 )}
             >

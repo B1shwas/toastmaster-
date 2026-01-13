@@ -41,7 +41,7 @@ export function UpcomingMeetingsSection({ meetings }: UpcomingMeetingsSectionPro
 	return (
 		<div className="space-y-4 my-8">
 			<h2 className="text-2xl font-semibold text-white px-2 ">Upcoming Meetings of Clubs</h2>
-			<ScrollableListFrame className="max-h-[600px]">
+			<ScrollableListFrame className="max-h-[600px]" showPrettyScrollbar={true}>
 				{meetings.map((meeting, index) => (
 					<Link
 						key={meeting.id}

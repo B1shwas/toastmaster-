@@ -15,7 +15,6 @@ import { useCreateClub, useJoinClub, useUserClub, useUpcomingMeetings } from "@/
 import { useToast } from "@/hooks/use-toast";
 import { getErrorMessage } from "@/lib/api";
 import useAuthStore from "@/lib/stores/useAuthStore";
-import { useAgendaReport } from "@/lib/api/hooks/use-agenda-report";
 import { ListAllAgendas } from "@/components/agendaReport/ListAllAgendas";
 
 export default function DashboardPage() {
@@ -100,7 +99,7 @@ export default function DashboardPage() {
 				/>
 
 				<ListAllAgendas />
-				
+
 				<YourClubsSection
 					clubs={clubs || []}
 					onJoinClick={() => setIsJoinModalOpen(true)}
