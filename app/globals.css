@@ -15,6 +15,28 @@
 .hide-scrollbar::-webkit-scrollbar {
   display: none;
 }
+
+.pretty-scrollbar {
+  scrollbar-width: thin;
+  scrollbar-color: rgba(71, 85, 105, 0.3) transparent;
+}
+
+.pretty-scrollbar::-webkit-scrollbar {
+  width: 5px;
+}
+
+.pretty-scrollbar::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.pretty-scrollbar::-webkit-scrollbar-thumb {
+  background: rgba(71, 85, 105, 0.4);
+  border-radius: 20px;
+}
+
+.pretty-scrollbar::-webkit-scrollbar-thumb:hover {
+  background: rgba(59, 130, 246, 0.5);
+}
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
