@@ -20,9 +20,10 @@ function MemberCardComponent({
   member,
   onRemove,
   onEdit,
+  onClick,
   isOwner = false,
   canViewEmail = false,
-}: MemberCardProps) {
+}: MemberCardProps & { onClick?: (member: any) => void }) {
   const isLinked = member.isRegisteredUser;
   const memberIsOwner = member.member_role === "OWNER";
   console.log("memememe", member.member_date_joined);
@@ -33,16 +34,16 @@ function MemberCardComponent({
       animate={{ opacity: 1, y: 0 }}
       exit={{ opacity: 0, y: -10 }}
       layout
-      className="bg-slate-800/50 border border-slate-700 rounded-xl p-4 hover:bg-slate-800/70 transition group"
+      onClick={() => onClick?.(member)}
+      className="bg-slate-800/50 border border-slate-700 rounded-xl p-4 hover:bg-slate-800/70 transition group cursor-pointer"
     >
       <div className="flex items-center gap-4">
         {/* Avatar */}
         <div
-          className={`w-12 h-12 rounded-full flex items-center justify-center text-white font-bold text-sm shrink-0 ${
-            isLinked
-              ? "bg-linear-to-br from-blue-500 to-cyan-400"
-              : "bg-slate-600"
-          }`}
+          className={`w-12 h-12 rounded-full flex items-center justify-center text-white font-bold text-sm shrink-0 ${isLinked
+            ? "bg-linear-to-br from-blue-500 to-cyan-400"
+            : "bg-slate-600"
+            }`}
         >
           {getInitials(member.member_member_name)}
         </div>

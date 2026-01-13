@@ -113,7 +113,7 @@ export function useJoinClub() {
 				queryKey: ["user-clubs"],
 				exact: false,
 			});
-			if (user?.id) {
+			if (!!data && !!user?.id) {
 				queryClient.invalidateQueries({
 					queryKey: clubKeys.role(data.id, user.id),
 				});

@@ -93,7 +93,6 @@ export default function MeetingsPage() {
         if (statusFilter !== "ALL" && meeting.status !== statusFilter) {
           return false;
         }
-
         // Filter by search query
         if (searchQuery) {
           const query = searchQuery.toLowerCase();

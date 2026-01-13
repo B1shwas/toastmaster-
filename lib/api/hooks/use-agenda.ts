@@ -4,6 +4,7 @@ import type {
   AgendaTemplate,
   CreateAgendaPayload,
   Agenda,
+  RoleCount,
 } from "@/lib/types/agenda";
 import type { ApiResponse } from "@/lib/types/meeting";
 
@@ -151,5 +152,16 @@ export function useReorderAgendas(meetingId: string) {
         queryKey: ["meeting-agendas", meetingId],
       });
     },
+  });
+}
+
+export function useRoleCounts(clubId: string) {
+  return useQuery<ApiResponse<RoleCount[]>>({
+    queryKey: ["role-counts", clubId],
+    queryFn: async () => {
+      const response = await api.get(`/agenda/role-counts/club/${clubId}`);
+      return response.data;
+    },
+    enabled: !!clubId,
   });
 }
