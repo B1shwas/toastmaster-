@@ -14,27 +14,12 @@ export const ListAllAgendas = ({
 	club_id?: string;
 	meeting_id?: string;
 }) => {
-    const { data, isLoading } = useAgendaReport();
-
-    if (isLoading) {
-        return (
-            <div className="fixed inset-0 flex items-center justify-center bg-black/60 backdrop-blur-sm z-50">
-                <div className="bg-neutral-900 border border-neutral-700 rounded-2xl px-8 py-6 shadow-2xl">
-                    <div className="flex items-center gap-3">
-                        <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-                        <p className="text-white text-lg font-medium">
-                            Loading reports...
-                        </p>
-                    </div>
-                </div>
-            </div>
-        );
-    }
+    const { data } = useAgendaReport();
 
     const filteredData = (data as FORDREPORT[] ?? [])?.filter(
         (d:FORDREPORT) =>
-            (!club_id || d?.club_id === club_id) &&
-            (!meeting_id || d?.meeting_id === meeting_id),
+            (!club_id || d?.clubId === club_id) &&
+            (!meeting_id || d?.meetingId === meeting_id),
     );
 
     return (
@@ -93,7 +78,7 @@ export const ListAllAgendas = ({
                                         </div>
                                         <div>
                                             <p className="text-white font-semibold text-base md:text-lg">
-                                                {d?.report_type || "Report"}
+                                                {d?.reportType || "Report"}
                                             </p>
                                             <p className="text-neutral-500 text-xs md:text-sm mt-0.5">
                                                 Meeting Report
@@ -105,18 +90,18 @@ export const ListAllAgendas = ({
                                 {/* Main Content Grid */}
                                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-5 mb-5">
                                     {/* Word of the Day Card */}
-                                    {d?.word_of_the_day && (
+                                    {d?.wordOfTheDay && (
                                         <div className="bg-neutral-800/50 rounded-xl p-4 border border-neutral-700/50">
                                             <p className="text-neutral-400 text-xs uppercase tracking-wider font-medium mb-2">
                                                 Word of the Day
                                             </p>
                                             <p className="text-white font-semibold text-lg mb-2">
-                                                {d.word_of_the_day}
+                                                {d.wordOfTheDay}
                                             </p>
-                                            {d?.word_of_the_day_definition && (
+                                            {d?.wordOfTheDayDefinition && (
                                                 <p className="text-neutral-300 text-sm leading-relaxed">
                                                     {
-                                                        d.word_of_the_day_definition
+                                                        d.wordOfTheDayDefinition
                                                     }
                                                 </p>
                                             )}
@@ -124,33 +109,33 @@ export const ListAllAgendas = ({
                                     )}
 
                                     {/* Grammar Notes Card */}
-                                    {d?.grammar_notes && (
+                                    {d?.grammarNotes && (
                                         <div className="bg-neutral-800/50 rounded-xl p-4 border border-neutral-700/50">
                                             <p className="text-neutral-400 text-xs uppercase tracking-wider font-medium mb-2">
                                                 Grammar Notes
                                             </p>
                                             <p className="text-neutral-300 text-sm leading-relaxed">
-                                                {d.grammar_notes}
+                                                {d.grammarNotes}
                                             </p>
                                         </div>
                                     )}
                                 </div>
 
                                 {/* Overall Notes Section */}
-                                {d?.overall_notes && (
+                                {d?.overallNotes && (
                                     <div className="bg-neutral-800/30 rounded-xl p-4 border border-neutral-700/30 mb-5">
                                         <p className="text-neutral-400 text-xs uppercase tracking-wider font-medium mb-2">
                                             Overall Notes
                                         </p>
                                         <p className="text-neutral-300 text-sm leading-relaxed">
-                                            {d.overall_notes}
+                                            {d.overallNotes}
                                         </p>
                                     </div>
                                 )}
 
                                 {/* Expandable Details */}
-                                {(d?.member_evaluation?.[0]?.examples ||
-                                    (d?.filler_word_counts?.length ?? 0) > 0) && (
+                                {(d?.memberEvaluation?.[0]?.examples ||
+                                    (d?.fillerWordCounts?.length ?? 0) > 0) && (
                                     <Accordion
                                         type="single"
                                         collapsible
@@ -183,7 +168,7 @@ export const ListAllAgendas = ({
                                             <AccordionContent className="pt-3">
                                                 <div className="flex flex-col gap-5">
                                                     {/* Member Evaluations */}
-                                                    {d?.member_evaluation?.[0]
+                                                    {d?.memberEvaluation?.[0]
                                                         ?.examples && (
                                                         <div className="bg-neutral-800/30 rounded-xl p-4 border border-neutral-700/30">
                                                             <h4 className="text-white font-semibold text-sm mb-3 flex items-center gap-2">
@@ -192,7 +177,7 @@ export const ListAllAgendas = ({
                                                                 Evaluations
                                                             </h4>
                                                             <div className="flex flex-col gap-2">
-                                                              {d?.member_evaluation?.[0]?.examples?.map(
+                                                              {d?.memberEvaluation?.[0]?.examples?.map(
                                                                     (
                                                                         example,
                                                                         idx,
@@ -216,7 +201,7 @@ export const ListAllAgendas = ({
                                                     )}
 
                                                     {/* Filler Words */}
-                                                    {(d?.filler_word_counts
+                                                    {(d?.fillerWordCounts
                                                         ?.length ?? 0) > 0 && (
                                                         <div className="bg-neutral-800/30 rounded-xl p-4 border border-neutral-700/30">
                                                             <h4 className="text-white font-semibold text-sm mb-3 flex items-center gap-2">
@@ -225,7 +210,7 @@ export const ListAllAgendas = ({
                                                                 Analysis
                                                             </h4>
                                                             <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                                                                {d?.filler_word_counts?.map(
+                                                                {d?.fillerWordCounts?.map(
                                                                     (
                                                                         count,
                                                                         idx,

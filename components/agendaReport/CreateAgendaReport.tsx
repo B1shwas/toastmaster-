@@ -20,27 +20,81 @@ import { useState } from "react";
 import { useProfile } from "@/lib/api";
 import { Textarea } from "../ui/textarea";
 import {
+    AgendaReport,
     AgendaReportPayload,
     CAN_CREATE,
     MemberReportData,
     REPORT_TYPE,
-    USERS_IN_MEETING,
 } from "@/lib/types/agendaReport";
 import { useCreateReport } from "@/lib/api/hooks/use-agenda-report";
 import { useParams } from "next/navigation";
 
 export const CreateAgendaReport = ({
     canUserCreateIt,
+    onEditSuccess,
 }: {
     canUserCreateIt: CAN_CREATE;
+    onEditSuccess?: () => void;
 }) => {
     const { data } = useProfile();
-    const [wordOfTheDay, setWordOfTheDay] = useState("");
-    const [wordOfTheDayDefinition, setWordOfTheDayDefinition] = useState("");
-    const [grammarNotes, setGrammarNotes] = useState("");
-    const [overallNotes, setOverallNotes] = useState("");
+    const initializeMemberReports = (
+        report: AgendaReport | null | undefined,
+    ): MemberReportData[] => {
+        if (!report) return [];
 
-    const [memberReports, setMemberReports] = useState<MemberReportData[]>([]);
+        if (report?.reportType === "GRAMMARIAN" && report?.memberEvaluations) {
+            return report?.memberEvaluations?.map((evaluation) => ({
+                memberId: evaluation?.memberId,
+                memberName: evaluation?.memberName,
+                wordUsageCount: evaluation?.wordUsageCount,
+                examples: evaluation?.examples,
+                grammarIssues: evaluation?.grammarIssues,
+                role: evaluation?.role,
+            }));
+        }
+
+        if (report.reportType === "AH_COUNTER" && report?.fillerWordCounts) {
+            return report?.fillerWordCounts?.map((count) => ({
+                memberId: count?.memberId,
+                memberName: count?.memberName,
+                ahs: count?.ahs,
+                ums: count?.ums,
+                likes: count?.likes,
+                other: count?.other,
+                notes: count?.notes,
+                role: count?.role,
+            }));
+        }
+
+        return [];
+    };
+
+    const initialValues = {
+        wordOfTheDay: canUserCreateIt?.report?.wordOfTheDay || "",
+        wordOfTheDayDefinition:
+            canUserCreateIt?.report?.wordOfTheDayDefinition || "",
+        grammarNotes: canUserCreateIt?.report?.grammarNotes || "",
+        overallNotes: canUserCreateIt?.report?.overallNotes || "",
+        memberReports: initializeMemberReports(canUserCreateIt?.report),
+    };
+
+    const [wordOfTheDay, setWordOfTheDay] = useState(
+        canUserCreateIt?.report?.wordOfTheDay || "",
+    );
+    const [wordOfTheDayDefinition, setWordOfTheDayDefinition] = useState(
+        canUserCreateIt?.report?.wordOfTheDayDefinition || "",
+    );
+    const [grammarNotes, setGrammarNotes] = useState(
+        canUserCreateIt?.report?.grammarNotes || "",
+    );
+    const [overallNotes, setOverallNotes] = useState(
+        canUserCreateIt?.report?.overallNotes || "",
+    );
+
+    const [memberReports, setMemberReports] = useState<MemberReportData[]>(
+        initializeMemberReports(canUserCreateIt?.report),
+    );
+    // console.log("member reports :: ", memberReports);
 
     const { meetingId } = useParams<{ meetingId: string }>();
     const createReport = useCreateReport(meetingId!);
@@ -93,17 +147,37 @@ export const CreateAgendaReport = ({
                     : [],
         };
 
-        // console.log("Final Payload:", payload);
-        // console.log(memberReports)
+        console.log("Final Payload:", payload);
+        console.log(memberReports);
         createReport.mutate(payload, {
             onSuccess: () => {
-                setWordOfTheDay("");
-                setWordOfTheDayDefinition("");
-                setGrammarNotes("");
-                setOverallNotes("");
-                setMemberReports([]);
+                // setWordOfTheDay("");
+                // setWordOfTheDayDefinition("");
+                // setGrammarNotes("");
+                // setOverallNotes("");
+                // setMemberReports([]);
+                onEditSuccess?.();
             },
         });
+    };
+
+    const memberToDisplay = canUserCreateIt?.meeting
+        ? canUserCreateIt?.meeting
+        : memberReports;
+
+    const hasChanges = () => {
+        if (wordOfTheDay !== initialValues.wordOfTheDay) return true;
+        if (wordOfTheDayDefinition !== initialValues.wordOfTheDayDefinition)
+            return true;
+        if (grammarNotes !== initialValues.grammarNotes) return true;
+        if (overallNotes !== initialValues.overallNotes) return true;
+        if (
+            JSON.stringify(memberReports) !==
+            JSON.stringify(initialValues.memberReports)
+        )
+            return true;
+
+        return false;
     };
 
     return (
@@ -167,8 +241,8 @@ export const CreateAgendaReport = ({
             {/* Member-specific Evaluations */}
             <div className="flex flex-col gap-y-2 border border-stone-600 rounded-xl p-2">
                 <h2 className="text-xl font-bold p-2">Member Evaluations</h2>
-                {canUserCreateIt?.meeting
-                    ?.filter((m) => m.userId !== data?.user_id)
+                {memberToDisplay
+                    ?.filter((m) => m?.memberId !== data?.user_id)
                     .map((member) => {
                         const hasReport = memberReports.find(
                             (r) => r.memberId === member.memberId,
@@ -195,11 +269,12 @@ export const CreateAgendaReport = ({
                                 </div>
 
                                 <div className="flex items-center gap-2">
-                                    {hasReport && (
-                                        <span className="text-green-500 font-bold">
-                                            ✓
-                                        </span>
-                                    )}
+                                    {canUserCreateIt?.meeting !== null &&
+                                        hasReport && (
+                                            <span className="text-green-500 font-bold">
+                                                ✓
+                                            </span>
+                                        )}
                                     <Dialog>
                                         <DialogTrigger asChild>
                                             <Button variant="outline">
@@ -227,20 +302,24 @@ export const CreateAgendaReport = ({
             <Button
                 onClick={handleFinalSubmit}
                 disabled={
-                    memberReports.length !==
-                    canUserCreateIt?.meeting?.filter(
-                        (m) => m.userId !== data?.user_id,
-                    ).length
+                    canUserCreateIt?.meeting !== null
+                        ? memberReports.length !==
+                          canUserCreateIt?.meeting?.filter(
+                              (m) => m.userId !== data?.user_id,
+                          ).length
+                        : !hasChanges()
                 }
-                className="w-full"
+                className="w-full bg-black hover:bg-neutral-800 disabled:bg-blue-950 cursor-pointer disabled:cursor-not-allowed"
             >
-                Submit Report ({memberReports.length}/
-                {
+                {`${canUserCreateIt?.meeting !== null ? `Submit Report` : "Edit Report"}`}{" "}
+                {canUserCreateIt?.meeting !== null &&
+                    `(${memberReports.length}/
+                ${
                     canUserCreateIt?.meeting?.filter(
                         (m) => m.userId !== data?.user_id,
                     )?.length
-                }{" "}
-                completed)
+                }${" "}
+                completed)`}
             </Button>
         </div>
     );
@@ -252,7 +331,7 @@ const MemberReportForm = ({
     onSubmit,
     existingData,
 }: {
-    member: USERS_IN_MEETING;
+    member: MemberReportData;
     reportType: REPORT_TYPE;
     onSubmit: (data: MemberReportData) => void;
     existingData?: MemberReportData;
@@ -273,6 +352,7 @@ const MemberReportForm = ({
     const [examples, setExamples] = useState<string[]>(
         existingData?.examples || [],
     );
+    console.log("examples :: ", examples);
     const [currentInput, setCurrentInput] = useState("");
 
     const handleSubmit = (e: React.FormEvent) => {
@@ -354,7 +434,7 @@ const MemberReportForm = ({
                                                 examples?.map((ex, index) => (
                                                     <div
                                                         key={index}
-                                                        className="flex  border border-neutral-400 rounded px-4 m-2"
+                                                        className="flex justify-between items-center border border-neutral-400 rounded px-4 py-2 m-2"
                                                     >
                                                         <p>{ex}</p>
                                                         <button
