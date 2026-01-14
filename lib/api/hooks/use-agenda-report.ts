@@ -1,7 +1,6 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { api, getErrorMessage } from "@/lib/api";
 import useAuthStore from "@/lib/stores/useAuthStore";
-import { CreateClubInput } from "@/lib/schemas/club.schema";
 import { ClubResponse } from "@/lib/types/club";
 import { toast as reactToast } from "react-hot-toast";
 import { AgendaReportPayload } from "@/lib/types/agendaReport";
@@ -16,25 +15,25 @@ export function useAgendaReport() {
             // console.log(data)
             const reports = data.data.map((a: any) => ({
                 id: a?.id,
-                agenda_id: a?.agenda_id,
-                club_id: a?.club_id,
-                meeting_id: a?.meeting_id,
-                report_type: a?.report_type,
-                word_of_the_day: a?.word_of_the_day ? a?.word_of_the_day : null,
-                word_of_the_day_definition: a?.word_of_the_day_definition
+                agendaId: a?.agenda_id,
+                clubId: a?.club_id,
+                meetingId: a?.meeting_id,
+                reportType: a?.report_type,
+                wordOfTheDay: a?.word_of_the_day ? a?.word_of_the_day : null,
+                wordOfTheDayDefinition: a?.word_of_the_day_definition
                     ? a?.word_of_the_day_definition
                     : null,
-                grammar_notes: a?.grammar_notes ? a?.grammar_notes : null,
-                overall_notes: a?.overall_notes ? a?.overall_notes : null,
-                member_evaluation:
+                grammarNotes: a?.grammar_notes ? a?.grammar_notes : null,
+                overallNotes: a?.overall_notes ? a?.overall_notes : null,
+                memberEvaluation:
                     a?.member_evaluations?.length > 0
                         ? a?.member_evaluations
                         : null,
-                filler_word_counts:
+                fillerWordCounts:
                     a?.filler_word_counts?.length > 0
                         ? a?.filler_word_counts
                         : null,
-                member_id:
+                memberId:
                     a?.member_evaluations?.length > 0
                         ? a?.member_evaluations[0].memberId
                         : null,
@@ -49,7 +48,7 @@ export function useAgendaReport() {
 
 export function useCanUserCreateReport(meetingId: string) {
     return useQuery({
-        queryKey: ["can-user-create-report",meetingId],
+        queryKey: ["can-user-create-report", meetingId],
         queryFn: async () => {
             const { data } = await api.get(
                 `/agenda-report/can-edit/${meetingId}`,
@@ -61,7 +60,7 @@ export function useCanUserCreateReport(meetingId: string) {
 }
 
 export function useCreateReport(meetingId: string) {
-    // const queryClient = useQueryClient();
+    const queryClient = useQueryClient();
 
     return useMutation({
         mutationFn: async (input: AgendaReportPayload) => {
@@ -72,6 +71,9 @@ export function useCreateReport(meetingId: string) {
             return data.data;
         },
         onSuccess: () => {
+            queryClient.invalidateQueries({
+                queryKey: ["can-user-create-report", meetingId],
+            });
             reactToast.success("Report Created Successfully");
         },
         onError: (error) => {

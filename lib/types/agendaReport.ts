@@ -3,15 +3,16 @@ export enum REPORT_TYPE {
     AH_COUNTER = "Ah Counter",
 }
 
-interface MEMBER_EVALUATION {
+export interface MEMBER_EVALUATION {
     memberId: string;
     memberName: string;
     wordUsageCount: number;
     examples: string[];
     grammarIssues: string;
+    role?: string;
 }
 
-interface FILLER_WORD_COUNT {
+export interface FILLER_WORD_COUNT {
     memberId: string;
     memberName: string;
     ahs: number;
@@ -19,49 +20,58 @@ interface FILLER_WORD_COUNT {
     likes: number;
     other: number;
     notes: string;
+    role?: string;
 }
 
 export interface REPORT {
     id: string;
-    agenda_id: string;
-    club_id: string;
-    meeting_id: string;
-    report_type: REPORT_TYPE;
-    word_of_the_day: string | null;
-    member_id: string;
-    word_of_the_day_definition: string | null;
-    grammar_notes: string | null;
-    overall_notes: string | null;
-    member_evaluation: MEMBER_EVALUATION | null;
-    filler_word_counts: FILLER_WORD_COUNT | null;
+    agendaId: string;
+    clubId: string;
+    meetingId: string;
+    reportType: REPORT_TYPE | string;
+    wordOfTheDay: string | null;
+    memberId: string | null;
+    wordOfTheDayDefinition: string | null;
+    grammarNotes: string | null;
+    overallNotes: string | null;
+    memberEvaluation: MEMBER_EVALUATION | null;
+    fillerWordCounts: FILLER_WORD_COUNT | null;
 }
 
-export interface FORDREPORT {
-  id: string;
-     agenda_id: string;
-     club_id: string;
-     meeting_id: string;
-     report_type: REPORT_TYPE | string;
-     word_of_the_day: string | null;
-     member_id: string | null;
-     word_of_the_day_definition: string | null;
-     grammar_notes: string | null;
-     overall_notes: string | null;
-     member_evaluation: MEMBER_EVALUATION[] | null;
-     filler_word_counts: FILLER_WORD_COUNT[] | null; 
+export interface FORDREPORT extends Omit<REPORT, 'memberEvaluation' | 'fillerWordCounts' > {
+    memberEvaluation: MEMBER_EVALUATION[] | null;
+    fillerWordCounts: FILLER_WORD_COUNT[] | null;
 }
 
-export interface USERS_IN_MEETING {
+// export interface USERS_IN_MEETING {
+//     memberId: string;
+//     memberName: string;
+//     userId: string;
+//     role: string;
+// }
+
+export interface MemberReportData {
     memberId: string;
     memberName: string;
-    userId: string;
-    role: string;
+    userId?: string;
+    // For GRAMMARIAN
+    wordUsageCount?: number;
+    examples?: string[];
+    grammarIssues?: string;
+    // For AH_COUNTER
+    ahs?: number;
+    ums?: number;
+    likes?: number;
+    other?: number;
+    notes?: string;
+    role?: string;
 }
 
 export interface CAN_CREATE {
     roleName: string;
     status: string;
-    meeting: USERS_IN_MEETING[];
+    meeting?: MemberReportData[] | null;
+    report?: AgendaReport  | null;     
 }
 
 export interface AgendaReportPayload {
@@ -75,17 +85,24 @@ export interface AgendaReportPayload {
 }
 
 
-export interface MemberReportData {
-    memberId: string;
-    memberName: string;
-    // For GRAMMARIAN
-    wordUsageCount?: number;
-    examples?: string[];
-    grammarIssues?: string;
-    // For AH_COUNTER
-    ahs?: number;
-    ums?: number;
-    likes?: number;
-    other?: number;
-    notes?: string;
+
+export interface AgendaReport  {
+    id: string;
+    reportType: "GRAMMARIAN" | "AH_COUNTER";
+    wordOfTheDay: string;
+    wordOfTheDayDefinition: string;
+    grammarNotes?: string;
+    memberEvaluations?: MEMBER_EVALUATION[];
+    fillerWordCounts?: FILLER_WORD_COUNT[];
+    overallNotes: string;
+    createdAt: string;
+    updatedAt: string;
+}
+
+export interface ViewAgendaReportProps {
+    reportData: {
+        roleName: string;
+        status: string;
+        report: AgendaReport ;
+    };
 }
