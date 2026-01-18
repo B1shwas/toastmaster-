@@ -93,10 +93,7 @@ export default function DashboardPage() {
 					meetingsCount={meetings.length}
 				/>
 
-				<QuickActions
-					onJoinClick={() => setIsJoinModalOpen(true)}
-					onCreateClick={() => setIsCreateModalOpen(true)}
-				/>
+				
 
 				 <ListAllAgendas /> 
 
@@ -107,6 +104,11 @@ export default function DashboardPage() {
 				/>
 
 				<UpcomingMeetingsSection meetings={meetings} />
+
+				<QuickActions
+					onJoinClick={() => setIsJoinModalOpen(true)}
+					onCreateClick={() => setIsCreateModalOpen(true)}
+				/>
 			</div>
 
 			{isAnyLoading && (
