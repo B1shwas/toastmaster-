@@ -1,9 +1,10 @@
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { useQuery, useMutation, useQueryClient, keepPreviousData } from "@tanstack/react-query";
 import { api } from "@/lib/api";
 import type {
 	Meeting,
-	MeetingResponse,
+  MeetingResponse,
 	MeetingsResponse,
+  Template,
 } from "@/lib/types/meeting";
 
 export const meetingKeys = {
@@ -165,5 +166,16 @@ export function useUpdateMeetingNotes() {
 				queryKey: meetingKeys.listByClub(variables.clubId),
 			});
 		},
+	});
+}
+
+export function useDuplicateAgenda(page: number=1, limit: number=10) {
+  return useQuery({
+		queryKey: ["duplicate-agenda",page,limit],
+		queryFn: async () => {
+			const { data } = await api.get<{data:Template}>(`/meetings/select-agenda?page=${page}&limit=${limit}`);
+			return data.data;
+    },
+    placeholderData: keepPreviousData,
 	});
 }

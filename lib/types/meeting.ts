@@ -54,3 +54,30 @@ export interface ApiResponse<T> {
 export type MeetingResponse = ApiResponse<Meeting>;
 export type MeetingsResponse = ApiResponse<Meeting[]>;
 export type AgendaResponse = ApiResponse<Agenda>;
+
+
+
+type AgendaItem = {
+  title: string;
+  roleName: string;
+  duration: number;
+  sequence: number;
+  notes: string | null;
+}
+
+export type MeetingSession = {
+  theme: string;
+  time: string;
+  notes: string | null;
+  agendas: AgendaItem[];
+}
+
+export interface Template {
+  data: MeetingSession[] | null;
+  total: number;
+  page: number;
+  limit: number;
+}
+
+
+
