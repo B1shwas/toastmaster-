@@ -1,11 +1,14 @@
 "use client";
 
-import { memo } from "react";
+import { memo, useState } from "react";
 import Link from "next/link";
-import { Calendar, ArrowRight, PlusCircle } from "lucide-react";
+import { Calendar, ArrowRight, PlusCircle, BookDashedIcon } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { MeetingCard } from "./MeetingCard";
 import type { Meeting } from "@/lib/types/meeting";
+import { useDuplicateAgenda } from "@/lib/api";
+import { Dialog, DialogTrigger } from "../ui/dialog";
+import { DuplicateAgenda } from "./DuplicateAgenda";
 
 interface MeetingListSectionProps {
   meetings: Meeting[];
@@ -49,6 +52,9 @@ function MeetingListSectionComponent({
   const isMeetingsArray = Array.isArray(meetings);
   const displayMeetings = isMeetingsArray ? meetings.slice(0, maxDisplay) : [];
   const meetingCount = isMeetingsArray ? meetings.length : 0;
+  const { data: duplicateAgenda } = useDuplicateAgenda();
+  
+  const [isDialogOpen, setIsDialogOpen] = useState(false);
 
   return (
     <section className="space-y-4">
@@ -78,6 +84,20 @@ function MeetingListSectionComponent({
               New Meeting
             </Button>
           )}
+          {duplicateAgenda  ? (
+            <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+                <DialogTrigger asChild>
+                  <Button
+                    size="sm"
+                    className="hidden gap-1.5 sm:flex bg-linear-to-br from-blue-500 to-cyan-400"
+                  >
+                    <BookDashedIcon className="h-4 w-4 " />
+                    Schedule Using Template
+                  </Button>
+                </DialogTrigger>
+              <DuplicateAgenda duplicateAgenda={ duplicateAgenda } onClose={() => setIsDialogOpen(false)} />
+            </Dialog>
+          ) : null}
           <Link href={`/club/${clubId}/meetings`}>
             <Button
               variant="ghost"
@@ -104,7 +124,7 @@ function MeetingListSectionComponent({
 
       {/* Mobile Schedule Button */}
       {onScheduleMeeting && meetingCount > 0 && (
-        <div className="sm:hidden">
+        <div className="flex flex-col gap-2 sm:hidden">
           <Button
             onClick={onScheduleMeeting}
             className="w-full gap-2 bg-linear-to-br from-blue-500 to-cyan-400"
@@ -112,6 +132,12 @@ function MeetingListSectionComponent({
             <PlusCircle className="h-4 w-4 " />
             Schedule New Meeting
           </Button>
+          {duplicateAgenda ? (
+            <Button className="w-full gap-2 bg-linear-to-br from-blue-500 to-cyan-400">
+              <BookDashedIcon className="h-4 w-4 " />
+              Schedule Using Template
+            </Button>
+          ) : null}
         </div>
       )}
     </section>
