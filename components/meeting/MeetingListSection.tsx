@@ -1,6 +1,6 @@
 "use client";
 
-import { memo } from "react";
+import { memo, useState } from "react";
 import Link from "next/link";
 import { Calendar, ArrowRight, PlusCircle, BookDashedIcon } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -53,6 +53,8 @@ function MeetingListSectionComponent({
   const displayMeetings = isMeetingsArray ? meetings.slice(0, maxDisplay) : [];
   const meetingCount = isMeetingsArray ? meetings.length : 0;
   const { data: duplicateAgenda } = useDuplicateAgenda();
+  
+  const [isDialogOpen, setIsDialogOpen] = useState(false);
 
   return (
     <section className="space-y-4">
@@ -83,7 +85,7 @@ function MeetingListSectionComponent({
             </Button>
           )}
           {duplicateAgenda  ? (
-            <Dialog>
+            <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
                 <DialogTrigger asChild>
                   <Button
                     size="sm"
@@ -93,7 +95,7 @@ function MeetingListSectionComponent({
                     Schedule Using Template
                   </Button>
                 </DialogTrigger>
-              <DuplicateAgenda duplicateAgenda={ duplicateAgenda } />
+              <DuplicateAgenda duplicateAgenda={ duplicateAgenda } onClose={() => setIsDialogOpen(false)} />
             </Dialog>
           ) : null}
           <Link href={`/club/${clubId}/meetings`}>

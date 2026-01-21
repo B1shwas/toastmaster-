@@ -23,7 +23,7 @@ import { format } from "date-fns";
 import { Calendar } from "../ui/calendar";
 import { SelectInput } from "../ui/form-elements";
 import { ROLE_LABELS, SystemRole } from "@/lib/types/agenda";
-import { useClubMembers } from "@/lib/api";
+import { useClubMembers, useCreateMeetingWithTemplate } from "@/lib/api";
 import { useParams } from "next/navigation";
 
 const meetingSessionSchema = z.object({
@@ -32,8 +32,8 @@ const meetingSessionSchema = z.object({
   meetingNo: z.string().min(1, "meetingNo is required"),
   date: z.string().min(1, "date is required"),
   venue: z.string().min(1, "venue is required"),
-  isDeleted: z.boolean(),
-  // status: z.string().min(1, "Theme is required"),
+  // isDeleted: z.boolean(),
+  status: z.string(),
   time: z.string().regex(/^\d{2}:\d{2}:\d{2}$/, "Invalid time format"),
   notes: z.string().nullable(),
   agendas: z
@@ -54,7 +54,7 @@ const meetingSessionSchema = z.object({
     .min(1, "At least one agenda item is required"),
 });
 
-type MeetingSessionForm = z.infer<typeof meetingSessionSchema>;
+export type MeetingSessionForm = z.infer<typeof meetingSessionSchema>;
 
 const TemplatePreview = ({
   session,
@@ -111,8 +111,8 @@ const TemplatePreview = ({
       date: "",
       clubId: clubId || "",
       meetingNo: "",
-      isDeleted: false,
-      // status: "",
+      // isDeleted: false,
+      status: "SCHEDULED",
       agendas: session.agendas
         .sort((a, b) => a.sequence - b.sequence)
         .map((agenda) => ({
@@ -155,7 +155,10 @@ const TemplatePreview = ({
         </div>
       </DialogHeader>
 
-      <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col flex-1 min-h-0">
+      <form
+        onSubmit={handleSubmit(onSubmit)}
+        className="flex flex-col flex-1 min-h-0"
+      >
         <ScrollArea className="flex-1 px-6 py-4 overflow-auto">
           <div className="space-y-6">
             {/* Session Overview */}
@@ -650,12 +653,16 @@ const TemplatePreview = ({
 export const DuplicateAgenda = ({
   duplicateAgenda,
   onTemplateSelect,
+  onClose,
 }: {
   duplicateAgenda: Template;
   onTemplateSelect?: (session: MeetingSession) => void;
+  onClose?: () => void;
 }) => {
   const [selectedSession, setSelectedSession] = useState<number | null>(null);
   const [showPreview, setShowPreview] = useState(false);
+
+  const createMeetingWithTemplate = useCreateMeetingWithTemplate();
 
   const handleSelectTemplate = (sessionIndex: number) => {
     setSelectedSession(sessionIndex);
@@ -666,6 +673,13 @@ export const DuplicateAgenda = ({
     if (selectedSession !== null && duplicateAgenda.data) {
       onTemplateSelect?.(formData);
       console.log("Confirmed session:", formData);
+      createMeetingWithTemplate.mutate(formData, {
+        onSuccess: () => {
+          setShowPreview(false);
+          setSelectedSession(null);
+          onClose?.();
+        },
+      });
     }
   };
 
