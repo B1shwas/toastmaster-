@@ -6,7 +6,7 @@ import { Calendar, ArrowRight, PlusCircle, BookDashedIcon } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { MeetingCard } from "./MeetingCard";
 import type { Meeting } from "@/lib/types/meeting";
-import { useDuplicateAgenda } from "@/lib/api";
+import { useDuplicateAgenda, useProfile } from "@/lib/api";
 import { Dialog, DialogTrigger } from "../ui/dialog";
 import { DuplicateAgenda } from "./DuplicateAgenda";
 
@@ -53,8 +53,25 @@ function MeetingListSectionComponent({
   const displayMeetings = isMeetingsArray ? meetings.slice(0, maxDisplay) : [];
   const meetingCount = isMeetingsArray ? meetings.length : 0;
   const { data: duplicateAgenda } = useDuplicateAgenda();
-  
+  const { data: userData } = useProfile();
+  // console.log("userData :: ",userData)
+
   const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const memberOf: Set<string> | null = new Set([
+    ...userData?.member_of?.map((u: { id: string; name: string }) => u?.id),
+    ...userData?.owned_clubs?.map((u: { id: string }) => u?.id),
+    ...userData?.admin_of?.map((u:{id:string}) => u?.id)
+    ]
+  )
+  const isMemberOf = memberOf.has(clubId)
+  // if (memberOf.has(clubId)) {
+  //   setIsMemberOf(true)
+  // }
+  // console.log("memberOf :: ", memberOf);
+  // console.log("clubId :: ", clubId)
+  // if (memberOf?.includes(clubId)) {
+  //   console.log("true yar xa")
+  // }
 
   return (
     <section className="space-y-4">
@@ -69,8 +86,9 @@ function MeetingListSectionComponent({
               ? "Failed to load meetings"
               : meetingCount === 0
                 ? "No meetings scheduled"
-                : `${meetingCount} meeting${meetingCount === 1 ? "" : "s"
-                } scheduled`}
+                : `${meetingCount} meeting${
+                    meetingCount === 1 ? "" : "s"
+                  } scheduled`}
           </p>
         </div>
         <div className="flex items-center gap-2">
@@ -84,18 +102,21 @@ function MeetingListSectionComponent({
               New Meeting
             </Button>
           )}
-          {duplicateAgenda  ? (
+          { isMemberOf && duplicateAgenda ? (
             <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-                <DialogTrigger asChild>
-                  <Button
-                    size="sm"
-                    className="hidden gap-1.5 sm:flex bg-linear-to-br from-blue-500 to-cyan-400"
-                  >
-                    <BookDashedIcon className="h-4 w-4 " />
-                    Schedule Using Template
-                  </Button>
-                </DialogTrigger>
-              <DuplicateAgenda duplicateAgenda={ duplicateAgenda } onClose={() => setIsDialogOpen(false)} />
+              <DialogTrigger asChild>
+                <Button
+                  size="sm"
+                  className="hidden gap-1.5 sm:flex bg-linear-to-br from-blue-500 to-cyan-400"
+                >
+                  <BookDashedIcon className="h-4 w-4 " />
+                  Schedule Using Template
+                </Button>
+              </DialogTrigger>
+              <DuplicateAgenda
+                duplicateAgenda={duplicateAgenda}
+                onClose={() => setIsDialogOpen(false)}
+              />
             </Dialog>
           ) : null}
           <Link href={`/club/${clubId}/meetings`}>
