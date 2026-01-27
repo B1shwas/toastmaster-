@@ -11,7 +11,7 @@ import {
 	UnauthenticatedView,
 } from "@/components/dashboard";
 import { useAuth } from "@/lib/hooks/useAuth";
-import { useCreateClub, useJoinClub, useUserClub, useUpcomingMeetings } from "@/lib/api";
+import { useCreateClub, useJoinClub, useUserClub, useUpcomingMeetings, useRequestJoinClub } from "@/lib/api";
 import { useToast } from "@/hooks/use-toast";
 import { getErrorMessage } from "@/lib/api";
 import useAuthStore from "@/lib/stores/useAuthStore";
@@ -27,7 +27,8 @@ export default function DashboardPage() {
 	const { data: meetings = [], isLoading: isMeetingsLoading } = useUpcomingMeetings();
 	const { toast } = useToast();
 	const createClubMutation = useCreateClub();
-	const joinClubMutation = useJoinClub();
+  const joinClubMutation = useJoinClub();
+	const requestJoinClubMutation = useRequestJoinClub();
 
 	useEffect(() => {
 		setIsMounted(true);
@@ -61,19 +62,7 @@ export default function DashboardPage() {
 	};
 
 	const handleJoinClub = async (data: JoinClubInput) => {
-		try {
-			await joinClubMutation.mutateAsync(data);
-			toast({
-				title: "Success",
-				description: "Successfully joined the club!",
-			});
-		} catch (error) {
-			toast({
-				title: "Error",
-				description: getErrorMessage(error),
-				variant: "destructive",
-			});
-		}
+			await requestJoinClubMutation.mutateAsync(data);
 	};
 
 	if (isAnyLoading) {

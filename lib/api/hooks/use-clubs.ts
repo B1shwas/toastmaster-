@@ -18,6 +18,8 @@ import type {
 	CreateClubInput,
 	JoinClubInput,
 } from "@/lib/schemas/club.schema";
+import { toast as reactToast } from "react-hot-toast";
+import { AxiosError } from "axios";
 
 export const clubKeys = {
 	all: ["clubs"] as const,
@@ -220,5 +222,41 @@ export function useRegenerateClubCode() {
 		onError: (error) => {
 			console.error("Failed to regenerate club code:", getErrorMessage(error));
 		},
+	});
+}
+
+export function useRequestJoinClub() {
+	const queryClient = useQueryClient();
+	const { user } = useAuthStore.getState();
+
+	return useMutation({
+		mutationFn: async (input: JoinClubInput) => {
+			const { data } = await api.post<ClubResponse>("/club/request-join", input);
+			return data.data;
+		},
+		onSuccess: (data) => {
+			queryClient.invalidateQueries({
+				queryKey: clubKeys.lists(),
+				exact: false,
+			});
+			queryClient.invalidateQueries({
+				queryKey: ["user-clubs"],
+				exact: false,
+			});
+			if (!!data && !!user?.id) {
+				queryClient.invalidateQueries({
+					queryKey: clubKeys.role(data.id, user.id),
+				});
+      }
+      reactToast.success("Your Request to join club Successfully Send.")
+    },
+    onError: (error) => {
+      const axiosError = error as AxiosError<any>;
+      const message =
+          axiosError.response?.data?.error?.message ??
+          "Something went wrong. Please try again.";
+      
+      reactToast.error(message);
+    }
 	});
 }

@@ -27,7 +27,7 @@ import { useAuth } from "@/lib/hooks/useAuth";
 import type { AddMemberInput, JoinClubInput } from "@/lib/schemas/club.schema";
 import { useRouter } from "next/navigation";
 import { JoinClubModal } from "@/components/clubs/JoinClubModal";
-import { useJoinClub } from "@/lib/api/hooks/use-clubs";
+import { useJoinClub, useRequestJoinClub } from "@/lib/api/hooks/use-clubs";
 import { useToast } from "@/hooks/use-toast";
 import { ListAllAgendas } from "@/components/agendaReport/ListAllAgendas";
 
@@ -77,7 +77,7 @@ export default function ClubPage({ params }: ClubPageProps) {
   const { data: clubStats, isLoading: isStatsLoading } = useClubStats(clubId);
   const { data: roleData, isLoading: isRoleLoading } = useClubRole(
     clubId,
-    user?.id ?? ""
+    user?.id ?? "",
   );
   const { data: clubMembers } = useClubMembers(clubId);
   const { data: meetings } = useMeetings(
@@ -86,17 +86,19 @@ export default function ClubPage({ params }: ClubPageProps) {
     undefined,
     undefined,
     1,
-    3
+    3,
   );
   const addMemberMutation = useAddMember(clubId);
-  const joinClubMutation = useJoinClub();
+  const requestJoinClubMutation = useRequestJoinClub();
   const createMeetingMutation = useCreateMeeting();
   const router = useRouter();
   const { toast } = useToast();
 
   const [isAddMemberOpen, setIsAddMemberOpen] = useState(false);
   const [isScheduleMeetingOpen, setIsScheduleMeetingOpen] = useState(false);
-  const [selectedMemberForReport, setSelectedMemberForReport] = useState<any | null>(null);
+  const [selectedMemberForReport, setSelectedMemberForReport] = useState<
+    any | null
+  >(null);
   const [searchQuery, setSearchQuery] = useState("");
 
   const isLoading = isClubLoading || isStatsLoading || isRoleLoading;
@@ -106,8 +108,11 @@ export default function ClubPage({ params }: ClubPageProps) {
   const canManageMembers = role === "OWNER" || role === "ADMIN";
 
   const existingEmails = useMemo(
-    () => (Array.isArray(clubMembers) ? clubMembers.map((m) => m.member_member_email) : []),
-    [clubMembers]
+    () =>
+      Array.isArray(clubMembers)
+        ? clubMembers.map((m) => m.member_member_email)
+        : [],
+    [clubMembers],
   );
 
   const nextMeetingNo = useMemo(() => {
@@ -131,7 +136,7 @@ export default function ClubPage({ params }: ClubPageProps) {
   };
 
   const handleCreateMeeting = async (
-    data: Omit<CreateMeetingInput, "clubId">
+    data: Omit<CreateMeetingInput, "clubId">,
   ) => {
     const meetingData: CreateMeetingInput = {
       ...data,
@@ -154,23 +159,7 @@ export default function ClubPage({ params }: ClubPageProps) {
   };
 
   const handleJoinClub = async (data: JoinClubInput) => {
-    try {
-      const data_data = await joinClubMutation.mutateAsync(data);
-      toast({
-        title: "Success",
-        description: "Successfully joined the club!",
-      });
-      console.log(data_data);
-      window.location.reload(); //TODO: Support the query reload not hard reload 
-
-
-    } catch (error) {
-      toast({
-        title: "Error",
-        description: getErrorMessage(error),
-        variant: "destructive",
-      });
-    }
+    await requestJoinClubMutation.mutateAsync(data);
   };
 
   if (isClubError) {
@@ -189,7 +178,6 @@ export default function ClubPage({ params }: ClubPageProps) {
     return <LoadingState />;
   }
 
-
   return (
     <div className="min-h-screen bg-linear-to-b from-slate-950 to-slate-900 pt-24 pb-12 px-4">
       <motion.div
@@ -206,7 +194,9 @@ export default function ClubPage({ params }: ClubPageProps) {
             totalMembers={clubStats.totalMembers}
             canSeeCode={canSeeCode}
             isMember={isMember}
-            onJoinClick={async () => (await handleJoinClub({ clubCode: club.clubCode as any }))}
+            onJoinClick={async () =>
+              await handleJoinClub({ clubCode: club.clubCode as any })
+            }
           />
         </motion.div>
 
@@ -214,7 +204,6 @@ export default function ClubPage({ params }: ClubPageProps) {
         <motion.div variants={ANIMATION_CONFIG.item}>
           <ClubStatsGrid stats={clubStats} />
         </motion.div>
-
 
         {/* Upcoming Meetings */}
         <motion.div variants={ANIMATION_CONFIG.item}>
@@ -244,31 +233,26 @@ export default function ClubPage({ params }: ClubPageProps) {
       </motion.div>
 
       {/* Add Member Modal */}
-      {
-        canManageMembers && (
-          <AddMemberModal
-            isOpen={isAddMemberOpen}
-            onClose={() => setIsAddMemberOpen(false)}
-            onSubmit={handleAddMember}
-            isLoading={addMemberMutation.isPending}
-            existingEmails={existingEmails}
-          />
-        )
-      }
-
+      {canManageMembers && (
+        <AddMemberModal
+          isOpen={isAddMemberOpen}
+          onClose={() => setIsAddMemberOpen(false)}
+          onSubmit={handleAddMember}
+          isLoading={addMemberMutation.isPending}
+          existingEmails={existingEmails}
+        />
+      )}
 
       {/* Schedule Meeting Modal */}
-      {
-        canManageMembers && (
-          <ScheduleMeetingModal
-            isOpen={isScheduleMeetingOpen}
-            onClose={() => setIsScheduleMeetingOpen(false)}
-            onSubmit={handleCreateMeeting}
-            isLoading={createMeetingMutation.isPending}
-            nextMeetingNo={nextMeetingNo}
-          />
-        )
-      }
+      {canManageMembers && (
+        <ScheduleMeetingModal
+          isOpen={isScheduleMeetingOpen}
+          onClose={() => setIsScheduleMeetingOpen(false)}
+          onSubmit={handleCreateMeeting}
+          isLoading={createMeetingMutation.isPending}
+          nextMeetingNo={nextMeetingNo}
+        />
+      )}
 
       <MemberRoleReportModal
         isOpen={!!selectedMemberForReport}
@@ -276,6 +260,6 @@ export default function ClubPage({ params }: ClubPageProps) {
         member={selectedMemberForReport}
         clubId={clubId}
       />
-    </div >
+    </div>
   );
 }
