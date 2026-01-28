@@ -77,3 +77,30 @@ export type {
 	ClubSettingsInput,
 	JoinClubInput,
 } from "../schemas/club.schema";
+
+
+export type MemberStatus = "pending" | "active" | "inactive";
+
+export interface Member {
+  id: string;
+  memberName: string;
+  memberEmail: string;
+  dateJoined: string;
+  status: MemberStatus;
+  role: string;
+}
+
+export interface PendingClubGroup {
+  id: string;
+  name: string;
+  description: string;
+  members: Member[];
+}
+
+export interface ApiResponsePendingClubGroup {
+  data: PendingClubGroup[];
+  statusCode: number;
+  timestamp: string; // ISO date string
+}
+
+

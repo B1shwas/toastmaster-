@@ -27,9 +27,10 @@ import { useAuth } from "@/lib/hooks/useAuth";
 import type { AddMemberInput, JoinClubInput } from "@/lib/schemas/club.schema";
 import { useRouter } from "next/navigation";
 import { JoinClubModal } from "@/components/clubs/JoinClubModal";
-import { useJoinClub, useRequestJoinClub } from "@/lib/api/hooks/use-clubs";
+import { useGetPendingRequest, useJoinClub, useRequestJoinClub } from "@/lib/api/hooks/use-clubs";
 import { useToast } from "@/hooks/use-toast";
 import { ListAllAgendas } from "@/components/agendaReport/ListAllAgendas";
+import { PendingRequest } from "@/components/dashboard/PendingRequest";
 
 const ANIMATION_CONFIG = {
   container: {
@@ -91,6 +92,9 @@ export default function ClubPage({ params }: ClubPageProps) {
   const addMemberMutation = useAddMember(clubId);
   const requestJoinClubMutation = useRequestJoinClub();
   const createMeetingMutation = useCreateMeeting();
+  const { data: pendingRequestData } = useGetPendingRequest()
+  
+  
   const router = useRouter();
   const { toast } = useToast();
 
@@ -204,6 +208,8 @@ export default function ClubPage({ params }: ClubPageProps) {
         <motion.div variants={ANIMATION_CONFIG.item}>
           <ClubStatsGrid stats={clubStats} />
         </motion.div>
+        
+        {pendingRequestData ? <PendingRequest pendingRequestData={pendingRequestData} clubId={clubId} /> : null}
 
         {/* Upcoming Meetings */}
         <motion.div variants={ANIMATION_CONFIG.item}>

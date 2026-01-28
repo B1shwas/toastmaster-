@@ -12,6 +12,8 @@ import type {
 	ClubResponse,
 	ClubMembersResponse,
 	ClubStats,
+  PendingClubGroup,
+  ApiResponsePendingClubGroup,
 } from "@/lib/types/club";
 import type {
 	AddMemberInput,
@@ -258,5 +260,15 @@ export function useRequestJoinClub() {
       
       reactToast.error(message);
     }
+	});
+}
+
+export function useGetPendingRequest() {
+	return useQuery({
+		queryKey: ['club-join-pending-request'],
+		queryFn: async () => {
+			const { data } = await api.get<ApiResponsePendingClubGroup>(`/club/request-join`);
+			return data.data;
+		},
 	});
 }

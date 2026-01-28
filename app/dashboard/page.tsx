@@ -11,11 +11,12 @@ import {
 	UnauthenticatedView,
 } from "@/components/dashboard";
 import { useAuth } from "@/lib/hooks/useAuth";
-import { useCreateClub, useJoinClub, useUserClub, useUpcomingMeetings, useRequestJoinClub } from "@/lib/api";
+import { useCreateClub, useJoinClub, useUserClub, useUpcomingMeetings, useRequestJoinClub, useGetPendingRequest } from "@/lib/api";
 import { useToast } from "@/hooks/use-toast";
 import { getErrorMessage } from "@/lib/api";
 import useAuthStore from "@/lib/stores/useAuthStore";
 import { ListAllAgendas } from "@/components/agendaReport/ListAllAgendas";
+import { PendingRequest } from "@/components/dashboard/PendingRequest";
 
 export default function DashboardPage() {
 	const [isMounted, setIsMounted] = useState(false);
@@ -28,8 +29,10 @@ export default function DashboardPage() {
 	const { toast } = useToast();
 	const createClubMutation = useCreateClub();
   const joinClubMutation = useJoinClub();
-	const requestJoinClubMutation = useRequestJoinClub();
-
+  const requestJoinClubMutation = useRequestJoinClub();
+  const { data: pendingRequestData } = useGetPendingRequest()
+  // console.log("pending Request :: ", pendingRequestData)
+  
 	useEffect(() => {
 		setIsMounted(true);
 	}, []);
@@ -90,8 +93,10 @@ export default function DashboardPage() {
 					clubs={clubs || []}
 					onJoinClick={() => setIsJoinModalOpen(true)}
 					onCreateClick={() => setIsCreateModalOpen(true)}
-				/>
-
+        />
+				
+        {pendingRequestData ? <PendingRequest pendingRequestData={pendingRequestData} /> : null}
+        
 				<UpcomingMeetingsSection meetings={meetings} />
 
 				<QuickActions
