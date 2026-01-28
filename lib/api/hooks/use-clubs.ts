@@ -312,3 +312,13 @@ export function usePendingRequestDecision() {
   },
 });
 }
+
+export function useUserClubStatus() {
+	return useQuery({
+		queryKey: ['user-club-status'],
+		queryFn: async () => {
+			const { data } = await api.get<{data:{clubId:string,status:string}[]}>(`/club/user-status`);
+			return data.data;
+		},
+	});
+}

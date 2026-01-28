@@ -27,7 +27,7 @@ import { useAuth } from "@/lib/hooks/useAuth";
 import type { AddMemberInput, JoinClubInput } from "@/lib/schemas/club.schema";
 import { useRouter } from "next/navigation";
 import { JoinClubModal } from "@/components/clubs/JoinClubModal";
-import { useGetPendingRequest, useJoinClub, useRequestJoinClub } from "@/lib/api/hooks/use-clubs";
+import { useGetPendingRequest, useJoinClub, useRequestJoinClub, useUserClubStatus } from "@/lib/api/hooks/use-clubs";
 import { useToast } from "@/hooks/use-toast";
 import { ListAllAgendas } from "@/components/agendaReport/ListAllAgendas";
 import { PendingRequest } from "@/components/dashboard/PendingRequest";

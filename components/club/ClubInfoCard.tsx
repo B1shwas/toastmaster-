@@ -5,7 +5,7 @@ import { Settings, MapPin, Hash, Calendar, Users } from "lucide-react";
 import type { Club } from "@/lib/types/club";
 import { formatMeetingFrequency } from "@/lib/utils/club";
 import { ClubCodeBadge } from "./ClubCodeBadge";
-import { useClubCode, useRegenerateClubCode } from "@/lib/api";
+import { useClubCode, useRegenerateClubCode, useUserClubStatus } from "@/lib/api";
 
 interface ClubInfoCardProps {
 	club: Club;
@@ -48,7 +48,17 @@ export function ClubInfoCard({
 		club.id,
 		canSeeCode
 	);
-	const { mutate: regenerateCode } = useRegenerateClubCode();
+  const { mutate: regenerateCode } = useRegenerateClubCode(); 
+  const { data: userClubStatusData } = useUserClubStatus();
+  // console.log("userClubStatusData :: ", userClubStatusData)
+  const mapUserClubStatusData = new Map<string, string>();
+  let status = "";
+  if (userClubStatusData) {
+    userClubStatusData.forEach((c) =>
+      mapUserClubStatusData.set(c.clubId, c.status),
+    );
+    status = mapUserClubStatusData.get(club.id) ?? "";
+  }
 
 	const clubCode = clubCodeData?.code ?? "";
 
@@ -88,7 +98,7 @@ export function ClubInfoCard({
 						onClick={onJoinClick}
 						className="px-6 py-2 bg-blue-600 rounded-lg text-white font-semibold hover:bg-blue-500 transition shrink-0 ml-4"
 					>
-						Join Club
+					{status === "pending" ? "Request Pending" : status === "rejected" ? "Request Decline" : "Join Club"}
 					</motion.button>
 				)}
 			</div>
