@@ -272,3 +272,43 @@ export function useGetPendingRequest() {
 		},
 	});
 }
+
+export function usePendingRequestDecision() {
+	const queryClient = useQueryClient();
+	const { user } = useAuthStore.getState();
+
+	return useMutation({
+  mutationFn: async (input: {clubId:string,memberId:string, decision:boolean}) => {
+    const { data } = await api.patch("/club/request-join", input);
+    return data.data;
+  },
+  onSuccess: (response) => {
+    queryClient.invalidateQueries({
+      queryKey: clubKeys.lists(),
+      exact: false,
+    });
+    queryClient.invalidateQueries({
+      queryKey: ["club-join-pending-request"],
+      exact: false,
+    });
+    
+    const clubData = response.data;
+    if (!!clubData && !!user?.id) {
+      queryClient.invalidateQueries({
+        queryKey: clubKeys.role(clubData.id, user.id),
+      });
+    }
+    console.log(response)
+    const message = response.message ?? "Club join request processed successfully.";
+    reactToast.success(message);
+  },
+  onError: (error) => {
+    const axiosError = error as AxiosError<any>;
+    const message =
+      axiosError.response?.data?.error?.message ??
+      "Something went wrong. Please try again.";
+
+    reactToast.error(message);
+  },
+});
+}

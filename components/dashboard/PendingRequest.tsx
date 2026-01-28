@@ -1,6 +1,7 @@
 import { Check, X, User, Mail, Calendar } from "lucide-react";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Member, PendingClubGroup } from "@/lib/types/club";
+import { usePendingRequestDecision } from "@/lib/api";
 
 interface RequestWithClubInfo extends Member {
   clubName: string;
@@ -87,14 +88,22 @@ export const PendingRequest = ({
   pendingRequestData: PendingClubGroup[];
   clubId?: string;
 }) => {
+  const pendingRequestDecisionMutation = usePendingRequestDecision();
+
   const handleAccept = (clubId: string, memberId: string) => {
-    console.log("Accepting request:", { clubId, memberId });
-    // Add your accept logic here
+    pendingRequestDecisionMutation.mutate({
+      clubId: clubId,
+      memberId: memberId,
+      decision: true,
+    });
   };
 
   const handleReject = (clubId: string, memberId: string) => {
-    console.log("Rejecting request:", { clubId, memberId });
-    // Add your reject logic here
+    pendingRequestDecisionMutation.mutate({
+      clubId: clubId,
+      memberId: memberId,
+      decision: false,
+    });
   };
 
   const formatDate = (dateString: string) => {
@@ -118,25 +127,7 @@ export const PendingRequest = ({
   const shouldScroll = allPendingRequests.length > 4;
 
   if (allPendingRequests.length === 0) {
-    return (
-      <div className="p-6">
-        <h2 className="text-white text-xl md:text-2xl font-semibold mb-6">
-          Pending Requests
-        </h2>
-        <div className="flex flex-col items-center justify-center py-16 md:py-24 border border-dashed border-neutral-700 rounded-2xl">
-          <div className="w-16 h-16 rounded-full bg-neutral-800 flex items-center justify-center mb-4">
-            <User className="w-8 h-8 text-neutral-600" />
-          </div>
-          <h3 className="text-neutral-300 text-lg font-semibold mb-2">
-            No Pending Requests
-          </h3>
-          <p className="text-neutral-500 text-sm text-center max-w-sm">
-            Membership requests will appear here when members apply to join your
-            clubs.
-          </p>
-        </div>
-      </div>
-    );
+    return null
   }
 
   return (

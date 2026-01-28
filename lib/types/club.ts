@@ -100,7 +100,7 @@ export interface PendingClubGroup {
 export interface ApiResponsePendingClubGroup {
   data: PendingClubGroup[];
   statusCode: number;
-  timestamp: string; // ISO date string
+  timestamp: string;
 }
 
 
