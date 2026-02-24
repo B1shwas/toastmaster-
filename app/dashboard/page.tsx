@@ -5,7 +5,7 @@ import type { CreateClubInput } from "@/components/clubs/CreateClubModal";
 import type { JoinClubInput } from "@/lib/schemas/club.schema";
 import {
 	WelcomeSection,
-	QuickActions,
+	// QuickActions,
 	YourClubsSection,
 	UpcomingMeetingsSection,
 	UnauthenticatedView,
@@ -81,28 +81,20 @@ export default function DashboardPage() {
 			<div className="max-w-7xl mx-auto">
 				<WelcomeSection
 					name={user.name}
-					clubsCount={clubs.length}
-					meetingsCount={meetings.length}
-				/>
+				meetingsCount={meetings.length}
+				clubs={clubs}
+			/>
 
-				
+			<ListAllAgendas />
 
-				 <ListAllAgendas /> 
-
-				<YourClubsSection
-					clubs={clubs || []}
-					onJoinClick={() => setIsJoinModalOpen(true)}
-					onCreateClick={() => setIsCreateModalOpen(true)}
-        />
-				
-        {pendingRequestData ? <PendingRequest pendingRequestData={pendingRequestData} /> : null}
+			{pendingRequestData ? <PendingRequest pendingRequestData={pendingRequestData} /> : null}
         
 				<UpcomingMeetingsSection meetings={meetings} />
 
-				<QuickActions
+				{/* <QuickActions
 					onJoinClick={() => setIsJoinModalOpen(true)}
 					onCreateClick={() => setIsCreateModalOpen(true)}
-				/>
+				/> */}
 			</div>
 
 			{isAnyLoading && (
