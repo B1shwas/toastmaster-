@@ -37,7 +37,7 @@ export const clubKeys = {
 	code: (clubId: string) => ["club-code", clubId] as const,
 };
 
-export function useClubs(page = 1, limit = 6) {
+export function useClubs(page = 1, limit = 8) {
 	return useQuery({
 		queryKey: clubKeys.list(page, limit),
 		queryFn: async () => {

@@ -26,7 +26,7 @@ const itemVariants = {
 
 export default function ClubsPage() {
   const [page, setPage] = useState(1);
-  const limit = 6;
+  const limit = 16;
   const [searchQuery, setSearchQuery] = useState("");
 
   const { data, isLoading, isError, isFetching } = useClubs(page, limit);
