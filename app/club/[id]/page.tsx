@@ -27,7 +27,7 @@ import { useAuth } from "@/lib/hooks/useAuth";
 import type { AddMemberInput, JoinClubInput } from "@/lib/schemas/club.schema";
 import { useRouter } from "next/navigation";
 import { JoinClubModal } from "@/components/clubs/JoinClubModal";
-import { useGetPendingRequest, useJoinClub, useRequestJoinClub, useUserClubStatus } from "@/lib/api/hooks/use-clubs";
+import { useGetPendingRequest, useJoinClub, useRemoveMember, useRequestJoinClub, useUserClubStatus } from "@/lib/api/hooks/use-clubs";
 import { useToast } from "@/hooks/use-toast";
 import { ListAllAgendas } from "@/components/agendaReport/ListAllAgendas";
 import { PendingRequest } from "@/components/dashboard/PendingRequest";
@@ -90,6 +90,7 @@ export default function ClubPage({ params }: ClubPageProps) {
     3,
   );
   const addMemberMutation = useAddMember(clubId);
+  const removeMemberMutation = useRemoveMember(clubId);
   const requestJoinClubMutation = useRequestJoinClub();
   const createMeetingMutation = useCreateMeeting();
   const { data: pendingRequestData } = useGetPendingRequest()
@@ -153,8 +154,20 @@ export default function ClubPage({ params }: ClubPageProps) {
     router.push(`/club/${clubId}/meetings/${meeting.id}`);
   };
 
-  const handleRemoveMember = () => {
-    console.log("Remove member");
+  const handleRemoveMember = async (memberId: string) => {
+    try {
+      await removeMemberMutation.mutateAsync(memberId);
+      toast({
+        title: "Member removed",
+        description: "The member has been removed from this club.",
+      });
+    } catch (error) {
+      toast({
+        variant: "destructive",
+        title: "Failed to remove member",
+        description: getErrorMessage(error),
+      });
+    }
   };
 
   const handleAddMember = async (data: AddMemberInput) => {
@@ -265,6 +278,12 @@ export default function ClubPage({ params }: ClubPageProps) {
         onClose={() => setSelectedMemberForReport(null)}
         member={selectedMemberForReport}
         clubId={clubId}
+        onRemoveMember={async (memberId) => {
+          await handleRemoveMember(memberId);
+          setSelectedMemberForReport(null);
+        }}
+        canRemoveMember={canManageMembers}
+        isRemovingMember={removeMemberMutation.isPending}
       />
     </div>
   );

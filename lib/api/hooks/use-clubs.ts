@@ -153,7 +153,7 @@ export function useRemoveMember(clubId: string) {
 
 	return useMutation({
 		mutationFn: async (memberId: string) => {
-			await api.delete(`/clubs/${clubId}/members/${memberId}`);
+			await api.delete(`/club/${clubId}/member/remove/${memberId}`);
 		},
 		onSuccess: () => {
 			queryClient.invalidateQueries({ queryKey: clubKeys.detail(clubId) });
