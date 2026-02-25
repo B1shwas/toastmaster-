@@ -1,9 +1,8 @@
 "use client";
 
 import { motion } from "framer-motion";
-import { Settings, MapPin, Hash, Calendar, Users } from "lucide-react";
+import { Settings, MapPin, Hash, Users } from "lucide-react";
 import type { Club } from "@/lib/types/club";
-import { formatMeetingFrequency } from "@/lib/utils/club";
 import { ClubCodeBadge } from "./ClubCodeBadge";
 import { useClubCode, useRegenerateClubCode, useUserClubStatus } from "@/lib/api";
 
@@ -14,6 +13,8 @@ interface ClubInfoCardProps {
 	canSeeCode: boolean;
 	isMember?: boolean;
 	onJoinClick?: () => void;
+	compact?: boolean;
+	className?: string;
 }
 
 const CLUB_DETAILS = [
@@ -25,10 +26,6 @@ const CLUB_DETAILS = [
 		icon: Hash,
 		getLabel: (club: Club) =>
 			`${club.area || "No Area"} / ${club.division || "No Division"}`,
-	},
-	{
-		icon: Calendar,
-		getLabel: (club: Club) => formatMeetingFrequency(club.meetingFrequency),
 	},
 	{
 		icon: Users,
@@ -43,6 +40,8 @@ export function ClubInfoCard({
 	canSeeCode,
 	isMember = false,
 	onJoinClick,
+	compact = false,
+	className,
 }: ClubInfoCardProps) {
 	const { data: clubCodeData, isLoading: isCodeLoading } = useClubCode(
 		club.id,
@@ -65,6 +64,50 @@ export function ClubInfoCard({
 	const handleRegenerateCode = () => {
 		regenerateCode(club.id);
 	};
+
+	if (compact) {
+		return (
+			<div className={`bg-slate-800/50 border border-slate-700 rounded-2xl p-6 h-full ${className ?? ""}`}>
+				<div className="flex items-start justify-between gap-3 mb-4">
+					<div className="min-w-0">
+						<div className="text-slate-400 text-sm mb-1">Club</div>
+						<h2 className="text-2xl font-bold text-white truncate">{club.name}</h2>
+					</div>
+					{!isMember && onJoinClick && (
+						<motion.button
+							whileHover={{ scale: 1.05 }}
+							whileTap={{ scale: 0.95 }}
+							onClick={onJoinClick}
+							className="px-3 py-1.5 bg-blue-600 rounded-lg text-white text-sm font-semibold hover:bg-blue-500 transition shrink-0"
+						>
+							{status === "pending"
+								? "Pending"
+								: status === "rejected"
+									? "Declined"
+									: "Join"}
+						</motion.button>
+					)}
+				</div>
+
+				<div className="space-y-2 text-slate-400 text-sm">
+					<div className="flex items-center gap-2">
+						<MapPin className="w-4 h-4 text-cyan-400 shrink-0" />
+						<span className="truncate">{club.district || "No District"}</span>
+					</div>
+					<div className="flex items-center gap-2">
+						<Hash className="w-4 h-4 text-cyan-400 shrink-0" />
+						<span className="truncate">
+							{club.area || "No Area"} / {club.division || "No Division"}
+						</span>
+					</div>
+					<div className="flex items-center gap-2">
+						<Users className="w-4 h-4 text-cyan-400 shrink-0" />
+						<span className="truncate">{totalMembers} Members</span>
+					</div>
+				</div>
+			</div>
+		);
+	}
 
 	return (
 		<div className="bg-slate-800/50 border border-slate-700 rounded-2xl p-6">
@@ -104,7 +147,7 @@ export function ClubInfoCard({
 			</div>
 
 			{/* Club Details */}
-			<div className="grid grid-cols-2 md:grid-cols-4 gap-4 mt-6">
+			<div className="grid grid-cols-2 md:grid-cols-3 gap-4 mt-6">
 				{CLUB_DETAILS.map((item, idx) => {
 					const Icon = item.icon;
 					const label = item.getLabel(club, totalMembers);
