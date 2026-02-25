@@ -81,17 +81,24 @@ function MemberCardComponent({
         {(onRemove || onEdit) && (
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
-              <button className="text-slate-500 hover:text-white p-1 opacity-0 group-hover:opacity-100 transition focus:opacity-100">
+              <button
+                onClick={(event) => event.stopPropagation()}
+                className="text-slate-500 hover:text-white p-1 opacity-0 group-hover:opacity-100 transition focus:opacity-100"
+              >
                 <MoreVertical className="w-4 h-4" />
               </button>
             </DropdownMenuTrigger>
             <DropdownMenuContent
               align="end"
+              onClick={(event) => event.stopPropagation()}
               className="bg-slate-800 border-slate-700"
             >
               {onRemove && (
                 <DropdownMenuItem
-                  onClick={() => onRemove(member.member_id)}
+                  onClick={(event) => {
+                    event.stopPropagation();
+                    onRemove(member.member_id);
+                  }}
                   className="text-red-400 focus:text-red-400 focus:bg-red-500/10 cursor-pointer"
                 >
                   <Trash2 className="w-4 h-4 mr-2" />

@@ -69,7 +69,7 @@ export function AddSingleAgendaModal({
     mode: "onSubmit",
     defaultValues: {
       title: "",
-      roleName: "",
+      // roleName: "",
       duration: 5,
       sequence: nextSequence,
       assignmentType: "member",
@@ -86,7 +86,7 @@ export function AddSingleAgendaModal({
       await createMutation.mutateAsync({
         title: data.title,
         // date: meetingDate,
-        roleName: data.roleName,
+        roleName: "",
         duration: data.duration,
         sequence: data.sequence,
         meetingId,
@@ -139,7 +139,7 @@ export function AddSingleAgendaModal({
               </FormField>
 
               {/* Role Name */}
-              <FormField
+              {/* <FormField
                 label="Role Name"
                 error={errors.roleName?.message}
                 required
@@ -150,7 +150,7 @@ export function AddSingleAgendaModal({
                   error={!!errors.roleName}
                   focusColor="emerald"
                 />
-              </FormField>
+              </FormField> */}
 
               {/* Duration & Sequence */}
               <div className="grid grid-cols-2 gap-4">

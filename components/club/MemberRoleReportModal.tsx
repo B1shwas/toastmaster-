@@ -1,7 +1,7 @@
 "use client";
 
 import { motion, AnimatePresence } from "framer-motion";
-import { X, Award, Loader2, User } from "lucide-react";
+import { X, Award, Loader2, User, Trash2 } from "lucide-react";
 import { useRoleCounts } from "@/lib/api/hooks/use-agenda";
 import type { ClubMember } from "@/lib/types/club";
 import { useMemo } from "react";
@@ -11,6 +11,9 @@ interface MemberRoleReportModalProps {
     onClose: () => void;
     member: ClubMember | null;
     clubId: string;
+    onRemoveMember?: (memberId: string) => Promise<void> | void;
+    canRemoveMember?: boolean;
+    isRemovingMember?: boolean;
 }
 
 export function MemberRoleReportModal({
@@ -18,6 +21,9 @@ export function MemberRoleReportModal({
     onClose,
     member,
     clubId,
+    onRemoveMember,
+    canRemoveMember = false,
+    isRemovingMember = false,
 }: MemberRoleReportModalProps) {
     const { data: roleCountsResponse, isLoading } = useRoleCounts(clubId);
 
@@ -116,6 +122,25 @@ export function MemberRoleReportModal({
 
                     {/* Footer */}
                     <div className="p-4 border-t border-white/5 bg-slate-900/50">
+                        {canRemoveMember && onRemoveMember && (
+                            <button
+                                onClick={() => onRemoveMember(member.member_id)}
+                                disabled={isRemovingMember}
+                                className="w-full py-3 mb-3 bg-red-500/15 hover:bg-red-500/25 text-red-300 font-semibold rounded-xl transition disabled:opacity-60 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+                            >
+                                {isRemovingMember ? (
+                                    <>
+                                        <Loader2 className="w-4 h-4 animate-spin" />
+                                        Removing Member...
+                                    </>
+                                ) : (
+                                    <>
+                                        <Trash2 className="w-4 h-4" />
+                                        Remove Member
+                                    </>
+                                )}
+                            </button>
+                        )}
                         <button
                             onClick={onClose}
                             className="w-full py-3 bg-slate-800 hover:bg-slate-700 text-white font-semibold rounded-xl transition"
