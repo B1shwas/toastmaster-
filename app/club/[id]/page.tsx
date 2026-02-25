@@ -203,23 +203,23 @@ export default function ClubPage({ params }: ClubPageProps) {
         animate="visible"
         className="max-w-7xl mx-auto space-y-8"
       >
-        {/* Club Information */}
+        {/* Club Summary + Statistics */}
         <motion.div variants={ANIMATION_CONFIG.item}>
-          <ClubInfoCard
-            club={club}
-            onSettingsClick={handleSettingsClick}
-            totalMembers={clubStats.totalMembers}
-            canSeeCode={canSeeCode}
-            isMember={isMember}
-            onJoinClick={async () =>
-              await handleJoinClub({ clubCode: club.clubCode as any })
-            }
-          />
-        </motion.div>
-
-        {/* Statistics Grid */}
-        <motion.div variants={ANIMATION_CONFIG.item}>
-          <ClubStatsGrid stats={clubStats} />
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
+            <ClubInfoCard
+              club={club}
+              onSettingsClick={handleSettingsClick}
+              totalMembers={clubStats.totalMembers}
+              canSeeCode={canSeeCode}
+              isMember={isMember}
+              compact
+              className="md:col-span-2"
+              onJoinClick={async () =>
+                await handleJoinClub({ clubCode: club.clubCode as any })
+              }
+            />
+            <ClubStatsGrid stats={clubStats} className="md:col-span-2" />
+          </div>
         </motion.div>
         
         {pendingRequestData ? <PendingRequest pendingRequestData={pendingRequestData} clubId={clubId} /> : null}
