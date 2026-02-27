@@ -67,6 +67,7 @@ export function AddSingleAgendaModal({
   } = useForm<CreateSingleAgendaForm>({
     resolver: zodResolver(createSingleAgendaSchema),
     mode: "onSubmit",
+    shouldFocusError: true,
     defaultValues: {
       title: "",
       roleName: "",
@@ -81,12 +82,20 @@ export function AddSingleAgendaModal({
 
   const assignmentType = watch("assignmentType");
 
+  const onValidationError = () => {
+    toast({
+      title: "Missing required fields",
+      description: "Please fill in all required fields before submitting",
+      variant: "destructive",
+    });
+  };
+
   const onSubmit = async (data: CreateSingleAgendaForm) => {
     try {
       await createMutation.mutateAsync({
         title: data.title,
         // date: meetingDate,
-        roleName: "",
+        roleName: data.roleName,
         duration: data.duration,
         sequence: data.sequence,
         meetingId,
@@ -255,7 +264,7 @@ export function AddSingleAgendaModal({
 
             <ModalFooter
               onCancel={onClose}
-              onSubmit={handleSubmit(onSubmit)}
+              onSubmit={handleSubmit(onSubmit, onValidationError)}
               isSubmitting={createMutation.isPending}
             />
           </form>
