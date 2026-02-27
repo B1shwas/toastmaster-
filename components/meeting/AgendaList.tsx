@@ -7,7 +7,9 @@ import { toast } from "@/hooks/use-toast";
 import { useDeleteAgenda, useReorderAgendas } from "@/lib/api/hooks/use-agenda";
 import type { Agenda } from "@/lib/types/agenda";
 import type { Meeting } from "@/lib/types/meeting";
+import type { ClubMember } from "@/lib/types/club";
 import { calculateAgendaTimes } from "@/lib/hooks/useAgendaTiming";
+import { IntroductionPopup } from "./IntroductionPopup";
 
 interface AgendaListProps {
   agendas: Agenda[];
@@ -16,6 +18,7 @@ interface AgendaListProps {
   clubId: string;
   isEditMode: boolean;
   onEditAgenda: (agenda: Agenda) => void;
+  members?: ClubMember[];
 }
 
 interface AgendaWithTiming extends Agenda {
@@ -30,6 +33,7 @@ type AgendaItemProps = {
   onDelete?: (id: string) => void;
   onEdit?: (agenda: AgendaWithTiming) => void;
   isDeletingId?: string | null;
+  onMemberClick?: (memberId: string, memberName: string) => void;
 };
 
 function AgendaItem({
@@ -39,6 +43,7 @@ function AgendaItem({
   onDelete,
   onEdit,
   isDeletingId,
+  onMemberClick,
 }: AgendaItemProps) {
   const controls = useDragControls();
   const isDeleting = isDeletingId === item.id;
@@ -73,12 +78,22 @@ function AgendaItem({
             </div>
           </div>
 
-          <div className="flex items-center gap-2 px-3 py-2 bg-green-500/10 border border-green-500/20 rounded-lg">
-            <User className="w-4 h-4 text-green-400" />
-            <span className="text-green-400 text-sm font-medium">
-              {item.memberName || "Unassigned"}
-            </span>
-          </div>
+          {item.memberName ? (
+            <button
+              onClick={() => item.memberId && onMemberClick?.(item.memberId, item.memberName!)}
+              className="flex items-center gap-2 px-3 py-2 bg-green-500/10 border border-green-500/20 rounded-lg hover:bg-green-500/20 transition-colors"
+            >
+              <User className="w-4 h-4 text-green-400" />
+              <span className="text-green-400 text-sm font-medium">
+                {item.memberName}
+              </span>
+            </button>
+          ) : (
+            <div className="flex items-center gap-2 px-3 py-2 bg-green-500/10 border border-green-500/20 rounded-lg">
+              <User className="w-4 h-4 text-green-400" />
+              <span className="text-green-400 text-sm font-medium">Unassigned</span>
+            </div>
+          )}
         </div>
       </motion.div>
     );
@@ -151,6 +166,7 @@ export default function AgendaList({
   clubId,
   isEditMode,
   onEditAgenda,
+  members = [],
 }: AgendaListProps) {
   const agendasArray = Array.isArray(agendas) ? agendas : [];
   const sortedAgendas = [...agendasArray].sort((a, b) => a.sequence - b.sequence);
@@ -162,6 +178,15 @@ export default function AgendaList({
   const [items, setItems] = useState<AgendaWithTiming[]>(agendasWithTimes);
   const [isDirty, setIsDirty] = useState(false);
   const [isDeletingId, setIsDeletingId] = useState<string | null>(null);
+  const [popupMember, setPopupMember] = useState<{ name: string; introduction: string | null } | null>(null);
+
+  const handleMemberClick = (memberId: string, memberName: string) => {
+    const member = members.find((m) => m.member_id === memberId);
+    setPopupMember({
+      name: memberName,
+      introduction: member?.user_introduction ?? null,
+    });
+  };
 
   const deleteMutation = useDeleteAgenda(meetingId);
   const reorderMutation = useReorderAgendas(meetingId);
@@ -224,16 +249,25 @@ export default function AgendaList({
 
   if (!isEditMode) {
     return (
-      <div className="space-y-3">
-        {items.map((item, index) => (
-          <AgendaItem
-            key={item.id}
-            item={item}
-            index={index}
-            isEditMode={false}
-          />
-        ))}
-      </div>
+      <>
+        <div className="space-y-3">
+          {items.map((item, index) => (
+            <AgendaItem
+              key={item.id}
+              item={item}
+              index={index}
+              isEditMode={false}
+              onMemberClick={handleMemberClick}
+            />
+          ))}
+        </div>
+        <IntroductionPopup
+          isOpen={!!popupMember}
+          onClose={() => setPopupMember(null)}
+          memberName={popupMember?.name ?? ""}
+          introduction={popupMember?.introduction ?? null}
+        />
+      </>
     );
   }
 

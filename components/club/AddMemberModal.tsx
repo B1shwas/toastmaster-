@@ -9,6 +9,7 @@ import {
   addMemberSchema,
   type AddMemberInput,
 } from "@/lib/schemas/club.schema";
+import { getErrorMessage } from "@/lib/api/error";
 
 interface AddMemberModalProps {
   isOpen: boolean;
@@ -65,8 +66,7 @@ export function AddMemberModal({
       reset();
       onClose();
     } catch (error) {
-      // Error handling can be extended here
-      console.error("Failed to add member:", error);
+      console.error("Failed to add member:", getErrorMessage(error));
     }
   };
 

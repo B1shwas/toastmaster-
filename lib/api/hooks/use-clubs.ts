@@ -268,8 +268,9 @@ export function useGetPendingRequest() {
 		queryKey: ['club-join-pending-request'],
 		queryFn: async () => {
 			const { data } = await api.get<ApiResponsePendingClubGroup>(`/club/request-join`);
-			return data.data;
+			return data.data ?? [];
 		},
+		retry: false,
 	});
 }
 

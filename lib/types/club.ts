@@ -11,6 +11,7 @@ export interface ClubMember {
 	member_date_joined: string;
 	member_role: "OWNER" | "ADMIN" | "MEMBER";
 	isRegisteredUser: boolean;
+	user_introduction?: string | null;
 }
 
 export interface Club {

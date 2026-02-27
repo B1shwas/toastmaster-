@@ -58,6 +58,7 @@ function Navbar() {
           ) : isAuthenticated ? (
             <>
               <NavLink href="/dashboard">Dashboard</NavLink>
+              <NavLink href="/profile">Profile</NavLink>
               <NavLink href="/clubs">Explore Clubs</NavLink>
               <MotionButton
                 whileHover={{ scale: 1.05 }}
