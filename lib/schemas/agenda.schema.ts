@@ -3,7 +3,7 @@ import { z } from "zod";
 export const createSingleAgendaSchema = z
   .object({
     title: z.string().min(1, "Title is required").max(200, "Title is too long"),
-    // roleName: z.string().min(1, "Role name is required"),
+    roleName: z.string().min(1, "Role name is required"),
     duration: z
       .number()
       .min(1, "Duration must be at least 1 minute")

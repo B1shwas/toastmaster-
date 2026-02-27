@@ -77,7 +77,7 @@ export function EditAgendaModal({
     if (agenda) {
       reset({
         title: agenda.title,
-        // roleName: agenda.roleName,
+        roleName: agenda.roleName,
         duration: agenda.duration,
         sequence: agenda.sequence,
         assignmentType: agenda.memberId
@@ -155,7 +155,7 @@ export function EditAgendaModal({
               </FormField>
 
               {/* Role Name */}
-              {/* <FormField
+              <FormField
                 label="Role Name"
                 error={errors.roleName?.message}
                 required
@@ -166,7 +166,7 @@ export function EditAgendaModal({
                   error={!!errors.roleName}
                   focusColor="emerald"
                 />
-              </FormField> */}
+              </FormField>
 
               {/* Duration & Sequence */}
               <div className="grid grid-cols-2 gap-4">

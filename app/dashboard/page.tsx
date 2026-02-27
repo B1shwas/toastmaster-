@@ -30,7 +30,7 @@ export default function DashboardPage() {
 	const createClubMutation = useCreateClub();
   const joinClubMutation = useJoinClub();
   const requestJoinClubMutation = useRequestJoinClub();
-  const { data: pendingRequestData } = useGetPendingRequest()
+  const { data: pendingRequestData, isError: isPendingRequestError, error: pendingRequestError } = useGetPendingRequest()
   // console.log("pending Request :: ", pendingRequestData)
   
 	useEffect(() => {
@@ -87,7 +87,11 @@ export default function DashboardPage() {
 
 			<ListAllAgendas />
 
-			{pendingRequestData ? <PendingRequest pendingRequestData={pendingRequestData} /> : null}
+			{isPendingRequestError ? (
+				<p className="text-red-400 text-sm px-6">{getErrorMessage(pendingRequestError)}</p>
+			) : pendingRequestData ? (
+				<PendingRequest pendingRequestData={pendingRequestData} />
+			) : null}
         
 				<UpcomingMeetingsSection meetings={meetings} />
 
