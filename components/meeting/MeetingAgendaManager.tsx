@@ -1,8 +1,9 @@
 "use client";
 
-import React, { useState } from "react";
+import { useState } from "react";
 import { motion } from "framer-motion";
-import { Plus, Eye, Edit } from "lucide-react";
+import { Plus, Eye, Edit, Lock } from "lucide-react";
+import { isMeetingUpcoming } from "@/lib/utils/meeting";
 import { toast } from "@/hooks/use-toast";
 import {
   AddAgendaModal,
@@ -42,7 +43,8 @@ export function MeetingAgendaManager({
   const [selectedTemplate, setSelectedTemplate] =
     useState<AgendaTemplate | null>(null);
   const [selectedAgenda, setSelectedAgenda] = useState<Agenda | null>(null);
-  const [isEditMode, setIsEditMode] = useState(userRole !== "MEMBER");
+  const isPastMeeting = !isMeetingUpcoming(meeting.date);
+  const [isEditMode, setIsEditMode] = useState(!isPastMeeting && userRole !== "MEMBER");
 
   const { data: agendasData, isLoading: isLoadingAgendas } = useMeetingAgendas(
     meeting.id
@@ -52,7 +54,7 @@ export function MeetingAgendaManager({
   const agendas = agendasData?.data || [];
   const members = membersData || [];
   const hasAgendas = agendas.length > 0;
-  const canEdit = userRole === "OWNER" || userRole === "ADMIN";
+  const canEdit = !isPastMeeting;
 
   const handleSuccess = () => {
     toast({
@@ -86,6 +88,12 @@ export function MeetingAgendaManager({
             </p>
           </div>
           <div className="flex gap-2">
+            {isPastMeeting && (
+              <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-slate-700/40 border border-slate-600/50 text-slate-400 text-sm">
+                <Lock className="w-3.5 h-3.5" />
+                <span className="hidden sm:inline">Past Meeting</span>
+              </div>
+            )}
             {canEdit && hasAgendas && (
               <motion.button
                 whileHover={{ scale: 1.05 }}

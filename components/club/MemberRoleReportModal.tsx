@@ -30,7 +30,7 @@ export function MemberRoleReportModal({
     const memberRoles = useMemo(() => {
         if (!roleCountsResponse?.data || !member) return [];
         return roleCountsResponse.data.filter(
-            (rc) => rc.memberName === member.member_member_name
+            (rc) => rc.memberName === member.member_member_name && rc.role
         );
     }, [roleCountsResponse, member]);
 
@@ -82,6 +82,17 @@ export function MemberRoleReportModal({
                                 </p>
                             </div>
                         </div>
+
+                        {member.user_introduction?.trim() ? (
+                            <div className="mt-4 p-3 bg-slate-800/50 border border-slate-700/50 rounded-xl">
+                                <p className="text-xs text-slate-400 uppercase tracking-wider mb-1">Introduction</p>
+                                <p className="text-slate-300 text-sm leading-relaxed">{member.user_introduction}</p>
+                            </div>
+                        ) : (
+                            <div className="mt-4 p-3 bg-slate-800/30 border border-slate-700/30 rounded-xl">
+                                <p className="text-slate-500 text-sm italic">No introduction added yet.</p>
+                            </div>
+                        )}
                     </div>
 
                     {/* Content */}

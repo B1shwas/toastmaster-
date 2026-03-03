@@ -1,4 +1,4 @@
-  import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { api } from "@/lib/api";
 import type { LoginFormData, SignupFormData } from "@/lib/schemas/auth.schema";
 import { ResponseFormat } from "../../types/response.format";
@@ -63,8 +63,6 @@ export function useProfile() {
     queryFn: async () => {
       const { data } = await api.get<ResponseFormat<any>>("/user/me");
 
-      console.log(data.data);
-
       setAuth(token, {
         name: data.data.user_full_name,
         email: data.data.user_email,
@@ -88,5 +86,46 @@ export function useUserClub() {
     },
     staleTime: 5 * 60 * 1000,
     gcTime: 30 * 60 * 1000,
+  });
+}
+
+interface ProfileData {
+  user_id: string;
+  user_full_name: string;
+  user_email: string;
+  introduction?: string | null;
+}
+
+interface UpdateProfileData {
+  fullName?: string;
+  email?: string;
+  introduction?: string;
+}
+
+interface ChangePasswordData {
+  currentPassword: string;
+  newPassword: string;
+}
+
+export function useUpdateProfile() {
+  const queryClient = useQueryClient();
+  return useMutation<ProfileData, Error, UpdateProfileData>({
+    mutationFn: async (input) => {
+      const { data } = await api.patch<ResponseFormat<ProfileData>>("/user/me", input);
+      return data.data;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["profile"] });
+      queryClient.invalidateQueries({ queryKey: ["clubs", "detail"], exact: false });
+    },
+  });
+}
+
+export function useChangePassword() {
+  return useMutation<{ success: boolean }, Error, ChangePasswordData>({
+    mutationFn: async (input) => {
+      const { data } = await api.patch<ResponseFormat<{ success: boolean }>>("/user/me/password", input);
+      return data.data;
+    },
   });
 }
