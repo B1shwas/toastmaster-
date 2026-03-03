@@ -27,28 +27,30 @@ const StatsCard = memo(StatsCardComponent);
 interface ClubStatsGridProps {
   stats: ClubStats;
   className?: string;
+  isMember?: boolean;
 }
 
-export function ClubStatsGrid({ stats, className }: ClubStatsGridProps) {
+export function ClubStatsGrid({ stats, className, isMember = false }: ClubStatsGridProps) {
+  const statItems = [
+    {
+      value: stats.totalMembers,
+      label: "Total Members",
+      colorClass: "text-white",
+    },
+    ...(isMember
+      ? [
+          {
+            value: stats.pendingMembers,
+            label: "Pending Invites",
+            colorClass: "text-orange-400",
+          },
+        ]
+      : []),
+  ];
+
   return (
     <div className={`grid grid-cols-1 md:grid-cols-2 gap-6 ${className ?? ""}`}>
-      {[
-        {
-          value: stats.totalMembers,
-          label: "Total Members",
-          colorClass: "text-white",
-        },
-        // {
-        //   value: stats.registeredUsers,
-        //   label: "Linked Accounts",
-        //   colorClass: "text-emerald-400",
-        // },
-        {
-          value: stats.pendingMembers,
-          label: "Pending Invites",
-          colorClass: "text-orange-400",
-        },
-      ].map((stat, index) => (
+      {statItems.map((stat, index) => (
         <StatsCard
           key={index}
           value={stat.value}

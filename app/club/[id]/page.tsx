@@ -218,7 +218,7 @@ export default function ClubPage({ params }: ClubPageProps) {
                 await handleJoinClub({ clubCode: club.clubCode as any })
               }
             />
-            <ClubStatsGrid stats={clubStats} className="md:col-span-2" />
+            <ClubStatsGrid stats={clubStats} className="md:col-span-2" isMember={isMember} />
           </div>
         </motion.div>
         
