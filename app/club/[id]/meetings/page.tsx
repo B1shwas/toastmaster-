@@ -9,6 +9,7 @@ import { MeetingCard } from "@/components/meeting";
 import { BackLink } from "@/components/ui/page-layout";
 import { MeetingStatus } from "@/lib/types/meeting";
 import { useMeetings } from "@/lib/api/hooks/use-meetings";
+import { isMeetingUpcoming } from "@/lib/utils/meeting";
 
 // Animation variants
 const containerVariants = {
@@ -84,15 +85,17 @@ export default function MeetingsPage() {
   );
   const [searchQuery, setSearchQuery] = useState("");
   const [statusFilter, setStatusFilter] = useState<FilterStatus>("ALL");
+  const [timeFilter, setTimeFilter] = useState<"upcoming" | "past">("upcoming");
 
   const filteredMeetings = useMemo(() => {
     if (!meetings) return [];
     return meetings
       .filter((meeting) => {
+        // Filter by upcoming / past tab
+        if (timeFilter === "upcoming" && !isMeetingUpcoming(meeting.date)) return false;
+        if (timeFilter === "past" && isMeetingUpcoming(meeting.date)) return false;
         // Filter by status
-        if (statusFilter !== "ALL" && meeting.status !== statusFilter) {
-          return false;
-        }
+        if (statusFilter !== "ALL" && meeting.status !== statusFilter) return false;
         // Filter by search query
         if (searchQuery) {
           const query = searchQuery.toLowerCase();
@@ -102,11 +105,13 @@ export default function MeetingsPage() {
             meeting.meetingNo.toString().includes(query)
           );
         }
-
         return true;
       })
-      .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
-  }, [meetings, searchQuery, statusFilter]);
+      .sort((a, b) => {
+        const diff = new Date(a.date).getTime() - new Date(b.date).getTime();
+        return timeFilter === "upcoming" ? diff : -diff;
+      });
+  }, [meetings, searchQuery, statusFilter, timeFilter]);
 
   const handleScheduleMeeting = () => {
     console.log("Schedule meeting clicked");
@@ -145,6 +150,28 @@ export default function MeetingsPage() {
               </Button>
             </motion.div>
           </div>
+        </motion.div>
+
+        {/* Upcoming / Past Tabs */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5, delay: 0.05 }}
+          className="flex gap-1 mb-6 p-1 bg-slate-800/50 border border-slate-700 rounded-xl w-fit"
+        >
+          {(["upcoming", "past"] as const).map((tab) => (
+            <button
+              key={tab}
+              onClick={() => setTimeFilter(tab)}
+              className={`px-5 py-2 rounded-lg text-sm font-medium transition-all capitalize ${
+                timeFilter === tab
+                  ? "bg-linear-to-br from-blue-500 to-cyan-400 text-white shadow"
+                  : "text-slate-400 hover:text-white"
+              }`}
+            >
+              {tab === "upcoming" ? "Upcoming" : "Past"}
+            </button>
+          ))}
         </motion.div>
 
         {/* Filters */}
@@ -186,6 +213,7 @@ export default function MeetingsPage() {
         {/* Meetings Grid */}
         {filteredMeetings.length > 0 ? (
           <motion.div
+            key={timeFilter}
             variants={containerVariants}
             initial="hidden"
             animate="visible"

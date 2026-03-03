@@ -22,7 +22,6 @@ import AgendaList from "./AgendaList";
 interface MeetingAgendaManagerProps {
   meeting: Meeting;
   clubId: string;
-  userRole: "OWNER" | "ADMIN" | "MEMBER";
 }
 
 type ModalStep =
@@ -37,14 +36,13 @@ type ModalStep =
 export function MeetingAgendaManager({
   meeting,
   clubId,
-  userRole,
 }: MeetingAgendaManagerProps) {
   const [modalStep, setModalStep] = useState<ModalStep>("closed");
   const [selectedTemplate, setSelectedTemplate] =
     useState<AgendaTemplate | null>(null);
   const [selectedAgenda, setSelectedAgenda] = useState<Agenda | null>(null);
   const isPastMeeting = !isMeetingUpcoming(meeting.date);
-  const [isEditMode, setIsEditMode] = useState(!isPastMeeting && userRole !== "MEMBER");
+  const [isEditMode, setIsEditMode] = useState(!isPastMeeting);
 
   const { data: agendasData, isLoading: isLoadingAgendas } = useMeetingAgendas(
     meeting.id

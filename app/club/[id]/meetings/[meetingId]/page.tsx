@@ -115,7 +115,6 @@ function MeetingContent({
                     <MeetingAgendaManager
                         meeting={meeting}
                         clubId={clubId}
-                        userRole={userRole}
                     />
                 </motion.div>
             </motion.div>
