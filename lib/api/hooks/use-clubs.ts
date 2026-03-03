@@ -283,7 +283,7 @@ export function usePendingRequestDecision() {
     const { data } = await api.patch("/club/request-join", input);
     return data.data;
   },
-  onSuccess: (response) => {
+  onSuccess: (response, variables) => {
     queryClient.invalidateQueries({
       queryKey: clubKeys.lists(),
       exact: false,
@@ -292,7 +292,10 @@ export function usePendingRequestDecision() {
       queryKey: ["club-join-pending-request"],
       exact: false,
     });
-    
+    queryClient.invalidateQueries({
+      queryKey: clubKeys.stats(variables.clubId),
+    });
+
     const clubData = response.data;
     if (!!clubData && !!user?.id) {
       queryClient.invalidateQueries({

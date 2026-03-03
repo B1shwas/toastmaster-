@@ -44,7 +44,7 @@ export function ClubStatsGrid({ stats, className }: ClubStatsGridProps) {
         //   colorClass: "text-emerald-400",
         // },
         {
-          value: stats.guestMembers,
+          value: stats.pendingMembers,
           label: "Pending Invites",
           colorClass: "text-orange-400",
         },

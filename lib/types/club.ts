@@ -32,6 +32,7 @@ export interface ClubStats {
 	totalMembers: number;
 	registeredUsers: number;
 	guestMembers: number;
+	pendingMembers: number;
 }
 
 export interface ApiResponse<T> {
