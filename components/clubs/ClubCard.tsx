@@ -20,7 +20,9 @@ export function ClubCard({ club }: ClubCardProps) {
       <div className="flex flex-col h-full">
         <div className="flex-1">
           <h3 className="text-base font-semibold text-white mb-1 group-hover:text-blue-400 transition-colors">
-            {club.name}
+            <Link href={`/club/${club.id}`} className="hover:underline">
+              {club.name}
+            </Link>
           </h3>
           <p className="text-slate-400 text-xs mb-2 line-clamp-2 sm:min-h-10">
             {club.description || "No description available"}
@@ -44,13 +46,7 @@ export function ClubCard({ club }: ClubCardProps) {
           </div>
         </div>
 
-        <Link
-          href={`/club/${club.id}`}
-          className="inline-flex items-center gap-2 text-blue-400 hover:text-blue-300 text-sm font-medium transition-colors"
-        >
-          View Details
-                <ArrowRight className="h-3 w-3 group-hover:translate-x-1 transition-transform" />
-        </Link>
+
       </div>
     </motion.div>
   );

@@ -50,20 +50,17 @@ function MeetingListSectionComponent({
   onScheduleMeeting,
 }: MeetingListSectionProps) {
   const isMeetingsArray = Array.isArray(meetings);
-  const displayMeetings = isMeetingsArray ? meetings.slice(0, maxDisplay) : [];
-  const meetingCount = isMeetingsArray ? meetings.length : 0;
   const { data: duplicateAgenda } = useDuplicateAgenda();
   const { data: userData } = useProfile();
   // console.log("userData :: ",userData)
 
   const [isDialogOpen, setIsDialogOpen] = useState(false);
-  const memberOf: Set<string> | null = new Set([
-    ...userData?.member_of?.map((u: { id: string; name: string }) => u?.id),
-    ...userData?.owned_clubs?.map((u: { id: string }) => u?.id),
-    ...userData?.admin_of?.map((u:{id:string}) => u?.id)
-    ]
-  )
-  const isMemberOf = memberOf.has(clubId)
+  const memberOf = new Set<string>([
+    ...(userData?.member_of?.map((u: { id: string }) => u.id) ?? []),
+    ...(userData?.owned_clubs?.map((u: { id: string }) => u.id) ?? []),
+    ...(userData?.admin_of?.map((u: { id: string }) => u.id) ?? []),
+  ]);
+  const isMemberOf = Boolean(userData) && memberOf.has(clubId);
   // if (memberOf.has(clubId)) {
   //   setIsMemberOf(true)
   // }
@@ -72,6 +69,17 @@ function MeetingListSectionComponent({
   // if (memberOf?.includes(clubId)) {
   //   console.log("true yar xa")
   // }
+
+  // Filter meetings visible to the current viewer: non-members only see upcoming meetings
+  const now = new Date();
+  const visibleMeetings = isMeetingsArray
+    ? isMemberOf
+      ? meetings
+      : meetings.filter((m) => new Date(m.date) >= now)
+    : [];
+
+  const displayMeetings = visibleMeetings.slice(0, maxDisplay);
+  const meetingCount = visibleMeetings.length;
 
   return (
     <section className="space-y-4">
@@ -91,7 +99,7 @@ function MeetingListSectionComponent({
                   } scheduled`}
           </p>
         </div>
-        <div className="flex items-center gap-2">
+          <div className="flex items-center gap-2">
           {onScheduleMeeting && meetingCount > 0 && (
             <Button
               onClick={onScheduleMeeting}
@@ -119,16 +127,18 @@ function MeetingListSectionComponent({
               />
             </Dialog>
           ) : null}
-          <Link href={`/club/${clubId}/meetings`}>
-            <Button
-              variant="ghost"
-              size="sm"
-              className="gap-1.5 text-slate-400 hover:text-white hover:bg-slate-800"
-            >
-              View All
-              <ArrowRight className="h-4 w-4" />
-            </Button>
-          </Link>
+          {isMemberOf && (
+            <Link href={`/club/${clubId}/meetings`}>
+              <Button
+                variant="ghost"
+                size="sm"
+                className="gap-1.5 text-slate-400 hover:text-white hover:bg-slate-800"
+              >
+                View All
+                <ArrowRight className="h-4 w-4" />
+              </Button>
+            </Link>
+          )}
         </div>
       </div>
 
@@ -153,7 +163,7 @@ function MeetingListSectionComponent({
             <PlusCircle className="h-4 w-4 " />
             Schedule New Meeting
           </Button>
-          {duplicateAgenda ? (
+          {isMemberOf && duplicateAgenda ? (
             <Button className="w-full gap-2 bg-linear-to-br from-blue-500 to-cyan-400">
               <BookDashedIcon className="h-4 w-4 " />
               Schedule Using Template

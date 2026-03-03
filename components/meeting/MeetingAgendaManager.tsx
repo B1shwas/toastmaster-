@@ -173,6 +173,7 @@ export function MeetingAgendaManager({
             meetingId={meeting.id}
             clubId={clubId}
             isEditMode={isEditMode}
+            members={members}
             onEditAgenda={(agenda: Agenda) => {
               setSelectedAgenda(agenda);
               setModalStep("edit-agenda");

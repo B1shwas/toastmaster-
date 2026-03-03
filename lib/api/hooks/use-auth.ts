@@ -1,6 +1,12 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { api } from "@/lib/api";
-import type { LoginFormData, SignupFormData } from "@/lib/schemas/auth.schema";
+import type {
+  LoginFormData,
+  SignupFormData,
+  UpdateProfileData,
+  ChangePasswordData,
+  ProfileData,
+} from "@/lib/schemas/auth.schema";
 import { ResponseFormat } from "../../types/response.format";
 import { useAuthStore } from "@/lib/stores/useAuthStore";
 
@@ -61,19 +67,21 @@ export function useProfile() {
     gcTime: 30 * 60 * 1000,
 
     queryFn: async () => {
-      const { data } = await api.get<ResponseFormat<any>>("/user/me");
+      const { data } = await api.get<ResponseFormat<ProfileData>>("/user/me");
+
+      const payload = data.data;
 
       setAuth(token, {
-        name: data.data.user_full_name,
-        email: data.data.user_email,
-        id: data.data.user_id,
+        name: payload.user_full_name,
+        email: payload.user_email,
+        id: payload.user_id,
         clubCount:
-          (data.data.member_of?.length ?? 0) +
-          (data.data.admin_of?.length ?? 0) +
-          (data.data.owned_clubs?.length ?? 0),
+          (payload.member_of?.length ?? 0) +
+          (payload.admin_of?.length ?? 0) +
+          (payload.owned_clubs?.length ?? 0),
       });
 
-      return data.data;
+      return payload;
     },
   });
 }
@@ -89,27 +97,13 @@ export function useUserClub() {
   });
 }
 
-interface ProfileData {
-  user_id: string;
-  user_full_name: string;
-  user_email: string;
-  introduction?: string | null;
-}
-
-interface UpdateProfileData {
-  fullName?: string;
-  email?: string;
-  introduction?: string;
-}
-
-interface ChangePasswordData {
-  currentPassword: string;
-  newPassword: string;
-}
-
 export function useUpdateProfile() {
   const queryClient = useQueryClient();
-  return useMutation<ProfileData, Error, UpdateProfileData>({
+  return useMutation<
+    ProfileData,
+    Error,
+    UpdateProfileData
+  >({
     mutationFn: async (input) => {
       const { data } = await api.patch<ResponseFormat<ProfileData>>("/user/me", input);
       return data.data;
@@ -122,7 +116,11 @@ export function useUpdateProfile() {
 }
 
 export function useChangePassword() {
-  return useMutation<{ success: boolean }, Error, ChangePasswordData>({
+  return useMutation<
+    { success: boolean },
+    Error,
+    ChangePasswordData
+  >({
     mutationFn: async (input) => {
       const { data } = await api.patch<ResponseFormat<{ success: boolean }>>("/user/me/password", input);
       return data.data;

@@ -22,3 +22,38 @@ export const signupSchema = z
 
 export type LoginFormData = z.infer<typeof loginSchema>;
 export type SignupFormData = z.infer<typeof signupSchema>;
+
+// profile API response schema
+export const profileSchema = z.object({
+  user_id: z.string(),
+  user_email: z.string().email(),
+  user_full_name: z.string(),
+  user_introduction: z.string().nullable().optional(),
+  member_of: z.array(z.object({ id: z.string(), name: z.string() })).optional(),
+  admin_of: z.array(z.object({ id: z.string(), name: z.string() })).optional(),
+  owned_clubs: z
+    .array(z.object({ id: z.string(), name: z.string(), clubCode: z.string() }))
+    .optional(),
+});
+export type ProfileData = z.infer<typeof profileSchema>;
+
+export const updateProfileSchema = z.object({
+  fullName: z.string().min(7, "Name must be at least 7 characters"),
+  email: z.string().email("Please enter a valid email address"),
+  introduction: z.string().max(500, "Introduction must be under 500 characters").optional().or(z.literal("")),
+});
+
+export type UpdateProfileData = z.infer<typeof updateProfileSchema>;
+
+export const changePasswordSchema = z
+  .object({
+    currentPassword: z.string().min(8, "Current password is required"),
+    newPassword: z.string().min(8, "Password must be at least 8 characters"),
+    confirmPassword: z.string(),
+  })
+  .refine((val) => val.newPassword === val.confirmPassword, {
+    message: "Passwords don't match",
+    path: ["confirmPassword"],
+  });
+
+export type ChangePasswordData = z.infer<typeof changePasswordSchema>;
