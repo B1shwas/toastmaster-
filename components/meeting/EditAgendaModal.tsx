@@ -100,7 +100,7 @@ export function EditAgendaModal({
         id: agenda.id,
         data: {
           title: data.title,
-          roleName: "",
+          roleName: data.roleName,
           duration: data.duration,
           sequence: data.sequence,
           meetingId,
