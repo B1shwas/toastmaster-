@@ -30,17 +30,20 @@ export function UpcomingMeetingsSection({ meetings }: UpcomingMeetingsSectionPro
 
 	if (!Array.isArray(meetings) || meetings.length === 0) {
 		return (
-			<ScrollableListFrame>
-				<div className="flex flex-col items-center justify-center p-8 text-center text-slate-400">
-					<Calendar className="h-10 w-10 mb-2 opacity-50" />
-					<p>{!Array.isArray(meetings) ? "Failed to load meetings" : "No upcoming meetings scheduled"}</p>
-				</div>
-			</ScrollableListFrame>
+			<div className="space-y-4">
+				<h2 className="text-2xl font-semibold text-white px-2">Upcoming Meetings of Clubs</h2>
+				<ScrollableListFrame>
+					<div className="flex flex-col items-center justify-center p-8 text-center text-slate-400">
+						<Calendar className="h-10 w-10 mb-2 opacity-50" />
+						<p>{!Array.isArray(meetings) ? "Failed to load meetings" : "No upcoming meetings scheduled"}</p>
+					</div>
+				</ScrollableListFrame>
+			</div>
 		);
 	}
 	return (
-		<div className="space-y-4 my-8">
-			<h2 className="text-2xl font-semibold text-white px-2 ">Upcoming Meetings of Clubs</h2>
+		<div className="space-y-4">
+			<h2 className="text-2xl font-semibold text-white px-2">Upcoming Meetings of Clubs</h2>
 			<ScrollableListFrame className="max-h-[600px]" showPrettyScrollbar={true}>
 				{meetings.map((meeting, index) => (
 					<Link

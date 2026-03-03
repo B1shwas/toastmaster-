@@ -81,19 +81,22 @@ export default function DashboardPage() {
 			<div className="max-w-7xl mx-auto">
 				<WelcomeSection
 					name={user.name}
-				meetingsCount={meetings.length}
-				clubs={clubs}
-			/>
+					clubs={clubs}
+				/>
 
-			<ListAllAgendas />
+				{isPendingRequestError ? (
+					<p className="text-red-400 text-sm px-6">{getErrorMessage(pendingRequestError)}</p>
+				) : pendingRequestData ? (
+					<PendingRequest pendingRequestData={pendingRequestData} />
+				) : null}
 
-			{isPendingRequestError ? (
-				<p className="text-red-400 text-sm px-6">{getErrorMessage(pendingRequestError)}</p>
-			) : pendingRequestData ? (
-				<PendingRequest pendingRequestData={pendingRequestData} />
-			) : null}
-        
-				<UpcomingMeetingsSection meetings={meetings} />
+				<div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-6">
+					<UpcomingMeetingsSection meetings={meetings} />
+					<div className="space-y-4">
+						<div className="h-8" />
+						<ListAllAgendas />
+					</div>
+				</div>
 
 				{/* <QuickActions
 					onJoinClick={() => setIsJoinModalOpen(true)}
