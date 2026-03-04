@@ -83,7 +83,7 @@ export function ClubSettingsModal({
             {...register("name")}
             placeholder="Enter club name"
             error={!!errors.name}
-            focusColor="cyan"
+            focusColor="blue"
             disabled={isLoading}
           />
         </FormField>
@@ -94,7 +94,7 @@ export function ClubSettingsModal({
             placeholder="Describe your club"
             rows={3}
             error={!!errors.description}
-            focusColor="cyan"
+            focusColor="blue"
             disabled={isLoading}
           />
         </FormField>
@@ -110,7 +110,7 @@ export function ClubSettingsModal({
                 {...register(name)}
                 placeholder={placeholder}
                 error={!!errors[name]}
-                focusColor="cyan"
+                focusColor="blue"
                 disabled={isLoading}
                 className="text-sm px-3"
               />
@@ -123,7 +123,7 @@ export function ClubSettingsModal({
             {...register("meetingFrequency")}
             options={MEETING_FREQUENCY_OPTIONS}
             error={!!errors.meetingFrequency}
-            focusColor="cyan"
+            focusColor="blue"
             disabled={isLoading}
           />
         </FormField>
