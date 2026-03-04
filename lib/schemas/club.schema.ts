@@ -78,7 +78,7 @@ export const createClubSchema = z.object({
   meetingFrequency: z.enum(["WEEKLY", "BIWEEKLY", "MONTHLY"], {
     message: "Please select a valid meeting frequency",
   }),
-  charterDate: z.string().optional().transform((val) => val || undefined),
+  charterDate: z.string().optional(),
 });
 
 export type CreateClubInput = z.infer<typeof createClubSchema>;
