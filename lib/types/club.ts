@@ -24,6 +24,7 @@ export interface Club {
 	division: string | null;
 	ownerId: string;
 	meetingFrequency: ClubMeetingFrequency;
+	charterDate?: string | null;
 	createdAt?: string;
 	updatedAt?: string;
 }

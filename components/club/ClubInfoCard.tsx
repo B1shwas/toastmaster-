@@ -1,7 +1,7 @@
 "use client";
 
 import { motion } from "framer-motion";
-import { Settings, MapPin, Hash, Users } from "lucide-react";
+import { Settings, MapPin, Users, Calendar } from "lucide-react";
 import type { Club } from "@/lib/types/club";
 import { ClubCodeBadge } from "./ClubCodeBadge";
 import { useClubCode, useRegenerateClubCode, useUserClubStatus } from "@/lib/api";
@@ -10,6 +10,7 @@ interface ClubInfoCardProps {
 	club: Club;
 	onSettingsClick?: () => void;
 	totalMembers: number;
+	pendingMembers?: number;
 	canSeeCode: boolean;
 	isMember?: boolean;
 	onJoinClick?: () => void;
@@ -17,26 +18,29 @@ interface ClubInfoCardProps {
 	className?: string;
 }
 
-const CLUB_DETAILS = [
-	{
-		icon: MapPin,
-		getLabel: (club: Club) => club.district || "No District",
-	},
-	{
-		icon: Hash,
-		getLabel: (club: Club) =>
-			`${club.area || "No Area"} / ${club.division || "No Division"}`,
-	},
-	{
-		icon: Users,
-		getLabel: (_club: Club, totalMembers: number) => `${totalMembers} Members`,
-	},
-];
+function formatCharterDate(dateStr: string | null | undefined): string {
+	if (!dateStr) return "No Charter Date";
+	return new Date(dateStr).toLocaleDateString("en-US", {
+		month: "long",
+		day: "numeric",
+		year: "numeric",
+	});
+}
+
+function clubIdentityLabel(club: Club): string {
+	const parts: string[] = [];
+	if (club.clubCode) parts.push(`#${club.clubCode}`);
+	if (club.district) parts.push(`District ${club.district}`);
+	if (club.division) parts.push(`Division ${club.division}`);
+	if (club.area) parts.push(`Area ${club.area}`);
+	return parts.length > 0 ? parts.join(", ") : "No Club Info";
+}
 
 export function ClubInfoCard({
 	club,
 	onSettingsClick,
 	totalMembers,
+	pendingMembers = 0,
 	canSeeCode,
 	isMember = false,
 	onJoinClick,
@@ -47,17 +51,16 @@ export function ClubInfoCard({
 		club.id,
 		canSeeCode
 	);
-  const { mutate: regenerateCode } = useRegenerateClubCode(); 
-  const { data: userClubStatusData } = useUserClubStatus();
-  // console.log("userClubStatusData :: ", userClubStatusData)
-  const mapUserClubStatusData = new Map<string, string>();
-  let status = "";
-  if (userClubStatusData) {
-    userClubStatusData.forEach((c) =>
-      mapUserClubStatusData.set(c.clubId, c.status),
-    );
-    status = mapUserClubStatusData.get(club.id) ?? "";
-  }
+	const { mutate: regenerateCode } = useRegenerateClubCode();
+	const { data: userClubStatusData } = useUserClubStatus();
+	const mapUserClubStatusData = new Map<string, string>();
+	let status = "";
+	if (userClubStatusData) {
+		userClubStatusData.forEach((c) =>
+			mapUserClubStatusData.set(c.clubId, c.status),
+		);
+		status = mapUserClubStatusData.get(club.id) ?? "";
+	}
 
 	const clubCode = clubCodeData?.code ?? "";
 
@@ -70,39 +73,52 @@ export function ClubInfoCard({
 			<div className={`bg-slate-800/50 border border-slate-700 rounded-2xl p-6 h-full ${className ?? ""}`}>
 				<div className="flex items-start justify-between gap-3 mb-4">
 					<div className="min-w-0">
-						<div className="text-slate-400 text-sm mb-1">Club</div>
 						<h2 className="text-2xl font-bold text-white truncate">{club.name}</h2>
 					</div>
-					{!isMember && onJoinClick && (
-						<motion.button
-							whileHover={{ scale: 1.05 }}
-							whileTap={{ scale: 0.95 }}
-							onClick={onJoinClick}
-							className="px-3 py-1.5 bg-blue-600 rounded-lg text-white text-sm font-semibold hover:bg-blue-500 transition shrink-0"
-						>
-							{status === "pending"
-								? "Pending"
-								: status === "rejected"
-									? "Declined"
-									: "Join"}
-						</motion.button>
-					)}
+					<div className="flex items-center gap-2 shrink-0">
+						{onSettingsClick && (
+							<motion.button
+								whileHover={{ scale: 1.05 }}
+								whileTap={{ scale: 0.95 }}
+								onClick={onSettingsClick}
+								className="p-2 bg-slate-700 rounded-lg text-slate-300 hover:text-white hover:bg-slate-600 transition"
+								aria-label="Club settings"
+							>
+								<Settings className="w-4 h-4" />
+							</motion.button>
+						)}
+						{!isMember && onJoinClick && (
+							<motion.button
+								whileHover={{ scale: 1.05 }}
+								whileTap={{ scale: 0.95 }}
+								onClick={onJoinClick}
+								className="px-3 py-1.5 bg-blue-600 rounded-lg text-white text-sm font-semibold hover:bg-blue-500 transition"
+							>
+								{status === "pending"
+									? "Pending"
+									: status === "rejected"
+										? "Declined"
+										: "Join"}
+							</motion.button>
+						)}
+					</div>
 				</div>
 
 				<div className="space-y-2 text-slate-400 text-sm">
 					<div className="flex items-center gap-2">
 						<MapPin className="w-4 h-4 text-cyan-400 shrink-0" />
-						<span className="truncate">{club.district || "No District"}</span>
+						<span className="truncate">{clubIdentityLabel(club)}</span>
 					</div>
 					<div className="flex items-center gap-2">
-						<Hash className="w-4 h-4 text-cyan-400 shrink-0" />
-						<span className="truncate">
-							{club.area || "No Area"} / {club.division || "No Division"}
-						</span>
+						<Calendar className="w-4 h-4 text-cyan-400 shrink-0" />
+						<span className="truncate">Charter Date: {formatCharterDate(club.charterDate)}</span>
 					</div>
 					<div className="flex items-center gap-2">
 						<Users className="w-4 h-4 text-cyan-400 shrink-0" />
-						<span className="truncate">{totalMembers} Members</span>
+						<span className="font-medium text-white">{totalMembers} Members</span>
+						{pendingMembers > 0 && (
+							<span className="text-orange-400 font-medium">· {pendingMembers} Pending</span>
+						)}
 					</div>
 				</div>
 			</div>
@@ -123,42 +139,48 @@ export function ClubInfoCard({
 						</p>
 					)}
 				</div>
-				{onSettingsClick && (
-					<motion.button
-						whileHover={{ scale: 1.05 }}
-						whileTap={{ scale: 0.95 }}
-						onClick={onSettingsClick}
-						className="p-2 bg-slate-700 rounded-lg text-slate-300 hover:text-white hover:bg-slate-600 transition shrink-0 ml-4"
-						aria-label="Club settings"
-					>
-						<Settings className="w-5 h-5" />
-					</motion.button>
-				)}
-				{!isMember && onJoinClick && (
-					<motion.button
-						whileHover={{ scale: 1.05 }}
-						whileTap={{ scale: 0.95 }}
-						onClick={onJoinClick}
-						className="px-6 py-2 bg-blue-600 rounded-lg text-white font-semibold hover:bg-blue-500 transition shrink-0 ml-4"
-					>
-					{status === "pending" ? "Request Pending" : status === "rejected" ? "Request Decline" : "Join Club"}
-					</motion.button>
-				)}
+				<div className="flex items-center gap-2 shrink-0 ml-4">
+					{onSettingsClick && (
+						<motion.button
+							whileHover={{ scale: 1.05 }}
+							whileTap={{ scale: 0.95 }}
+							onClick={onSettingsClick}
+							className="p-2 bg-slate-700 rounded-lg text-slate-300 hover:text-white hover:bg-slate-600 transition"
+							aria-label="Club settings"
+						>
+							<Settings className="w-5 h-5" />
+						</motion.button>
+					)}
+					{!isMember && onJoinClick && (
+						<motion.button
+							whileHover={{ scale: 1.05 }}
+							whileTap={{ scale: 0.95 }}
+							onClick={onJoinClick}
+							className="px-6 py-2 bg-blue-600 rounded-lg text-white font-semibold hover:bg-blue-500 transition"
+						>
+							{status === "pending" ? "Request Pending" : status === "rejected" ? "Request Decline" : "Join Club"}
+						</motion.button>
+					)}
+				</div>
 			</div>
 
 			{/* Club Details */}
-			<div className="grid grid-cols-2 md:grid-cols-3 gap-4 mt-6">
-				{CLUB_DETAILS.map((item, idx) => {
-					const Icon = item.icon;
-					const label = item.getLabel(club, totalMembers);
-
-					return (
-						<div key={idx} className="flex items-center gap-2 text-slate-400">
-							<Icon className="w-4 h-4 text-cyan-400 shrink-0" />
-							<span className="text-sm truncate">{label}</span>
-						</div>
-					);
-				})}
+			<div className="flex flex-wrap gap-4 mt-6 text-slate-400 text-sm">
+				<div className="flex items-center gap-2">
+					<MapPin className="w-4 h-4 text-cyan-400 shrink-0" />
+					<span>{clubIdentityLabel(club)}</span>
+				</div>
+				<div className="flex items-center gap-2">
+					<Calendar className="w-4 h-4 text-cyan-400 shrink-0" />
+					<span>Charter Date: {formatCharterDate(club.charterDate)}</span>
+				</div>
+				<div className="flex items-center gap-2">
+					<Users className="w-4 h-4 text-cyan-400 shrink-0" />
+					<span className="font-medium text-white">{totalMembers} Members</span>
+					{pendingMembers > 0 && (
+						<span className="text-orange-400 font-medium">· {pendingMembers} Pending</span>
+					)}
+				</div>
 			</div>
 
 			{/* Club Code Section */}

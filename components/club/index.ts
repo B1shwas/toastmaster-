@@ -6,3 +6,4 @@ export { ClubStatsGrid } from "./ClubStatsGrid";
 export { ClubInfoCard } from "./ClubInfoCard";
 export { MemberListSection } from "./MemberListSection";
 export { MemberRoleReportModal } from "./MemberRoleReportModal";
+export { ClubSettingsModal } from "./ClubSettingsModal";

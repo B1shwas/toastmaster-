@@ -26,6 +26,7 @@ const formSchema = z.object({
   area: z.string().max(100, "Area must be less than 100 characters"),
   division: z.string().max(100, "Division must be less than 100 characters"),
   meetingFrequency: z.enum(["WEEKLY", "BIWEEKLY", "MONTHLY"]),
+  charterDate: z.string().optional(),
 });
 
 type FormData = z.infer<typeof formSchema>;
@@ -159,6 +160,16 @@ export function CreateClubModal({
             error={!!errors.meetingFrequency}
             focusColor="emerald"
             disabled={isLoading}
+          />
+        </FormField>
+
+        {/* Charter Date */}
+        <FormField label="Charter Date" error={errors.charterDate?.message}>
+          <input
+            type="date"
+            {...register("charterDate")}
+            disabled={isLoading}
+            className="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-white text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent disabled:opacity-50 disabled:cursor-not-allowed"
           />
         </FormField>
 
