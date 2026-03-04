@@ -23,33 +23,33 @@ export type AddMemberInput = z.infer<typeof addMemberSchema>;
 export const clubSettingsSchema = z.object({
   name: z
     .string()
+    .trim()
     .min(3, "Club name must be at least 3 characters")
-    .max(100, "Club name must be less than 100 characters")
-    .transform((val) => val.trim()),
+    .max(100, "Club name must be less than 100 characters"),
   description: z
     .string()
+    .trim()
     .max(255, "Description must be less than 255 characters")
-    .optional()
-    .transform((val) => val?.trim()),
+    .optional(),
   district: z
     .string()
+    .trim()
     .max(100, "District must be less than 100 characters")
-    .optional()
-    .transform((val) => val?.trim()),
+    .optional(),
   area: z
     .string()
+    .trim()
     .max(100, "Area must be less than 100 characters")
-    .optional()
-    .transform((val) => val?.trim()),
+    .optional(),
   division: z
     .string()
+    .trim()
     .max(100, "Division must be less than 100 characters")
-    .optional()
-    .transform((val) => val?.trim()),
+    .optional(),
   meetingFrequency: z.enum(["WEEKLY", "BIWEEKLY", "MONTHLY"], {
     message: "Please select a valid meeting frequency",
   }),
-  charterDate: z.string().optional().transform((val) => val || undefined),
+  charterDate: z.string().optional(),
 });
 
 export type ClubSettingsInput = z.infer<typeof clubSettingsSchema>;
