@@ -34,6 +34,7 @@ type AgendaItemProps = {
   onEdit?: (agenda: AgendaWithTiming) => void;
   isDeletingId?: string | null;
   onMemberClick?: (memberId: string, memberName: string) => void;
+  members?: ClubMember[];
 };
 
 function AgendaItem({
@@ -44,7 +45,11 @@ function AgendaItem({
   onEdit,
   isDeletingId,
   onMemberClick,
+  members,
 }: AgendaItemProps) {
+  const displayName = item.memberId
+    ? (members?.find((m) => m.member_id === item.memberId)?.member_member_name ?? item.memberName)
+    : item.memberName;
   const controls = useDragControls();
   const isDeleting = isDeletingId === item.id;
 
@@ -78,14 +83,14 @@ function AgendaItem({
             </div>
           </div>
 
-          {item.memberName ? (
+          {displayName ? (
             <button
-              onClick={() => item.memberId && onMemberClick?.(item.memberId, item.memberName!)}
+              onClick={() => item.memberId && onMemberClick?.(item.memberId, displayName)}
               className="flex items-center gap-2 px-3 py-2 bg-green-500/10 border border-green-500/20 rounded-lg hover:bg-green-500/20 transition-colors"
             >
               <User className="w-4 h-4 text-green-400" />
               <span className="text-green-400 text-sm font-medium">
-                {item.memberName}
+                {displayName}
               </span>
             </button>
           ) : (
@@ -183,7 +188,7 @@ export default function AgendaList({
   const handleMemberClick = (memberId: string, memberName: string) => {
     const member = members.find((m) => m.member_id === memberId);
     setPopupMember({
-      name: memberName,
+      name: member?.member_member_name ?? memberName,
       introduction: member?.user_introduction ?? null,
     });
   };
@@ -258,6 +263,7 @@ export default function AgendaList({
               index={index}
               isEditMode={false}
               onMemberClick={handleMemberClick}
+              members={members}
             />
           ))}
         </div>

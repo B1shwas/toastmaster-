@@ -26,6 +26,30 @@ import { ROLE_LABELS, SystemRole } from "@/lib/types/agenda";
 import { useClubMembers, useCreateMeetingWithTemplate } from "@/lib/api";
 import { useParams } from "next/navigation";
 
+const agendaItemSchema = z
+  .object({
+    title: z.string().min(1, "Title is required"),
+    roleName: z.string().min(1, "Role is required"),
+    duration: z.number().min(1).max(300),
+    memberId: z.string().nullable(),
+    memberName: z.string().nullable(),
+    sequence: z.number().min(1),
+    notes: z.string().nullable(),
+    assignmentType: z.enum(["member", "guest"]),
+  })
+  .superRefine((data, ctx) => {
+    if (
+      data.assignmentType === "guest" &&
+      (!data.memberName || data.memberName.length < 2)
+    ) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        message: "Guest name is required (min 2 characters)",
+        path: ["memberName"],
+      });
+    }
+  });
+
 const meetingSessionSchema = z.object({
   theme: z.string().min(1, "Theme is required"),
   clubId: z.string().min(1, "clubId is required"),
@@ -37,20 +61,7 @@ const meetingSessionSchema = z.object({
   time: z.string().regex(/^\d{2}:\d{2}:\d{2}$/, "Invalid time format"),
   notes: z.string().nullable(),
   agendas: z
-    .array(
-      z.object({
-        // description: z.string().min(1, "description is required"),
-        // role: z.number().min(1, "role is required"),
-        title: z.string().min(1, "Title is required"),
-        roleName: z.string().min(1, "Role is required"),
-        duration: z.number().min(1).max(300),
-        memberId: z.string().nullable(),
-        memberName: z.string().min(2, "member name should be given"),
-        sequence: z.number().min(1),
-        notes: z.string().nullable(),
-        assignmentType: z.enum(["member", "guest"]),
-      }),
-    )
+    .array(agendaItemSchema)
     .min(1, "At least one agenda item is required"),
 });
 
@@ -539,24 +550,7 @@ const TemplatePreview = ({
                                         value={value || ""}
                                         options={memberOptions}
                                         onChange={(e) => {
-                                          const selectedValue = e.target.value;
-                                          onChange(selectedValue || null);
-                                          const selectedMember =
-                                            membersData?.find(
-                                              (m) =>
-                                                m.member_id === selectedValue,
-                                            );
-                                          if (selectedMember) {
-                                            setValue(
-                                              `agendas.${index}.memberName`,
-                                              selectedMember.member_member_name,
-                                            );
-                                          } else {
-                                            setValue(
-                                              `agendas.${index}.memberName`,
-                                              "",
-                                            );
-                                          }
+                                          onChange(e.target.value || null);
                                         }}
                                         className="w-full px-3 py-2 text-gray-900 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-gray-900 focus:border-transparent bg-white"
                                       />
@@ -586,7 +580,7 @@ const TemplatePreview = ({
                                     } else {
                                       setValue(
                                         `agendas.${index}.memberName`,
-                                        "",
+                                        null,
                                       );
                                     }
                                   }}
@@ -818,6 +812,7 @@ export const DuplicateAgenda = ({
           <Button
             variant="outline"
             size="sm"
+            onClick={onClose}
             className="border-gray-300 text-gray-700 hover:bg-gray-100"
           >
             Cancel

@@ -3,12 +3,14 @@
 import { useState, useMemo } from "react";
 import { useParams } from "next/navigation";
 import { motion } from "framer-motion";
-import { Calendar, PlusCircle, Search, Filter } from "lucide-react";
+import { Calendar, PlusCircle, Search, Filter, Copy } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { Dialog } from "@/components/ui/dialog";
 import { MeetingCard } from "@/components/meeting";
+import { DuplicateAgenda } from "@/components/meeting/DuplicateAgenda";
 import { BackLink } from "@/components/ui/page-layout";
 import { MeetingStatus } from "@/lib/types/meeting";
-import { useMeetings } from "@/lib/api/hooks/use-meetings";
+import { useMeetings, useDuplicateAgenda } from "@/lib/api/hooks/use-meetings";
 import { isMeetingUpcoming } from "@/lib/utils/meeting";
 
 // Animation variants
@@ -83,6 +85,8 @@ export default function MeetingsPage() {
     1,
     10
   );
+  const { data: duplicateAgendaData } = useDuplicateAgenda();
+  const [showDuplicateModal, setShowDuplicateModal] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const [statusFilter, setStatusFilter] = useState<FilterStatus>("ALL");
   const [timeFilter, setTimeFilter] = useState<"upcoming" | "past">("upcoming");
@@ -140,15 +144,28 @@ export default function MeetingsPage() {
                   }`}
               </p>
             </div>
-            <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
-              <Button
-                onClick={handleScheduleMeeting}
-                className="gap-2 bg-linear-to-br from-blue-500 to-cyan-400"
-              >
-                <PlusCircle className="h-4 w-4" />
-                Schedule Meeting
-              </Button>
-            </motion.div>
+            <div className="flex gap-2">
+              <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
+                <Button
+                  onClick={() => setShowDuplicateModal(true)}
+                  variant="outline"
+                  className="gap-2 border-slate-600 text-slate-300 hover:bg-slate-700 hover:text-white"
+                >
+                  <Copy className="h-4 w-4" />
+                  <span className="hidden sm:inline">Use Existing as Template</span>
+                  <span className="sm:hidden">Duplicate</span>
+                </Button>
+              </motion.div>
+              <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
+                <Button
+                  onClick={handleScheduleMeeting}
+                  className="gap-2 bg-linear-to-br from-blue-500 to-cyan-400"
+                >
+                  <PlusCircle className="h-4 w-4" />
+                  Schedule Meeting
+                </Button>
+              </motion.div>
+            </div>
           </div>
         </motion.div>
 
@@ -240,6 +257,15 @@ export default function MeetingsPage() {
           </motion.div>
         )}
       </div>
+
+      {duplicateAgendaData && (
+        <Dialog open={showDuplicateModal} onOpenChange={setShowDuplicateModal}>
+          <DuplicateAgenda
+            duplicateAgenda={duplicateAgendaData}
+            onClose={() => setShowDuplicateModal(false)}
+          />
+        </Dialog>
+      )}
     </div>
   );
 }
