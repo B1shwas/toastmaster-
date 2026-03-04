@@ -49,6 +49,7 @@ export const clubSettingsSchema = z.object({
   meetingFrequency: z.enum(["WEEKLY", "BIWEEKLY", "MONTHLY"], {
     message: "Please select a valid meeting frequency",
   }),
+  charterDate: z.string().optional().transform((val) => val || undefined),
 });
 
 export type ClubSettingsInput = z.infer<typeof clubSettingsSchema>;
@@ -77,6 +78,7 @@ export const createClubSchema = z.object({
   meetingFrequency: z.enum(["WEEKLY", "BIWEEKLY", "MONTHLY"], {
     message: "Please select a valid meeting frequency",
   }),
+  charterDate: z.string().optional().transform((val) => val || undefined),
 });
 
 export type CreateClubInput = z.infer<typeof createClubSchema>;

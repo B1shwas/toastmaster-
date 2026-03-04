@@ -17,6 +17,7 @@ import type {
 } from "@/lib/types/club";
 import type {
 	AddMemberInput,
+	ClubSettingsInput,
 	CreateClubInput,
 	JoinClubInput,
 } from "@/lib/schemas/club.schema";
@@ -95,6 +96,26 @@ export function useCreateClub() {
 		},
 		onError: (error) => {
 			console.error("Failed to create club:", getErrorMessage(error));
+		},
+	});
+}
+
+export function useUpdateClub(clubId: string) {
+	const queryClient = useQueryClient();
+
+	return useMutation({
+		mutationFn: async (input: ClubSettingsInput) => {
+			const { data } = await api.patch<ClubResponse>(
+				`/club/update/${clubId}`,
+				input
+			);
+			return data.data;
+		},
+		onSuccess: () => {
+			queryClient.invalidateQueries({ queryKey: clubKeys.detail(clubId) });
+		},
+		onError: (error) => {
+			console.error("Failed to update club:", getErrorMessage(error));
 		},
 	});
 }

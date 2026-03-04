@@ -9,7 +9,7 @@ import { getErrorMessage } from "@/lib/api";
 import {
   AddMemberModal,
   ClubInfoCard,
-  ClubStatsGrid,
+  ClubSettingsModal,
   MemberListSection,
   MemberRoleReportModal,
 } from "@/components/club";
@@ -24,10 +24,10 @@ import {
 import { useCreateMeeting, useMeetings } from "@/lib/api/hooks/use-meetings";
 import type { CreateMeetingInput } from "@/lib/api/hooks/use-meetings";
 import { useAuth } from "@/lib/hooks/useAuth";
-import type { AddMemberInput, JoinClubInput } from "@/lib/schemas/club.schema";
+import type { AddMemberInput, ClubSettingsInput, JoinClubInput } from "@/lib/schemas/club.schema";
 import { useRouter } from "next/navigation";
 import { JoinClubModal } from "@/components/clubs/JoinClubModal";
-import { useGetPendingRequest, useJoinClub, useRemoveMember, useRequestJoinClub, useUserClubStatus } from "@/lib/api/hooks/use-clubs";
+import { useGetPendingRequest, useJoinClub, useRemoveMember, useRequestJoinClub, useUpdateClub, useUserClubStatus } from "@/lib/api/hooks/use-clubs";
 import { useToast } from "@/hooks/use-toast";
 import { ListAllAgendas } from "@/components/agendaReport/ListAllAgendas";
 import { PendingRequest } from "@/components/dashboard/PendingRequest";
@@ -91,6 +91,7 @@ export default function ClubPage({ params }: ClubPageProps) {
   );
   const addMemberMutation = useAddMember(clubId);
   const removeMemberMutation = useRemoveMember(clubId);
+  const updateClubMutation = useUpdateClub(clubId);
   const requestJoinClubMutation = useRequestJoinClub();
   const createMeetingMutation = useCreateMeeting();
   const { data: pendingRequestData } = useGetPendingRequest()
@@ -99,6 +100,7 @@ export default function ClubPage({ params }: ClubPageProps) {
   const router = useRouter();
   const { toast } = useToast();
 
+  const [isSettingsOpen, setIsSettingsOpen] = useState(false);
   const [isAddMemberOpen, setIsAddMemberOpen] = useState(false);
   const [isScheduleMeetingOpen, setIsScheduleMeetingOpen] = useState(false);
   const [selectedMemberForReport, setSelectedMemberForReport] = useState<
@@ -131,9 +133,10 @@ export default function ClubPage({ params }: ClubPageProps) {
   // );
 
   // Event handlers
-  const handleSettingsClick = () => {
-    console.log("Navigate to settings");
-    // TODO: Implement settings navigation
+  const handleSettingsClick = () => setIsSettingsOpen(true);
+
+  const handleSaveSettings = async (data: ClubSettingsInput) => {
+    await updateClubMutation.mutateAsync(data);
   };
 
   const handleScheduleMeeting = () => {
@@ -203,23 +206,20 @@ export default function ClubPage({ params }: ClubPageProps) {
         animate="visible"
         className="max-w-7xl mx-auto space-y-8"
       >
-        {/* Club Summary + Statistics */}
+        {/* Club Summary */}
         <motion.div variants={ANIMATION_CONFIG.item}>
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
-            <ClubInfoCard
-              club={club}
-              onSettingsClick={handleSettingsClick}
-              totalMembers={clubStats.totalMembers}
-              canSeeCode={canSeeCode}
-              isMember={isMember}
-              compact
-              className="md:col-span-2"
-              onJoinClick={async () =>
-                await handleJoinClub({ clubCode: club.clubCode as any })
-              }
-            />
-            <ClubStatsGrid stats={clubStats} className="md:col-span-2" isMember={isMember} />
-          </div>
+          <ClubInfoCard
+            club={club}
+            onSettingsClick={handleSettingsClick}
+            totalMembers={clubStats.totalMembers}
+            pendingMembers={clubStats.pendingMembers}
+            canSeeCode={canSeeCode}
+            isMember={isMember}
+            compact
+            onJoinClick={async () =>
+              await handleJoinClub({ clubCode: club.clubCode as any })
+            }
+          />
         </motion.div>
         
         {pendingRequestData ? <PendingRequest pendingRequestData={pendingRequestData} clubId={clubId} /> : null}
@@ -270,6 +270,17 @@ export default function ClubPage({ params }: ClubPageProps) {
           onSubmit={handleCreateMeeting}
           isLoading={createMeetingMutation.isPending}
           nextMeetingNo={nextMeetingNo}
+        />
+      )}
+
+      {/* Club Settings Modal */}
+      {canManageMembers && (
+        <ClubSettingsModal
+          isOpen={isSettingsOpen}
+          onClose={() => setIsSettingsOpen(false)}
+          onSave={handleSaveSettings}
+          club={club}
+          isLoading={updateClubMutation.isPending}
         />
       )}
 
