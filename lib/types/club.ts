@@ -9,9 +9,10 @@ export interface ClubMember {
 	member_member_name: string;
 	member_member_email: string;
 	member_date_joined: string;
-	member_role: "OWNER" | "ADMIN" | "MEMBER";
+	member_role: "Immediate Past President" | "President" | "VP Education" | "Associate - VPE" | "VP Membership" | "Associate - VPM" | "VP Public Relations" | "Associate - VPPR" | "Secretary" | "Treasurer" | "Sergeant at Arms" | "Member";
 	isRegisteredUser: boolean;
 	user_introduction?: string | null;
+	isPending?: boolean;
 }
 
 export interface Club {

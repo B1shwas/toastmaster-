@@ -5,25 +5,28 @@ import { LoginForm } from "@/components/auth/LoginForm";
 import { SignupForm } from "@/components/auth/SignupForm";
 import type { LoginFormData, SignupFormData } from "@/lib/schemas/auth.schema";
 import { useLogin, useSignup } from "@/lib/api";
+import { getErrorMessage } from "@/lib/api/error";
 
 export default function AuthPage() {
   const [isLogin, setIsLogin] = useState(true);
+  const [signupError, setSignupError] = useState<string | null>(null);
+  const [loginError, setLoginError] = useState<string | null>(null);
 
   const login = useLogin();
   const signup = useSignup();
 
   const handleLoginSubmit = async (data: LoginFormData) => {
+    setLoginError(null);
     try {
       await login.mutateAsync(data);
       window.location.href = "/dashboard";
     } catch (error) {
-      console.error("Login failed", error);
-
-      // we will add toast or anything needed later
+      setLoginError(getErrorMessage(error));
     }
   };
 
   const handleSignupSubmit = async (data: SignupFormData) => {
+    setSignupError(null);
     try {
       await signup.mutateAsync({
         fullName: data.fullName,
@@ -35,8 +38,7 @@ export default function AuthPage() {
 
       window.location.href = "/dashboard";
     } catch (err) {
-      console.error("Signup or login failed", err);
-      // here as well we will be adding toast or anything needed later
+      setSignupError(getErrorMessage(err));
     }
   };
 
@@ -108,9 +110,9 @@ export default function AuthPage() {
                 transition={{ duration: 0.3 }}
               >
                 {isLogin ? (
-                  <LoginForm onSubmit={handleLoginSubmit} />
+                  <LoginForm onSubmit={handleLoginSubmit} serverError={loginError ?? undefined} />
                 ) : (
-                  <SignupForm onSubmit={handleSignupSubmit} />
+                  <SignupForm onSubmit={handleSignupSubmit} serverError={signupError ?? undefined} />
                 )}
               </motion.div>
             </AnimatePresence>

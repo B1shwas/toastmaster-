@@ -8,9 +8,10 @@ import { PasswordInput } from "./PasswordInput";
 
 interface LoginFormProps {
   onSubmit: (data: LoginFormData) => void;
+  serverError?: string;
 }
 
-export function LoginForm({ onSubmit }: LoginFormProps) {
+export function LoginForm({ onSubmit, serverError }: LoginFormProps) {
   const {
     register,
     handleSubmit,
@@ -45,6 +46,10 @@ export function LoginForm({ onSubmit }: LoginFormProps) {
       >
         {isSubmitting ? "Logging in..." : "Login to Dashboard"}
       </motion.button>
+
+      {serverError && (
+        <p className="text-red-400 text-sm text-center">{serverError}</p>
+      )}
     </form>
   );
 }

@@ -1,7 +1,7 @@
 "use client";
 
 import { motion, AnimatePresence } from "framer-motion";
-import { X, Award, Loader2, User, Trash2 } from "lucide-react";
+import { X, Award, Loader2, User, Trash2, CheckCircle } from "lucide-react";
 import { useRoleCounts } from "@/lib/api/hooks/use-agenda";
 import type { ClubMember } from "@/lib/types/club";
 import { useMemo } from "react";
@@ -12,8 +12,10 @@ interface MemberRoleReportModalProps {
     member: ClubMember | null;
     clubId: string;
     onRemoveMember?: (memberId: string) => Promise<void> | void;
+    onAcceptMember?: (memberId: string) => Promise<void> | void;
     canRemoveMember?: boolean;
     isRemovingMember?: boolean;
+    isAcceptingMember?: boolean;
 }
 
 export function MemberRoleReportModal({
@@ -22,8 +24,10 @@ export function MemberRoleReportModal({
     member,
     clubId,
     onRemoveMember,
+    onAcceptMember,
     canRemoveMember = false,
     isRemovingMember = false,
+    isAcceptingMember = false,
 }: MemberRoleReportModalProps) {
     const { data: roleCountsResponse, isLoading } = useRoleCounts(clubId);
 
@@ -78,7 +82,7 @@ export function MemberRoleReportModal({
                                     {member.member_member_name}
                                 </h3>
                                 <p className="text-slate-400 text-sm italic">
-                                    Role engagement summary
+                                    {member.member_role}
                                 </p>
                             </div>
                         </div>
@@ -133,24 +137,67 @@ export function MemberRoleReportModal({
 
                     {/* Footer */}
                     <div className="p-4 border-t border-white/5 bg-slate-900/50">
-                        {canRemoveMember && onRemoveMember && (
-                            <button
-                                onClick={() => onRemoveMember(member.member_id)}
-                                disabled={isRemovingMember}
-                                className="w-full py-3 mb-3 bg-red-500/15 hover:bg-red-500/25 text-red-300 font-semibold rounded-xl transition disabled:opacity-60 disabled:cursor-not-allowed flex items-center justify-center gap-2"
-                            >
-                                {isRemovingMember ? (
-                                    <>
-                                        <Loader2 className="w-4 h-4 animate-spin" />
-                                        Removing Member...
-                                    </>
-                                ) : (
-                                    <>
-                                        <Trash2 className="w-4 h-4" />
-                                        Remove Member
-                                    </>
+                        {member.isPending ? (
+                            <>
+                                {onAcceptMember && (
+                                    <button
+                                        onClick={() => onAcceptMember(member.member_id)}
+                                        disabled={isAcceptingMember}
+                                        className="w-full py-3 mb-3 bg-emerald-500/15 hover:bg-emerald-500/25 text-emerald-300 font-semibold rounded-xl transition disabled:opacity-60 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+                                    >
+                                        {isAcceptingMember ? (
+                                            <>
+                                                <Loader2 className="w-4 h-4 animate-spin" />
+                                                Accepting...
+                                            </>
+                                        ) : (
+                                            <>
+                                                <CheckCircle className="w-4 h-4" />
+                                                Accept Member
+                                            </>
+                                        )}
+                                    </button>
                                 )}
-                            </button>
+                                {canRemoveMember && onRemoveMember && (
+                                    <button
+                                        onClick={() => onRemoveMember(member.member_id)}
+                                        disabled={isRemovingMember}
+                                        className="w-full py-3 mb-3 bg-red-500/15 hover:bg-red-500/25 text-red-300 font-semibold rounded-xl transition disabled:opacity-60 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+                                    >
+                                        {isRemovingMember ? (
+                                            <>
+                                                <Loader2 className="w-4 h-4 animate-spin" />
+                                                Removing...
+                                            </>
+                                        ) : (
+                                            <>
+                                                <Trash2 className="w-4 h-4" />
+                                                Remove Member
+                                            </>
+                                        )}
+                                    </button>
+                                )}
+                            </>
+                        ) : (
+                            canRemoveMember && onRemoveMember && (
+                                <button
+                                    onClick={() => onRemoveMember(member.member_id)}
+                                    disabled={isRemovingMember}
+                                    className="w-full py-3 mb-3 bg-red-500/15 hover:bg-red-500/25 text-red-300 font-semibold rounded-xl transition disabled:opacity-60 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+                                >
+                                    {isRemovingMember ? (
+                                        <>
+                                            <Loader2 className="w-4 h-4 animate-spin" />
+                                            Removing Member...
+                                        </>
+                                    ) : (
+                                        <>
+                                            <Trash2 className="w-4 h-4" />
+                                            Remove Member
+                                        </>
+                                    )}
+                                </button>
+                            )
                         )}
                         <button
                             onClick={onClose}
