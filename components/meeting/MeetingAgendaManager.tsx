@@ -172,7 +172,7 @@ export function MeetingAgendaManager({
             meeting={meeting}
             meetingId={meeting.id}
             clubId={clubId}
-            isEditMode={isEditMode}
+            isEditMode={isEditMode && canEdit}
             members={members}
             onEditAgenda={(agenda: Agenda) => {
               setSelectedAgenda(agenda);
