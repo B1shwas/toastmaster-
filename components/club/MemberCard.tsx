@@ -25,7 +25,6 @@ function MemberCardComponent({
   canViewEmail = false,
 }: MemberCardProps & { onClick?: (member: any) => void }) {
   const isLinked = member.isRegisteredUser;
-  const memberIsOwner = member.member_role === "OWNER";
   console.log("memememe", member.member_date_joined);
 
   return (
@@ -54,12 +53,16 @@ function MemberCardComponent({
             <h4 className="text-white font-semibold truncate">
               {member.member_member_name}
             </h4>
-            {isLinked && (
+            {isLinked && !member.isPending && (
               <UserCheck className="w-4 h-4 text-emerald-400 shrink-0" />
             )}
-            {memberIsOwner && (
+            {member.isPending ? (
+              <span className="text-xs bg-orange-500/20 text-orange-400 px-2 py-0.5 rounded-full">
+                Pending
+              </span>
+            ) : (
               <span className="text-xs bg-cyan-500/20 text-cyan-400 px-2 py-0.5 rounded-full">
-                Owner
+                {member.member_role}
               </span>
             )}
           </div>

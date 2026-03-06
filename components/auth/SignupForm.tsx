@@ -9,9 +9,10 @@ import { FormCheckbox } from "./FormCheckbox";
 
 interface SignupFormProps {
   onSubmit: (data: SignupFormData) => void;
+  serverError?: string;
 }
 
-export function SignupForm({ onSubmit }: SignupFormProps) {
+export function SignupForm({ onSubmit, serverError }: SignupFormProps) {
   const {
     register,
     handleSubmit,
@@ -78,6 +79,10 @@ export function SignupForm({ onSubmit }: SignupFormProps) {
       >
         {isSubmitting ? "Creating Account..." : "Create Account"}
       </motion.button>
+
+      {serverError && (
+        <p className="text-red-400 text-sm text-center">{serverError}</p>
+      )}
     </form>
   );
 }

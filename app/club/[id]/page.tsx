@@ -27,10 +27,9 @@ import { useAuth } from "@/lib/hooks/useAuth";
 import type { AddMemberInput, ClubSettingsInput, JoinClubInput } from "@/lib/schemas/club.schema";
 import { useRouter } from "next/navigation";
 import { JoinClubModal } from "@/components/clubs/JoinClubModal";
-import { useGetPendingRequest, useJoinClub, useRemoveMember, useRequestJoinClub, useUpdateClub, useUserClubStatus } from "@/lib/api/hooks/use-clubs";
+import { useGetPendingRequest, useJoinClub, usePendingRequestDecision, useRemoveMember, useRequestJoinClub, useUpdateClub, useUserClubStatus } from "@/lib/api/hooks/use-clubs";
 import { useToast } from "@/hooks/use-toast";
 import { ListAllAgendas } from "@/components/agendaReport/ListAllAgendas";
-import { PendingRequest } from "@/components/dashboard/PendingRequest";
 
 const ANIMATION_CONFIG = {
   container: {
@@ -93,6 +92,7 @@ export default function ClubPage({ params }: ClubPageProps) {
   const removeMemberMutation = useRemoveMember(clubId);
   const updateClubMutation = useUpdateClub(clubId);
   const requestJoinClubMutation = useRequestJoinClub();
+  const pendingDecisionMutation = usePendingRequestDecision();
   const createMeetingMutation = useCreateMeeting();
   const { data: pendingRequestData } = useGetPendingRequest()
   
@@ -120,6 +120,28 @@ export default function ClubPage({ params }: ClubPageProps) {
         ? clubMembers.map((m) => m.member_member_email)
         : [],
     [clubMembers],
+  );
+
+  const pendingMembersForClub = useMemo(() => {
+    if (!pendingRequestData || !canManageMembers) return [];
+    const clubGroup = pendingRequestData.find((g) => g.id === clubId);
+    if (!clubGroup) return [];
+    return clubGroup.members
+      .filter((m) => m.status === "pending")
+      .map((m) => ({
+        member_id: m.id,
+        member_member_name: m.memberName,
+        member_member_email: m.memberEmail,
+        member_date_joined: m.dateJoined,
+        member_role: "Member" as const,
+        isRegisteredUser: false,
+        isPending: true,
+      }));
+  }, [pendingRequestData, clubId, canManageMembers]);
+
+  const allMembers = useMemo(
+    () => [...(clubMembers ?? []), ...pendingMembersForClub],
+    [clubMembers, pendingMembersForClub],
   );
 
   const nextMeetingNo = useMemo(() => {
@@ -182,6 +204,11 @@ export default function ClubPage({ params }: ClubPageProps) {
     await requestJoinClubMutation.mutateAsync(data);
   };
 
+  const handleAcceptMember = async (memberId: string) => {
+    pendingDecisionMutation.mutate({ clubId, memberId, decision: true });
+    setSelectedMemberForReport(null);
+  };
+
   if (isClubError) {
     return (
       <div className="min-h-screen flex flex-col justify-center items-center text-white bg-linear-to-b from-slate-950 to-slate-900">
@@ -222,7 +249,6 @@ export default function ClubPage({ params }: ClubPageProps) {
           />
         </motion.div>
         
-        {pendingRequestData ? <PendingRequest pendingRequestData={pendingRequestData} clubId={clubId} /> : null}
 
         {/* Upcoming Meetings */}
         <motion.div variants={ANIMATION_CONFIG.item}>
@@ -239,7 +265,7 @@ export default function ClubPage({ params }: ClubPageProps) {
         {/* Members Section */}
         <motion.div variants={ANIMATION_CONFIG.item}>
           <MemberListSection
-            members={clubMembers ?? []}
+            members={allMembers}
             searchQuery={searchQuery}
             onSearchChange={setSearchQuery}
             onAddMember={() => setIsAddMemberOpen(true)}
@@ -290,11 +316,17 @@ export default function ClubPage({ params }: ClubPageProps) {
         member={selectedMemberForReport}
         clubId={clubId}
         onRemoveMember={async (memberId) => {
-          await handleRemoveMember(memberId);
+          if (selectedMemberForReport?.isPending) {
+            pendingDecisionMutation.mutate({ clubId, memberId, decision: false });
+          } else {
+            await handleRemoveMember(memberId);
+          }
           setSelectedMemberForReport(null);
         }}
+        onAcceptMember={canManageMembers ? handleAcceptMember : undefined}
         canRemoveMember={canManageMembers}
-        isRemovingMember={removeMemberMutation.isPending}
+        isRemovingMember={removeMemberMutation.isPending || pendingDecisionMutation.isPending}
+        isAcceptingMember={pendingDecisionMutation.isPending}
       />
     </div>
   );
