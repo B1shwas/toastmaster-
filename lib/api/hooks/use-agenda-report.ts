@@ -56,6 +56,7 @@ export function useCanUserCreateReport(meetingId: string) {
             return data.data;
         },
         enabled: !!meetingId,
+        retry: false,
     });
 }
 

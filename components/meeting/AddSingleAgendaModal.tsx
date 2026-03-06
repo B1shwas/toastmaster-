@@ -161,43 +161,29 @@ export function AddSingleAgendaModal({
                 />
               </FormField>
 
-              {/* Duration & Sequence */}
-              <div className="grid grid-cols-2 gap-4">
-                <FormField
-                  label="Duration (minutes)"
-                  error={errors.duration?.message}
-                  required
-                >
-                  <TextInput
-                    type="number"
-                    {...register("duration", { valueAsNumber: true })}
-                    min={1}
-                    max={300}
-                    error={!!errors.duration}
-                    focusColor="emerald"
-                  />
-                </FormField>
+              {/* Duration */}
+              <FormField
+                label="Duration (minutes)"
+                error={errors.duration?.message}
+                required
+              >
+                <TextInput
+                  type="number"
+                  {...register("duration", { valueAsNumber: true })}
+                  min={1}
+                  max={300}
+                  error={!!errors.duration}
+                  focusColor="emerald"
+                />
+              </FormField>
 
-                <FormField
-                  label="Sequence"
-                  error={errors.sequence?.message}
-                  required
-                >
-                  <TextInput
-                    type="number"
-                    {...register("sequence", { valueAsNumber: true })}
-                    min={1}
-                    error={!!errors.sequence}
-                    focusColor="emerald"
-                  />
-                </FormField>
-              </div>
+              <input type="hidden" {...register("sequence", { valueAsNumber: true })} />
 
               {/* Assignment Type */}
               <div className="p-5 bg-linear-to-br from-slate-800/40 to-slate-800/20 border border-slate-700/60 rounded-xl space-y-4">
                 <h3 className="text-white font-semibold text-sm mb-4 flex items-center gap-2">
                   <div className="w-1 h-4 bg-linear-to-b from-emerald-400 to-cyan-400 rounded-full"></div>
-                  Assignment <span className="text-red-400">*</span>
+                  Assignment
                 </h3>
 
                 <div className="space-y-3">
