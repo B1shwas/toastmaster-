@@ -16,16 +16,13 @@ export const createSingleAgendaSchema = z
   })
   .refine(
     (data) => {
-      if (data.assignmentType === "member" && !data.memberId) {
-        return false;
-      }
       if (data.assignmentType === "guest" && !data.memberName) {
         return false;
       }
       return true;
     },
     {
-      message: "Please select a member or enter a guest name",
+      message: "Please enter a guest name",
       path: ["assignmentType"],
     }
   );
