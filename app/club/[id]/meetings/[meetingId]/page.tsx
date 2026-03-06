@@ -47,11 +47,13 @@ function MeetingContent({
     clubId,
     canManageNotes,
     userRole,
+    isMember,
 }: {
     meeting: Meeting;
     clubId: string;
     canManageNotes: boolean;
     userRole: "OWNER" | "ADMIN" | "MEMBER";
+    isMember: boolean;
 }) {
     const agendas = Array.isArray(meeting.agendas) ? meeting.agendas : [];
     const assignedCount = agendas.filter((a) => a.memberId).length;
@@ -115,6 +117,7 @@ function MeetingContent({
                     <MeetingAgendaManager
                         meeting={meeting}
                         clubId={clubId}
+                        isMember={isMember}
                     />
                 </motion.div>
             </motion.div>
@@ -163,6 +166,7 @@ export default function MeetingPage() {
             clubId={params.id}
             canManageNotes={canManageNotes}
             userRole={userRole}
+            isMember={roleData?.member === true}
         />
     );
 }
