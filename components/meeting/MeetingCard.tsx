@@ -6,6 +6,7 @@ import { Calendar, Clock, MapPin, ChevronRight, Users } from "lucide-react";
 import type { Meeting } from "@/lib/types/meeting";
 import {
 	getMeetingStatusConfig,
+	getEffectiveMeetingStatus,
 	formatMeetingDate,
 	formatMeetingTime,
 } from "@/lib/utils/meeting";
@@ -16,7 +17,7 @@ interface MeetingCardProps {
 }
 
 function MeetingCardComponent({ meeting, clubId }: MeetingCardProps) {
-	const statusConfig = getMeetingStatusConfig(meeting.status);
+	const statusConfig = getMeetingStatusConfig(getEffectiveMeetingStatus(meeting));
 	const agendaCount = meeting.agendas?.length ?? 0;
 	const filledRoles = meeting.agendas?.filter((a) => a.memberId).length ?? 0;
 

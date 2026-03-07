@@ -67,26 +67,12 @@ export function MeetingAgendaManager({
     setSelectedAgenda(null);
   };
 
-  const totalDuration = agendas.reduce(
-    (sum, agenda) => sum + agenda.duration,
-    0
-  );
-  const assignedCount = agendas.filter(
-    (a) => a.memberId || a.memberName
-  ).length;
 
   return (
     <>
       <div className="space-y-6">
         <div className="flex items-center justify-between">
-          <div>
-            <h2 className="text-2xl font-bold text-white">Meeting Agenda</h2>
-            <p className="text-slate-400 text-sm mt-1">
-              {hasAgendas
-                ? `${assignedCount} of ${agendas.length} roles assigned • ${totalDuration} minutes total`
-                : "No agenda items yet"}
-            </p>
-          </div>
+          <div />
           <div className="flex gap-2">
             {isPastMeeting && (
               <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-slate-700/40 border border-slate-600/50 text-slate-400 text-sm">

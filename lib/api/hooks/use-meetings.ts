@@ -96,7 +96,7 @@ export function useUpdateMeeting(meetingId: string, clubId: string) {
     mutationFn: async (input: Partial<Meeting>) => {
       const { data } = await api.patch<MeetingResponse>(
         `/meetings/${meetingId}`,
-        input,
+        { ...input, clubId },
       );
       return data.data;
     },

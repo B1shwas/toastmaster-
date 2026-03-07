@@ -1,4 +1,5 @@
-import type { Meeting, MeetingStatus } from "../types/meeting";
+import { MeetingStatus } from "../types/meeting";
+import type { Meeting } from "../types/meeting";
 
 const STATUS_CONFIG: Record<
   MeetingStatus,
@@ -15,7 +16,7 @@ const STATUS_CONFIG: Record<
     bgColor: "rgba(96, 165, 250, 0.25)",
   },
   IN_PROGRESS: {
-    label: "In Progress",
+    label: "Ongoing",
     color: "#4ade80",
     bgColor: "rgba(74, 222, 128, 0.25)",
   },
@@ -30,6 +31,17 @@ const STATUS_CONFIG: Record<
     bgColor: "rgba(248, 113, 113, 0.25)",
   },
 };
+
+export function getEffectiveMeetingStatus(meeting: Meeting): MeetingStatus {
+  if (
+    (meeting.status === MeetingStatus.SCHEDULED ||
+      meeting.status === MeetingStatus.IN_PROGRESS) &&
+    !isMeetingUpcoming(meeting.date)
+  ) {
+    return MeetingStatus.COMPLETED;
+  }
+  return meeting.status;
+}
 
 export function getMeetingStatusConfig(status: MeetingStatus) {
   return STATUS_CONFIG[status] || STATUS_CONFIG.DRAFT;
