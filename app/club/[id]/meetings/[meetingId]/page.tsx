@@ -5,6 +5,7 @@ import { motion } from "framer-motion";
 import type { Meeting } from "@/lib/types/meeting";
 import { useMeeting } from "@/lib/api/hooks/use-meetings";
 import { useClubRole } from "@/lib/api/hooks/use-clubs";
+import { useMeetingAgendas } from "@/lib/api/hooks/use-agenda";
 import { useAuthStore } from "@/lib/stores/useAuthStore";
 import {
     MeetingHeader,
@@ -55,8 +56,9 @@ function MeetingContent({
     userRole: "OWNER" | "ADMIN" | "MEMBER";
     isMember: boolean;
 }) {
-    const agendas = Array.isArray(meeting.agendas) ? meeting.agendas : [];
-    const assignedCount = agendas.filter((a) => a.memberId).length;
+    const { data: agendasData } = useMeetingAgendas(meeting.id);
+    const agendas = agendasData?.data ?? [];
+    const totalDuration = agendas.reduce((sum, a) => sum + a.duration, 0);
     const { data: canUserCreateIt } = useCanUserCreateReport(meeting?.id);
 
     return (
@@ -78,8 +80,10 @@ function MeetingContent({
                 <motion.div variants={itemVariants}>
                     <MeetingDetailsCard
                         meeting={meeting}
-                        assignedCount={assignedCount}
-                        totalRoles={agendas.length}
+                        totalDuration={totalDuration}
+                        canEdit={isMember}
+                        meetingId={meeting.id}
+                        clubId={clubId}
                     />
                 </motion.div>
 

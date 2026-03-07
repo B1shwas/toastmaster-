@@ -62,10 +62,6 @@ function AgendaItem({
         className="bg-slate-800/50 border border-cyan-500/20 rounded-xl p-4 hover:bg-slate-800/70 transition-all"
       >
         <div className="flex items-center gap-4">
-          <div className="w-10 h-10 bg-slate-700 rounded-lg flex items-center justify-center text-cyan-400 font-bold shrink-0">
-            {item.sequence}
-          </div>
-
           <div className="flex-1 min-w-0">
             <h4 className="text-white font-medium mb-1">{item.title}</h4>
             <div className="flex items-center gap-3 flex-wrap">
@@ -124,10 +120,6 @@ function AgendaItem({
           >
             <GripVertical size={20} />
           </button>
-
-          <div className="w-10 h-10 bg-slate-700 rounded-lg flex items-center justify-center text-cyan-400 font-bold shrink-0">
-            {item.sequence}
-          </div>
 
           <div className="flex-1 min-w-0">
             <h4 className="text-white font-medium mb-1">{item.title}</h4>
