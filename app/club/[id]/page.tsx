@@ -27,7 +27,7 @@ import { useAuth } from "@/lib/hooks/useAuth";
 import type { AddMemberInput, ClubSettingsInput, JoinClubInput } from "@/lib/schemas/club.schema";
 import { useRouter } from "next/navigation";
 import { JoinClubModal } from "@/components/clubs/JoinClubModal";
-import { useGetPendingRequest, useJoinClub, usePendingRequestDecision, useRemoveMember, useRequestJoinClub, useUpdateClub, useUserClubStatus } from "@/lib/api/hooks/use-clubs";
+import { useClubPendingMembers, useJoinClub, usePendingRequestDecision, useRemoveMember, useRequestJoinClub, useUpdateClub, useUserClubStatus } from "@/lib/api/hooks/use-clubs";
 import { useToast } from "@/hooks/use-toast";
 import { ListAllAgendas } from "@/components/agendaReport/ListAllAgendas";
 
@@ -94,9 +94,7 @@ export default function ClubPage({ params }: ClubPageProps) {
   const requestJoinClubMutation = useRequestJoinClub();
   const pendingDecisionMutation = usePendingRequestDecision();
   const createMeetingMutation = useCreateMeeting();
-  const { data: pendingRequestData } = useGetPendingRequest()
-  
-  
+
   const router = useRouter();
   const { toast } = useToast();
 
@@ -114,6 +112,8 @@ export default function ClubPage({ params }: ClubPageProps) {
   const canSeeCode = role === "OWNER" || role === "ADMIN";
   const canManageMembers = role === "OWNER" || role === "ADMIN";
 
+  const { data: pendingMembersList } = useClubPendingMembers(clubId, canManageMembers);
+
   const existingEmails = useMemo(
     () =>
       Array.isArray(clubMembers)
@@ -123,21 +123,17 @@ export default function ClubPage({ params }: ClubPageProps) {
   );
 
   const pendingMembersForClub = useMemo(() => {
-    if (!pendingRequestData || !canManageMembers) return [];
-    const clubGroup = pendingRequestData.find((g) => g.id === clubId);
-    if (!clubGroup) return [];
-    return clubGroup.members
-      .filter((m) => m.status === "pending")
-      .map((m) => ({
-        member_id: m.id,
-        member_member_name: m.memberName,
-        member_member_email: m.memberEmail,
-        member_date_joined: m.dateJoined,
-        member_role: "Member" as const,
-        isRegisteredUser: false,
-        isPending: true,
-      }));
-  }, [pendingRequestData, clubId, canManageMembers]);
+    if (!pendingMembersList || !canManageMembers) return [];
+    return pendingMembersList.map((m: any) => ({
+      member_id: m.id,
+      member_member_name: m.memberName,
+      member_member_email: m.memberEmail,
+      member_date_joined: m.dateJoined,
+      member_role: "Member" as const,
+      isRegisteredUser: false,
+      isPending: true,
+    }));
+  }, [pendingMembersList, canManageMembers]);
 
   const allMembers = useMemo(
     () => [...(clubMembers ?? []), ...pendingMembersForClub],
@@ -246,6 +242,9 @@ export default function ClubPage({ params }: ClubPageProps) {
             onJoinClick={async () =>
               await handleJoinClub({ clubCode: club.clubCode as any })
             }
+            onPendingClick={() =>
+              document.getElementById("members-section")?.scrollIntoView({ behavior: "smooth" })
+            }
           />
         </motion.div>
         
@@ -263,7 +262,7 @@ export default function ClubPage({ params }: ClubPageProps) {
         </motion.div>
 
         {/* Members Section */}
-        <motion.div variants={ANIMATION_CONFIG.item}>
+        <motion.div id="members-section" variants={ANIMATION_CONFIG.item}>
           <MemberListSection
             members={allMembers}
             searchQuery={searchQuery}
