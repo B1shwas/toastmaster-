@@ -14,6 +14,7 @@ interface ClubInfoCardProps {
 	canSeeCode: boolean;
 	isMember?: boolean;
 	onJoinClick?: () => void;
+	onPendingClick?: () => void;
 	compact?: boolean;
 	className?: string;
 }
@@ -44,6 +45,7 @@ export function ClubInfoCard({
 	canSeeCode,
 	isMember = false,
 	onJoinClick,
+	onPendingClick,
 	compact = false,
 	className,
 }: ClubInfoCardProps) {
@@ -117,7 +119,7 @@ export function ClubInfoCard({
 						<Users className="w-4 h-4 text-cyan-400 shrink-0" />
 						<span className="font-medium text-white">{totalMembers} Members</span>
 						{pendingMembers > 0 && (
-							<span className="text-orange-400 font-medium">· {pendingMembers} Pending</span>
+							<button onClick={onPendingClick} className="text-orange-400 font-medium hover:underline cursor-pointer">· {pendingMembers} Pending</button>
 						)}
 					</div>
 				</div>

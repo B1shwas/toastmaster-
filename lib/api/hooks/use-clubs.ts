@@ -76,6 +76,19 @@ export function useClubMembers(clubId: string) {
 	});
 }
 
+export function useClubPendingMembers(clubId: string, enabled: boolean) {
+	return useQuery({
+		queryKey: [...clubKeys.members(clubId), 'pending'],
+		queryFn: async () => {
+			const { data } = await api.get<{ data: any[] }>(
+				`/club/${clubId}/members/pending`
+			);
+			return data.data ?? [];
+		},
+		enabled: !!clubId && enabled,
+	});
+}
+
 export function useCreateClub() {
 	const queryClient = useQueryClient();
 
@@ -179,6 +192,8 @@ export function useRemoveMember(clubId: string) {
 		onSuccess: () => {
 			queryClient.invalidateQueries({ queryKey: clubKeys.detail(clubId) });
 			queryClient.invalidateQueries({ queryKey: clubKeys.members(clubId) });
+			queryClient.invalidateQueries({ queryKey: [...clubKeys.members(clubId), 'pending'] });
+			queryClient.invalidateQueries({ queryKey: clubKeys.stats(clubId) });
 		},
 	});
 }
@@ -315,6 +330,9 @@ export function usePendingRequestDecision() {
     });
     queryClient.invalidateQueries({
       queryKey: clubKeys.stats(variables.clubId),
+    });
+    queryClient.invalidateQueries({
+      queryKey: [...clubKeys.members(variables.clubId), 'pending'],
     });
 
     const clubData = response.data;
