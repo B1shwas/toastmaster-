@@ -1,6 +1,6 @@
 "use client";
 
-import React from "react";
+import React, { useEffect, useEffectEvent } from "react";
 import { AnimatePresence } from "framer-motion";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -71,7 +71,7 @@ export function AddSingleAgendaModal({
     defaultValues: {
       title: "",
       roleName: "",
-      duration: 5,
+      duration: 0,
       sequence: nextSequence,
       assignmentType: "member",
       memberId: "",
@@ -79,6 +79,19 @@ export function AddSingleAgendaModal({
       notes: "",
     },
   });
+
+  useEffect(() => {
+    reset({
+      title: "",
+      roleName: "",
+      duration: 0,
+      sequence: nextSequence,
+      assignmentType: "member",
+      memberId: "",
+      memberName: "",
+      notes: "",
+    });
+  }, [isOpen, nextSequence, reset]);
 
   const assignmentType = watch("assignmentType");
 
