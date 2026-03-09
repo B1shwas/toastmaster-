@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { motion } from "framer-motion";
 import { Plus, Eye, Edit, Lock } from "lucide-react";
 import { isMeetingUpcoming } from "@/lib/utils/meeting";
@@ -67,7 +67,12 @@ export function MeetingAgendaManager({
     setSelectedAgenda(null);
   };
 
+  const nextSquence = useMemo(() => {
+    if (!agendas || agendas.length === 0) return 1;
+    return Math.max(...agendas.map((a) => a.sequence)) + 1;
+  }, [agendas]);
 
+console.log("Next sequence:", {nextSquence, agendas});
   return (
     <>
       <div className="space-y-6">
@@ -219,7 +224,7 @@ export function MeetingAgendaManager({
             meetingId={meeting.id}
             meetingDate={meeting.date.toString()}
             members={members}
-            nextSequence={agendas.length + 1}
+            nextSequence={nextSquence}
             onSuccess={handleSuccess}
           />
 
