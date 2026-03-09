@@ -15,6 +15,9 @@ import {
   Plus,
   X,
   Loader2,
+  Link,
+  ExternalLink,
+  Trash2,
 } from "lucide-react";
 import { Calendar } from "@/components/ui/calendar";
 import {
@@ -93,6 +96,14 @@ const editMeetingSchema = z.object({
     .string()
     .min(3, "Venue must be at least 3 characters")
     .max(200, "Venue must be less than 200 characters"),
+  socialLinks: z
+    .array(
+      z
+        .string()
+        .regex(/^https?:\/\/.+/, "Must be a valid URL starting with http(s)")
+    )
+    .max(3, "Maximum 3 social media links allowed")
+    .optional(),
 });
 
 type EditMeetingInput = z.infer<typeof editMeetingSchema>;
@@ -123,6 +134,12 @@ function EditMeetingModal({
     initialDate
   );
 
+  const initialLinks =
+    meeting.socialLinks && meeting.socialLinks.length > 0
+      ? meeting.socialLinks
+      : [""];
+  const [socialLinks, setSocialLinks] = useState<string[]>(initialLinks);
+
   const {
     register,
     handleSubmit,
@@ -135,16 +152,19 @@ function EditMeetingModal({
       date: initialDate ? format(initialDate, "yyyy-MM-dd") : "",
       time: `${timeParts[0] || "00"}:${timeParts[1] || "00"}`,
       venue: meeting.venue || "",
+      socialLinks: meeting.socialLinks ?? [],
     },
   });
 
   const onSubmit = (data: EditMeetingInput) => {
+    const filteredLinks = socialLinks.filter((l) => l.trim() !== "");
     updateMeeting.mutate(
       {
         theme: data.theme,
         date: new Date(data.date),
         time: `${data.time}:00`,
         venue: data.venue,
+        socialLinks: filteredLinks.length > 0 ? filteredLinks : [],
       },
       { onSuccess: onClose }
     );
@@ -347,6 +367,64 @@ function EditMeetingModal({
                 {errors.venue.message}
               </p>
             )}
+          </div>
+
+          {/* Social Media Links */}
+          <div>
+            <div className="flex items-center justify-between mb-2">
+              <label className="block text-slate-300 text-sm font-medium">
+                Social Media Links
+                <span className="ml-2 text-slate-500 text-xs font-normal">
+                  (up to 3)
+                </span>
+              </label>
+              {socialLinks.length < 3 && (
+                <button
+                  type="button"
+                  disabled={isDisabled}
+                  onClick={() => setSocialLinks((prev) => [...prev, ""])}
+                  className="flex items-center gap-1 text-xs text-cyan-400 hover:text-cyan-300 disabled:opacity-50"
+                >
+                  <Plus className="w-3.5 h-3.5" />
+                  Add link
+                </button>
+              )}
+            </div>
+            <div className="space-y-2">
+              {socialLinks.map((link, index) => (
+                <div key={index} className="flex items-center gap-2">
+                  <div className="relative flex-1">
+                    <Link className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-500" />
+                    <input
+                      type="url"
+                      value={link}
+                      onChange={(e) => {
+                        const updated = [...socialLinks];
+                        updated[index] = e.target.value;
+                        setSocialLinks(updated);
+                      }}
+                      disabled={isDisabled}
+                      placeholder="https://www.facebook.com/share/p/..."
+                      className="w-full pl-10 pr-4 py-3 bg-slate-800/50 border border-slate-700 rounded-xl text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-cyan-500 disabled:opacity-50 disabled:cursor-not-allowed text-sm"
+                    />
+                  </div>
+                  {socialLinks.length > 1 && (
+                    <button
+                      type="button"
+                      disabled={isDisabled}
+                      onClick={() =>
+                        setSocialLinks((prev) =>
+                          prev.filter((_, i) => i !== index)
+                        )
+                      }
+                      className="text-slate-500 hover:text-red-400 disabled:opacity-50"
+                    >
+                      <Trash2 className="w-4 h-4" />
+                    </button>
+                  )}
+                </div>
+              ))}
+            </div>
           </div>
 
           {/* Actions */}
@@ -565,6 +643,59 @@ function MeetingNotesCardComponent({
   );
 }
 
+function getSocialPlatformLabel(url: string): string {
+  try {
+    const host = new URL(url).hostname.replace("www.", "");
+    if (host.includes("facebook")) return "Facebook";
+    if (host.includes("instagram")) return "Instagram";
+    if (host.includes("linkedin")) return "LinkedIn";
+    if (host.includes("twitter") || host.includes("x.com")) return "X / Twitter";
+    if (host.includes("youtube")) return "YouTube";
+    if (host.includes("tiktok")) return "TikTok";
+    return host;
+  } catch {
+    return url;
+  }
+}
+
+function MeetingSocialLinksCardComponent({
+  socialLinks,
+}: {
+  socialLinks: string[] | null;
+}) {
+  const links = socialLinks?.filter((l) => l.trim() !== "") ?? [];
+
+  if (links.length === 0) return null;
+
+  return (
+    <section className="space-y-3 rounded-xl border border-slate-700/50 bg-slate-800/30 p-6">
+      <div className="flex items-center gap-2">
+        <ExternalLink className="h-4 w-4 text-slate-400" />
+        <h2 className="text-sm font-semibold uppercase tracking-wide text-slate-400">
+          Social Media Posts
+        </h2>
+      </div>
+      <ul className="space-y-2">
+        {links.map((url, i) => (
+          <li key={i}>
+            <a
+              href={url}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="flex items-center gap-2 text-sm text-cyan-400 hover:text-cyan-300 transition-colors break-all"
+            >
+              <Link className="h-3.5 w-3.5 shrink-0" />
+              {getSocialPlatformLabel(url)}
+              <ExternalLink className="h-3 w-3 shrink-0 opacity-60" />
+            </a>
+          </li>
+        ))}
+      </ul>
+    </section>
+  );
+}
+
 export const MeetingHeader = memo(MeetingHeaderComponent);
 export const MeetingDetailsCard = memo(MeetingDetailsCardComponent);
 export const MeetingNotesCard = memo(MeetingNotesCardComponent);
+export const MeetingSocialLinksCard = memo(MeetingSocialLinksCardComponent);

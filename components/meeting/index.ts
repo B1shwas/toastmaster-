@@ -4,6 +4,7 @@ export {
   MeetingHeader,
   MeetingDetailsCard,
   MeetingNotesCard,
+  MeetingSocialLinksCard,
 } from "./MeetingDetails";
 export { ScheduleMeetingModal } from "./ScheduleMeetingModal";
 export { AddAgendaModal } from "./AddAgendaModal";
