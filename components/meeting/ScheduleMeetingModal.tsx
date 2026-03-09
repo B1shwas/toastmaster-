@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useForm, Controller } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { X, Calendar as CalendarIcon, Clock, Loader2 } from "lucide-react";
+import { X, Calendar as CalendarIcon, Clock, Loader2, Link, Plus, Trash2 } from "lucide-react";
 import { z } from "zod";
 import { format } from "date-fns";
 import { Calendar } from "@/components/ui/calendar";
@@ -32,6 +32,14 @@ const scheduleMeetingSchema = z.object({
     .string()
     .min(3, "Venue must be at least 3 characters")
     .max(200, "Venue must be less than 200 characters"),
+  socialLinks: z
+    .array(
+      z
+        .string()
+        .regex(/^https?:\/\/.+/, "Must be a valid URL starting with http(s)")
+    )
+    .max(3, "Maximum 3 social media links allowed")
+    .optional(),
 });
 
 export type ScheduleMeetingInput = z.infer<typeof scheduleMeetingSchema>;
@@ -56,13 +64,13 @@ export function ScheduleMeetingModal({
     hours: 14,
     minutes: 0,
   });
+  const [socialLinks, setSocialLinks] = useState<string[]>([""]);
 
   const {
     register,
     handleSubmit,
     reset,
     control,
-    setValue,
     formState: { errors, isSubmitting },
   } = useForm<ScheduleMeetingInput>({
     resolver: zodResolver(scheduleMeetingSchema),
@@ -72,6 +80,7 @@ export function ScheduleMeetingModal({
       date: "",
       time: "14:00",
       venue: "",
+      socialLinks: [],
     },
   });
 
@@ -81,6 +90,7 @@ export function ScheduleMeetingModal({
       reset();
       setSelectedDate(undefined);
       setSelectedTime({ hours: 14, minutes: 0 });
+      setSocialLinks([""]);
     } else {
       reset({
         meetingNo: nextMeetingNo,
@@ -88,16 +98,22 @@ export function ScheduleMeetingModal({
         date: "",
         time: "14:00",
         venue: "",
+        socialLinks: [],
       });
       setSelectedDate(undefined);
       setSelectedTime({ hours: 14, minutes: 0 });
+      setSocialLinks([""]);
     }
   }, [isOpen, nextMeetingNo, reset]);
 
   const onFormSubmit = async (data: ScheduleMeetingInput) => {
     try {
-      // Add seconds to time for API (HH:MM -> HH:MM:00)
-      const submitData = { ...data, time: `${data.time}:00` };
+      const filteredLinks = socialLinks.filter((l) => l.trim() !== "");
+      const submitData = {
+        ...data,
+        time: `${data.time}:00`,
+        socialLinks: filteredLinks.length > 0 ? filteredLinks : undefined,
+      };
       await onSubmit(submitData);
       reset();
       onClose();
@@ -362,6 +378,64 @@ export function ScheduleMeetingModal({
                   {errors.venue.message}
                 </p>
               )}
+            </div>
+
+            {/* Social Media Links */}
+            <div>
+              <div className="flex items-center justify-between mb-2">
+                <label className="block text-slate-300 text-sm font-medium">
+                  Social Media Links
+                  <span className="ml-2 text-slate-500 text-xs font-normal">
+                    (up to 3)
+                  </span>
+                </label>
+                {socialLinks.length < 3 && (
+                  <button
+                    type="button"
+                    disabled={isDisabled}
+                    onClick={() => setSocialLinks((prev) => [...prev, ""])}
+                    className="flex items-center gap-1 text-xs text-cyan-400 hover:text-cyan-300 disabled:opacity-50"
+                  >
+                    <Plus className="w-3.5 h-3.5" />
+                    Add link
+                  </button>
+                )}
+              </div>
+              <div className="space-y-2">
+                {socialLinks.map((link, index) => (
+                  <div key={index} className="flex items-center gap-2">
+                    <div className="relative flex-1">
+                      <Link className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-500" />
+                      <input
+                        type="url"
+                        value={link}
+                        onChange={(e) => {
+                          const updated = [...socialLinks];
+                          updated[index] = e.target.value;
+                          setSocialLinks(updated);
+                        }}
+                        disabled={isDisabled}
+                        placeholder="https://www.facebook.com/share/p/..."
+                        className="w-full pl-10 pr-4 py-3 bg-slate-800/50 border border-slate-700 rounded-xl text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-cyan-500 disabled:opacity-50 disabled:cursor-not-allowed text-sm"
+                      />
+                    </div>
+                    {socialLinks.length > 1 && (
+                      <button
+                        type="button"
+                        disabled={isDisabled}
+                        onClick={() =>
+                          setSocialLinks((prev) =>
+                            prev.filter((_, i) => i !== index)
+                          )
+                        }
+                        className="text-slate-500 hover:text-red-400 disabled:opacity-50"
+                      >
+                        <Trash2 className="w-4 h-4" />
+                      </button>
+                    )}
+                  </div>
+                ))}
+              </div>
             </div>
 
             {/* Actions */}

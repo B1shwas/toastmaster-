@@ -11,6 +11,7 @@ import {
     MeetingHeader,
     MeetingDetailsCard,
     MeetingNotesCard,
+    MeetingSocialLinksCard,
     MeetingAgendaManager,
 } from "@/components/meeting";
 import {
@@ -94,6 +95,10 @@ function MeetingContent({
                         clubId={clubId}
                         canManageNotes={canManageNotes}
                     />
+                </motion.div>
+
+                <motion.div variants={itemVariants}>
+                    <MeetingSocialLinksCard socialLinks={meeting.socialLinks} />
                 </motion.div>
 
                 {meeting?.status == "COMPLETED" ? (

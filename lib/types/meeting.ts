@@ -31,6 +31,7 @@ export interface Meeting {
   time: string; // HH:MM:SS
   venue: string;
   notes: string | null;
+  socialLinks: string[] | null;
   status: MeetingStatus;
   isDeleted: boolean;
   createdAt?: string;
