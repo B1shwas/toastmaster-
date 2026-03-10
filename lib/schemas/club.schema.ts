@@ -16,6 +16,12 @@ export const addMemberSchema = z.object({
     .email("Please enter a valid email address")
     .max(100, "Email must be less than 100 characters")
     .transform((val) => val.toLowerCase().trim()),
+  toastmasterId: z
+    .string()
+    .regex(/^[A-Z]{2}-\d+$/, "Invalid format (e.g. PN-67598269)")
+    .optional()
+    .or(z.literal(""))
+    .transform((val) => (val === "" ? undefined : val)),
 });
 
 export type AddMemberInput = z.infer<typeof addMemberSchema>;
