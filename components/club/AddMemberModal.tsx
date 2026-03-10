@@ -37,6 +37,7 @@ export function AddMemberModal({
     defaultValues: {
       memberName: "",
       memberEmail: "",
+      toastmasterId: "",
     },
   });
 
@@ -160,6 +161,31 @@ export function AddMemberModal({
               {errors.memberEmail && (
                 <p className="mt-1 text-sm text-red-400">
                   {errors.memberEmail.message}
+                </p>
+              )}
+            </div>
+
+            <div>
+              <label
+                htmlFor="toastmasterId"
+                className="block text-slate-300 text-sm font-medium mb-2"
+              >
+                Toastmasters Member ID{" "}
+                <span className="text-slate-500 font-normal">(optional)</span>
+              </label>
+              <input
+                id="toastmasterId"
+                type="text"
+                {...register("toastmasterId")}
+                placeholder="e.g. PN-67598269"
+                disabled={isDisabled}
+                className={`w-full px-4 py-3 bg-slate-800/50 border rounded-xl text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed font-mono ${
+                  errors.toastmasterId ? "border-red-500" : "border-slate-700"
+                }`}
+              />
+              {errors.toastmasterId && (
+                <p className="mt-1 text-sm text-red-400">
+                  {errors.toastmasterId.message}
                 </p>
               )}
             </div>

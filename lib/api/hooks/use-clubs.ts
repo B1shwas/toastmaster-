@@ -356,6 +356,26 @@ export function usePendingRequestDecision() {
 });
 }
 
+export function useUpdateToastmasterId(clubId: string) {
+	const queryClient = useQueryClient();
+
+	return useMutation({
+		mutationFn: async ({ memberId, toastmasterId }: { memberId: string; toastmasterId: string | null }) => {
+			const { data } = await api.patch<{ data: { message: string } }>(
+				`/club/${clubId}/member/${memberId}/toastmaster-id`,
+				{ toastmasterId }
+			);
+			return data.data;
+		},
+		onSuccess: () => {
+			queryClient.invalidateQueries({ queryKey: clubKeys.members(clubId) });
+		},
+		onError: (error) => {
+			console.error("Failed to update Toastmasters ID:", getErrorMessage(error));
+		},
+	});
+}
+
 export function useUserClubStatus() {
 	return useQuery({
 		queryKey: ['user-club-status'],

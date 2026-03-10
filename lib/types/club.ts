@@ -13,6 +13,7 @@ export interface ClubMember {
 	isRegisteredUser: boolean;
 	user_introduction?: string | null;
 	isPending?: boolean;
+	member_toastmaster_id?: string | null;
 }
 
 export interface Club {
@@ -92,6 +93,7 @@ export interface Member {
   dateJoined: string;
   status: MemberStatus;
   role: string;
+  toastmasterId?: string | null;
 }
 
 export interface PendingClubGroup {

@@ -84,6 +84,11 @@ export function MemberRoleReportModal({
                                 <p className="text-slate-400 text-sm italic">
                                     {member.member_role}
                                 </p>
+                                {member.member_toastmaster_id && (
+                                    <p className="text-slate-500 text-xs font-mono mt-0.5">
+                                        ID: {member.member_toastmaster_id}
+                                    </p>
+                                )}
                             </div>
                         </div>
 
