@@ -18,10 +18,11 @@ export const addMemberSchema = z.object({
     .transform((val) => val.toLowerCase().trim()),
   toastmasterId: z
     .string()
-    .regex(/^[A-Z]{2}-\d+$/, "Invalid format (e.g. PN-67598269)")
-    .optional()
-    .or(z.literal(""))
-    .transform((val) => (val === "" ? undefined : val)),
+    .refine(
+      (val) => !val || /^[A-Z]{2}-\d+$/.test(val),
+      "Invalid format (e.g. PN-67598269)"
+    )
+    .optional(),
 });
 
 export type AddMemberInput = z.infer<typeof addMemberSchema>;

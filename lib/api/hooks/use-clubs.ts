@@ -165,9 +165,13 @@ export function useAddMember(clubId: string) {
 
 	return useMutation({
 		mutationFn: async (input: AddMemberInput) => {
+			const payload = {
+				...input,
+				toastmasterId: input.toastmasterId || undefined,
+			};
 			const { data } = await api.post<{ data: ClubMember }>(
 				`/club/${clubId}/member/add`,
-				input
+				payload
 			);
 			return data.data;
 		},
