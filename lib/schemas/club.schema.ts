@@ -57,6 +57,14 @@ export const clubSettingsSchema = z.object({
     message: "Please select a valid meeting frequency",
   }),
   charterDate: z.string().optional(),
+  socialLinks: z
+    .array(
+      z
+        .string()
+        .regex(/^https?:\/\/.+/, "Must be a valid URL starting with http(s)")
+    )
+    .max(3, "Maximum 3 social media links allowed")
+    .optional(),
 });
 
 export type ClubSettingsInput = z.infer<typeof clubSettingsSchema>;

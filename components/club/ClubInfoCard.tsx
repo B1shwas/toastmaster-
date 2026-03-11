@@ -1,7 +1,7 @@
 "use client";
 
 import { motion } from "framer-motion";
-import { Settings, MapPin, Users, Calendar } from "lucide-react";
+import { Settings, MapPin, Users, Calendar, ExternalLink, Link } from "lucide-react";
 import type { Club } from "@/lib/types/club";
 import { ClubCodeBadge } from "./ClubCodeBadge";
 import { useClubCode, useRegenerateClubCode, useUserClubStatus } from "@/lib/api";
@@ -17,6 +17,21 @@ interface ClubInfoCardProps {
 	onPendingClick?: () => void;
 	compact?: boolean;
 	className?: string;
+}
+
+function getSocialPlatformLabel(url: string): string {
+	try {
+		const host = new URL(url).hostname.replace("www.", "");
+		if (host.includes("facebook")) return "Facebook";
+		if (host.includes("instagram")) return "Instagram";
+		if (host.includes("linkedin")) return "LinkedIn";
+		if (host.includes("twitter") || host.includes("x.com")) return "X / Twitter";
+		if (host.includes("youtube")) return "YouTube";
+		if (host.includes("tiktok")) return "TikTok";
+		return host;
+	} catch {
+		return url;
+	}
 }
 
 function formatCharterDate(dateStr: string | null | undefined): string {
@@ -122,6 +137,22 @@ export function ClubInfoCard({
 							<button onClick={onPendingClick} className="text-orange-400 font-medium hover:underline cursor-pointer">· {pendingMembers} Pending</button>
 						)}
 					</div>
+					{club.socialLinks && club.socialLinks.filter((l) => l.trim() !== "").length > 0 && (
+						<div className="pt-1 space-y-1">
+							{club.socialLinks.filter((l) => l.trim() !== "").map((url, i) => (
+								<a
+									key={i}
+									href={url}
+									target="_blank"
+									rel="noopener noreferrer"
+									className="flex items-center gap-2 text-cyan-400 hover:text-cyan-300 transition-colors"
+								>
+									<ExternalLink className="w-4 h-4 shrink-0" />
+									<span className="truncate">{getSocialPlatformLabel(url)}</span>
+								</a>
+							))}
+						</div>
+					)}
 				</div>
 			</div>
 		);
@@ -201,6 +232,34 @@ export function ClubInfoCard({
 					) : (
 						<span className="text-slate-400 text-sm">No code available</span>
 					)}
+				</div>
+			)}
+
+			{/* Social Media Links */}
+			{club.socialLinks && club.socialLinks.filter((l) => l.trim() !== "").length > 0 && (
+				<div className="mt-6 space-y-2">
+					<div className="flex items-center gap-2">
+						<ExternalLink className="w-4 h-4 text-slate-400" />
+						<span className="text-xs font-semibold uppercase tracking-wide text-slate-400">
+							Social Media
+						</span>
+					</div>
+					<ul className="space-y-1.5">
+						{club.socialLinks.filter((l) => l.trim() !== "").map((url, i) => (
+							<li key={i}>
+								<a
+									href={url}
+									target="_blank"
+									rel="noopener noreferrer"
+									className="flex items-center gap-2 text-sm text-cyan-400 hover:text-cyan-300 transition-colors break-all"
+								>
+									<Link className="h-3.5 w-3.5 shrink-0" />
+									{getSocialPlatformLabel(url)}
+									<ExternalLink className="h-3 w-3 shrink-0 opacity-60" />
+								</a>
+							</li>
+						))}
+					</ul>
 				</div>
 			)}
 		</div>
