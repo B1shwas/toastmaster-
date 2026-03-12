@@ -44,7 +44,7 @@ export interface Agenda {
   title: string;
   description: string | null;
   date: string;
-  roleName: string;
+  roleName: string | null;
   duration: number;
   sequence: number;
   meetingId: string;
@@ -59,7 +59,7 @@ export interface CreateAgendaPayload {
   title: string;
   // description?: string;
   // date: string;
-  roleName: string;
+  roleName?: string;
   duration: number;
   sequence: number;
   meetingId: string;

@@ -77,14 +77,14 @@ export function EditAgendaModal({
     if (agenda) {
       reset({
         title: agenda.title,
-        roleName: agenda.roleName,
+        roleName: agenda.roleName ?? undefined,
         duration: agenda.duration,
         sequence: agenda.sequence,
         assignmentType: agenda.memberId
           ? "member"
           : agenda.memberName
           ? "guest"
-          : "member",
+          : "unassigned",
         memberId: agenda.memberId || "",
         memberName: agenda.memberName || "",
         notes: agenda.notes || "",
@@ -105,7 +105,7 @@ export function EditAgendaModal({
           sequence: data.sequence,
           meetingId,
           memberId:
-            data.assignmentType === "member" ? data.memberId : undefined,
+            data.assignmentType === "member" ? data.memberId || undefined : undefined,
           memberName:
             data.assignmentType === "guest" ? data.memberName : undefined,
           notes: data.notes,
@@ -158,7 +158,6 @@ export function EditAgendaModal({
               <FormField
                 label="Role Name"
                 error={errors.roleName?.message}
-                required
               >
                 <SelectInput
                   {...register("roleName")}
@@ -204,7 +203,7 @@ export function EditAgendaModal({
               <div className="p-5 bg-linear-to-br from-slate-800/40 to-slate-800/20 border border-slate-700/60 rounded-xl space-y-4">
                 <h3 className="text-white font-semibold text-sm mb-4 flex items-center gap-2">
                   <div className="w-1 h-4 bg-linear-to-b from-emerald-400 to-cyan-400 rounded-full"></div>
-                  Assignment <span className="text-red-400">*</span>
+                  Assignment
                 </h3>
 
                 <div className="space-y-3">

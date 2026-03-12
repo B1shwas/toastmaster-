@@ -12,7 +12,7 @@ import {
 import { useCreateAgenda } from "@/lib/api/hooks/use-agenda";
 import type { ClubMember } from "@/lib/types/club";
 import { SystemRole, ROLE_LABELS } from "@/lib/types/agenda";
-import { ModalFooter, ModalHeader, ModalWrapper } from "../ui/modal-components";
+import { ModalHeader, ModalWrapper } from "../ui/modal-components";
 import {
   FormField,
   TextInput,
@@ -63,6 +63,8 @@ export function AddSingleAgendaModal({
     handleSubmit,
     watch,
     reset,
+    trigger,
+    getValues,
     formState: { errors },
   } = useForm<CreateSingleAgendaForm>({
     resolver: zodResolver(createSingleAgendaSchema),
@@ -73,7 +75,7 @@ export function AddSingleAgendaModal({
       roleName: "",
       duration: 0,
       sequence: nextSequence,
-      assignmentType: "member",
+      assignmentType: "unassigned",
       memberId: "",
       memberName: "",
       notes: "",
@@ -86,7 +88,7 @@ export function AddSingleAgendaModal({
       roleName: "",
       duration: 0,
       sequence: nextSequence,
-      assignmentType: "member",
+      assignmentType: "unassigned",
       memberId: "",
       memberName: "",
       notes: "",
@@ -101,6 +103,41 @@ export function AddSingleAgendaModal({
       description: "Please fill in all required fields before submitting",
       variant: "destructive",
     });
+  };
+
+  const handleSaveUnassigned = async () => {
+    const isValid = await trigger(["title", "duration", "sequence"]);
+    if (!isValid) {
+      onValidationError();
+      return;
+    }
+    const data = getValues();
+    try {
+      await createMutation.mutateAsync({
+        title: data.title,
+        roleName: data.roleName,
+        duration: data.duration,
+        sequence: data.sequence,
+        meetingId,
+        notes: data.notes,
+        clubId,
+      });
+      toast({
+        title: "Success",
+        description: "Agenda item created successfully",
+        variant: "success",
+      });
+      reset();
+      onSuccess();
+      onClose();
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Failed to create agenda item",
+        variant: "destructive",
+      });
+      console.error(error);
+    }
   };
 
   const onSubmit = async (data: CreateSingleAgendaForm) => {
@@ -164,7 +201,6 @@ export function AddSingleAgendaModal({
               <FormField
                 label="Role Name"
                 error={errors.roleName?.message}
-                required
               >
                 <SelectInput
                   {...register("roleName")}
@@ -247,6 +283,7 @@ export function AddSingleAgendaModal({
                       />
                     </div>
                   )}
+
                 </div>
               </div>
 
@@ -261,11 +298,38 @@ export function AddSingleAgendaModal({
               </FormField>
             </div>
 
-            <ModalFooter
-              onCancel={onClose}
-              onSubmit={handleSubmit(onSubmit, onValidationError)}
-              isSubmitting={createMutation.isPending}
-            />
+            <div className="sticky bottom-0 bg-slate-900/95 backdrop-blur-sm border-t border-cyan-500/20 px-6 py-4">
+              <div className="flex justify-between items-center">
+                <button
+                  type="button"
+                  onClick={onClose}
+                  className="px-4 py-2 text-slate-400 hover:text-white transition-colors"
+                >
+                  Cancel
+                </button>
+                <div className="flex items-center gap-3">
+                  <button
+                    type="button"
+                    onClick={handleSaveUnassigned}
+                    disabled={createMutation.isPending}
+                    className="px-4 py-2 text-slate-300 hover:text-white border border-slate-600 hover:border-slate-500 rounded-lg text-sm font-medium transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+                  >
+                    Save without assignment
+                  </button>
+                  <button
+                    type="submit"
+                    onClick={handleSubmit(onSubmit, onValidationError)}
+                    disabled={createMutation.isPending}
+                    className="px-6 py-2 bg-linear-to-r from-cyan-500 to-blue-500 hover:from-cyan-400 hover:to-blue-400 text-white rounded-lg font-medium transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
+                  >
+                    {createMutation.isPending && (
+                      <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                    )}
+                    Submit
+                  </button>
+                </div>
+              </div>
+            </div>
           </form>
         </ModalWrapper>
       )}
