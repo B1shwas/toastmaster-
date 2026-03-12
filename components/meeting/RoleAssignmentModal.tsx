@@ -16,7 +16,7 @@ import {
   type CreateAgendaPayload,
 } from "@/lib/types/agenda";
 import type { ClubMember } from "@/lib/types/club";
-import { ModalFooter, ModalHeader, ModalWrapper } from "../ui/modal-components";
+import { ModalHeader, ModalWrapper } from "../ui/modal-components";
 
 interface RoleAssignmentModalProps {
   isOpen: boolean;
@@ -53,7 +53,7 @@ export function RoleAssignmentModal({
       templateId: template.id,
       roleAssignments: template.items.map((item) => ({
         templateItemId: item.id,
-        assignmentType: "member",
+        assignmentType: "unassigned",
         memberId: undefined,
         memberName: undefined,
       })),
@@ -64,6 +64,34 @@ export function RoleAssignmentModal({
     control,
     name: "roleAssignments",
   });
+
+  const handleSaveAllUnassigned = async () => {
+    try {
+      const agendas: CreateAgendaPayload[] = template.items.map((item) => ({
+        title: item.title,
+        roleName: item.customRole || ROLE_LABELS[item.systemRole],
+        duration: item.duration,
+        sequence: item.sequence,
+        meetingId,
+        clubId,
+      }));
+      await createMutation.mutateAsync({ clubId, meetingId, agendas });
+      toast({
+        title: "Success",
+        description: `Created ${agendas.length} agenda items successfully`,
+        variant: "success",
+      });
+      onSuccess();
+      onClose();
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Failed to create agendas",
+        variant: "destructive",
+      });
+      console.error(error);
+    }
+  };
 
   const onSubmit = async (data: CreateFromTemplateForm) => {
     try {
@@ -150,12 +178,38 @@ export function RoleAssignmentModal({
             </div>
 
             {/* Footer */}
-            <ModalFooter
-              onCancel={onClose}
-              onSubmit={handleSubmit(onSubmit)}
-              isSubmitting={createMutation.isPending}
-              submitLabel="Create Agendas"
-            />
+            <div className="sticky bottom-0 bg-slate-900/95 backdrop-blur-sm border-t border-cyan-500/20 px-6 py-4">
+              <div className="flex justify-between items-center">
+                <button
+                  type="button"
+                  onClick={onClose}
+                  className="px-4 py-2 text-slate-400 hover:text-white transition-colors"
+                >
+                  Cancel
+                </button>
+                <div className="flex items-center gap-3">
+                  <button
+                    type="button"
+                    onClick={handleSaveAllUnassigned}
+                    disabled={createMutation.isPending}
+                    className="px-4 py-2 text-slate-300 hover:text-white border border-slate-600 hover:border-slate-500 rounded-lg text-sm font-medium transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+                  >
+                    unassigned
+                  </button>
+                  <button
+                    type="submit"
+                    onClick={handleSubmit(onSubmit)}
+                    disabled={createMutation.isPending}
+                    className="px-6 py-2 bg-linear-to-r from-cyan-500 to-blue-500 hover:from-cyan-400 hover:to-blue-400 text-white rounded-lg font-medium transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
+                  >
+                    {createMutation.isPending && (
+                      <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                    )}
+                    Create Agendas
+                  </button>
+                </div>
+              </div>
+            </div>
           </form>
         </ModalWrapper>
       )}
@@ -263,6 +317,7 @@ function RoleAssignmentRow({
               />
             </div>
           )}
+
         </div>
       </div>
     </motion.div>
