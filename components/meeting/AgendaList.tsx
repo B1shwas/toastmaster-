@@ -2,9 +2,9 @@
 
 import { useState, useEffect } from "react";
 import { Reorder, useDragControls, motion } from "framer-motion";
-import { GripVertical, Clock, User, Trash2, Edit2, Save } from "lucide-react";
+import { GripVertical, Clock, User, Trash2, Edit2, Save, Copy } from "lucide-react";
 import { toast } from "@/hooks/use-toast";
-import { useDeleteAgenda, useReorderAgendas } from "@/lib/api/hooks/use-agenda";
+import { useDeleteAgenda, useReorderAgendas, useCreateAgenda } from "@/lib/api/hooks/use-agenda";
 import type { Agenda } from "@/lib/types/agenda";
 import type { Meeting } from "@/lib/types/meeting";
 import type { ClubMember } from "@/lib/types/club";
@@ -32,6 +32,7 @@ type AgendaItemProps = {
   isEditMode: boolean;
   onDelete?: (id: string) => void;
   onEdit?: (agenda: AgendaWithTiming) => void;
+  onCopy?: (agenda: AgendaWithTiming) => void;
   isDeletingId?: string | null;
   onMemberClick?: (memberId: string, memberName: string) => void;
   members?: ClubMember[];
@@ -43,6 +44,7 @@ function AgendaItem({
   isEditMode,
   onDelete,
   onEdit,
+  onCopy,
   isDeletingId,
   onMemberClick,
   members,
@@ -143,6 +145,13 @@ function AgendaItem({
             <Edit2 size={18} />
           </button>
           <button
+            onClick={() => onCopy?.(item)}
+            onPointerDown={(e) => e.stopPropagation()}
+            className="opacity-0 group-hover:opacity-100 transition-opacity p-2 hover:bg-blue-500/20 rounded-lg text-slate-400 hover:text-blue-400"
+          >
+            <Copy size={18} />
+          </button>
+          <button
             onClick={() => onDelete?.(item.id)}
             onPointerDown={(e) => e.stopPropagation()}
             disabled={isDeleting}
@@ -187,6 +196,7 @@ export default function AgendaList({
 
   const deleteMutation = useDeleteAgenda(meetingId);
   const reorderMutation = useReorderAgendas(meetingId);
+  const createAgendaMutation = useCreateAgenda();
 
   useEffect(() => {
     const currentAgendas = Array.isArray(agendas) ? agendas : [];
@@ -217,6 +227,34 @@ export default function AgendaList({
       toast({
         title: "Error",
         description: "Failed to save agenda order",
+        variant: "destructive",
+      });
+    }
+  };
+
+  const handleCopy = async (item: AgendaWithTiming) => {
+    const maxSequence = items.length > 0 ? Math.max(...items.map((i) => i.sequence)) : 0;
+    try {
+      await createAgendaMutation.mutateAsync({
+        title: item.title,
+        roleName: item.roleName ?? undefined,
+        duration: item.duration,
+        sequence: maxSequence + 1,
+        meetingId,
+        memberId: item.memberId ?? undefined,
+        memberName: item.memberName ?? undefined,
+        notes: item.notes ?? undefined,
+        clubId,
+      });
+      toast({
+        title: "Success",
+        description: "Agenda item duplicated",
+        variant: "success",
+      });
+    } catch {
+      toast({
+        title: "Error",
+        description: "Failed to duplicate agenda item",
         variant: "destructive",
       });
     }
@@ -305,6 +343,7 @@ export default function AgendaList({
             isEditMode={true}
             onDelete={handleDelete}
             onEdit={onEditAgenda}
+            onCopy={handleCopy}
             isDeletingId={isDeletingId}
           />
         ))}

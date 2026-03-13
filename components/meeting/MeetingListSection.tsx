@@ -1,14 +1,12 @@
 "use client";
 
-import { memo, useState } from "react";
+import { memo } from "react";
 import Link from "next/link";
-import { Calendar, ArrowRight, PlusCircle, BookDashedIcon } from "lucide-react";
+import { Calendar, ArrowRight, PlusCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { MeetingCard } from "./MeetingCard";
 import type { Meeting } from "@/lib/types/meeting";
-import { useDuplicateAgenda, useProfile } from "@/lib/api";
-import { Dialog, DialogTrigger } from "../ui/dialog";
-import { DuplicateAgenda } from "./DuplicateAgenda";
+import { useProfile } from "@/lib/api";
 
 interface MeetingListSectionProps {
   meetings: Meeting[];
@@ -50,11 +48,8 @@ function MeetingListSectionComponent({
   onScheduleMeeting,
 }: MeetingListSectionProps) {
   const isMeetingsArray = Array.isArray(meetings);
-  const { data: duplicateAgenda } = useDuplicateAgenda();
   const { data: userData } = useProfile();
-  // console.log("userData :: ",userData)
 
-  const [isDialogOpen, setIsDialogOpen] = useState(false);
   const memberOf = new Set<string>([
     ...(userData?.member_of?.map((u: { id: string }) => u.id) ?? []),
     ...(userData?.owned_clubs?.map((u: { id: string }) => u.id) ?? []),
@@ -110,23 +105,6 @@ function MeetingListSectionComponent({
               New Meeting
             </Button>
           )}
-          { isMemberOf && duplicateAgenda ? (
-            <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-              <DialogTrigger asChild>
-                <Button
-                  size="sm"
-                  className="hidden gap-1.5 sm:flex bg-linear-to-br from-blue-500 to-cyan-400"
-                >
-                  <BookDashedIcon className="h-4 w-4 " />
-                  Schedule Using Template
-                </Button>
-              </DialogTrigger>
-              <DuplicateAgenda
-                duplicateAgenda={duplicateAgenda}
-                onClose={() => setIsDialogOpen(false)}
-              />
-            </Dialog>
-          ) : null}
           {isMemberOf && (
             <Link href={`/club/${clubId}/meetings`}>
               <Button
@@ -163,13 +141,7 @@ function MeetingListSectionComponent({
             <PlusCircle className="h-4 w-4 " />
             Schedule New Meeting
           </Button>
-          {isMemberOf && duplicateAgenda ? (
-            <Button className="w-full gap-2 bg-linear-to-br from-blue-500 to-cyan-400">
-              <BookDashedIcon className="h-4 w-4 " />
-              Schedule Using Template
-            </Button>
-          ) : null}
-        </div>
+            </div>
       )}
     </section>
   );
