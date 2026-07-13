@@ -4,9 +4,10 @@ import { useEffect, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useForm, Controller } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { X, Calendar as CalendarIcon, Clock, Loader2, Link, Plus, Trash2 } from "lucide-react";
+import { X, Calendar as CalendarIcon, Clock, Loader2, Link, Plus, Trash2, Video, MapPin, MonitorSmartphone } from "lucide-react";
 import { z } from "zod";
 import { format } from "date-fns";
+import { MeetingType } from "@/lib/types/meeting";
 import { Calendar } from "@/components/ui/calendar";
 import {
   Popover,
@@ -40,6 +41,9 @@ const scheduleMeetingSchema = z.object({
     )
     .max(3, "Maximum 3 social media links allowed")
     .optional(),
+  meetingType: z.nativeEnum(MeetingType, {
+    message: "Meeting type is required",
+  }),
 });
 
 export type ScheduleMeetingInput = z.infer<typeof scheduleMeetingSchema>;
@@ -81,6 +85,7 @@ export function ScheduleMeetingModal({
       time: "14:00",
       venue: "",
       socialLinks: [],
+      meetingType: MeetingType.PHYSICAL,
     },
   });
 
@@ -99,6 +104,7 @@ export function ScheduleMeetingModal({
         time: "14:00",
         venue: "",
         socialLinks: [],
+        meetingType: MeetingType.PHYSICAL,
       });
       setSelectedDate(undefined);
       setSelectedTime({ hours: 14, minutes: 0 });
@@ -376,6 +382,69 @@ export function ScheduleMeetingModal({
               {errors.venue && (
                 <p className="mt-1 text-sm text-red-400">
                   {errors.venue.message}
+                </p>
+              )}
+            </div>
+
+            {/* Meeting Type */}
+            <div>
+              <label className="block text-slate-300 text-sm font-medium mb-2">
+                Meeting Type *
+              </label>
+              <Controller
+                name="meetingType"
+                control={control}
+                render={({ field }) => {
+                  const options = [
+                    {
+                      value: MeetingType.ONLINE,
+                      label: "Online",
+                      icon: Video,
+                    },
+                    {
+                      value: MeetingType.PHYSICAL,
+                      label: "Physical",
+                      icon: MapPin,
+                    },
+                    {
+                      value: MeetingType.HYBRID,
+                      label: "Hybrid",
+                      icon: MonitorSmartphone,
+                    },
+                  ];
+                  return (
+                    <div className="grid grid-cols-3 gap-2">
+                      {options.map((opt) => {
+                        const selected = field.value === opt.value;
+                        const Icon = opt.icon;
+                        return (
+                          <button
+                            key={opt.value}
+                            type="button"
+                            disabled={isDisabled}
+                            onClick={() => field.onChange(opt.value)}
+                            className={`flex flex-col items-center justify-center gap-1.5 rounded-xl border px-3 py-3 text-sm font-medium transition-all disabled:opacity-50 disabled:cursor-not-allowed ${
+                              selected
+                                ? "border-cyan-400/60 bg-linear-to-br from-cyan-500/20 to-blue-500/20 text-white ring-1 ring-cyan-400/50"
+                                : "border-slate-700 bg-slate-800/50 text-slate-400 hover:border-slate-600 hover:text-slate-200"
+                            }`}
+                          >
+                            <Icon
+                              className={`h-5 w-5 ${
+                                selected ? "text-cyan-300" : "text-slate-500"
+                              }`}
+                            />
+                            {opt.label}
+                          </button>
+                        );
+                      })}
+                    </div>
+                  );
+                }}
+              />
+              {errors.meetingType && (
+                <p className="mt-1 text-sm text-red-400">
+                  {errors.meetingType.message}
                 </p>
               )}
             </div>

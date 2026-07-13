@@ -6,6 +6,12 @@ export enum MeetingStatus {
   CANCELLED = "CANCELLED",
 }
 
+export enum MeetingType {
+  ONLINE = "ONLINE",
+  PHYSICAL = "PHYSICAL",
+  HYBRID = "HYBRID",
+}
+
 export interface Agenda {
   id: string;
   title: string;
@@ -33,6 +39,7 @@ export interface Meeting {
   notes: string | null;
   socialLinks: string[] | null;
   status: MeetingStatus;
+  meetingType: MeetingType;
   isDeleted: boolean;
   createdAt?: string;
   updatedAt?: string;

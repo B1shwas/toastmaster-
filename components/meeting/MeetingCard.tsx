@@ -7,6 +7,7 @@ import type { Meeting } from "@/lib/types/meeting";
 import {
 	getMeetingStatusConfig,
 	getEffectiveMeetingStatus,
+	getMeetingTypeConfig,
 	formatMeetingDate,
 	formatMeetingTime,
 } from "@/lib/utils/meeting";
@@ -18,6 +19,7 @@ interface MeetingCardProps {
 
 function MeetingCardComponent({ meeting, clubId }: MeetingCardProps) {
 	const statusConfig = getMeetingStatusConfig(getEffectiveMeetingStatus(meeting));
+	const typeConfig = getMeetingTypeConfig(meeting.meetingType);
 	const agendaCount = meeting.agendas?.length ?? 0;
 	const filledRoles = meeting.agendas?.filter((a) => a.memberId).length ?? 0;
 
@@ -29,7 +31,7 @@ function MeetingCardComponent({ meeting, clubId }: MeetingCardProps) {
 			{/* Header */}
 			<div className="mb-3 flex items-start justify-between gap-3">
 				<div className="min-w-0 flex-1">
-					<div className="mb-1 flex items-center gap-2">
+					<div className="mb-1 flex flex-wrap items-center gap-2">
 						<span className="text-sm font-medium text-slate-400">
 							#{meeting.meetingNo}
 						</span>
@@ -42,6 +44,17 @@ function MeetingCardComponent({ meeting, clubId }: MeetingCardProps) {
 						>
 							{statusConfig.label}
 						</span>
+						{meeting.meetingType && (
+							<span
+								className="rounded-full px-2 py-0.5 text-xs font-medium"
+								style={{
+									color: typeConfig.color,
+									backgroundColor: typeConfig.bgColor,
+								}}
+							>
+								{typeConfig.label}
+							</span>
+						)}
 					</div>
 					<h3 className="truncate text-base font-semibold text-white group-hover:text-blue-400">
 						{meeting.theme || "Untitled Meeting"}

@@ -1,5 +1,5 @@
 import type { Meeting } from "@/lib/types/meeting";
-import { formatMeetingTime } from "@/lib/utils/meeting";
+import { formatMeetingTime, getMeetingTypeConfig } from "@/lib/utils/meeting";
 import { ScrollableListFrame } from "@/components/ui/scrollable-list-frame";
 import { Calendar, MapPin, Clock } from "lucide-react";
 import { cn } from "@/lib/utils/cn";
@@ -92,7 +92,19 @@ export function UpcomingMeetingsSection({ meetings }: UpcomingMeetingsSectionPro
 												</span>
 											</div>
 										</div>
-										<div className="flex-shrink-0">
+										<div className="flex shrink-0 items-center gap-1.5">
+											{meeting.meetingType && (
+												<span
+													className="inline-flex items-center px-2 py-1 rounded-full text-[10px] font-medium border"
+													style={{
+														color: getMeetingTypeConfig(meeting.meetingType).color,
+														backgroundColor: getMeetingTypeConfig(meeting.meetingType).bgColor,
+														borderColor: getMeetingTypeConfig(meeting.meetingType).bgColor,
+													}}
+												>
+													{getMeetingTypeConfig(meeting.meetingType).label}
+												</span>
+											)}
 											<span className={cn(
 												"inline-flex items-center px-2 py-1 rounded-full text-[10px] font-medium border",
 												meeting.status === "SCHEDULED" ? "bg-emerald-500/10 text-emerald-400 border-emerald-500/20" :

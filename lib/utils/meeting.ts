@@ -1,5 +1,30 @@
-import { MeetingStatus } from "../types/meeting";
+import { MeetingStatus, MeetingType } from "../types/meeting";
 import type { Meeting } from "../types/meeting";
+
+const MEETING_TYPE_CONFIG: Record<
+  MeetingType,
+  { label: string; color: string; bgColor: string }
+> = {
+  ONLINE: {
+    label: "Online",
+    color: "#a78bfa",
+    bgColor: "rgba(167, 139, 250, 0.25)",
+  },
+  PHYSICAL: {
+    label: "Physical",
+    color: "#fbbf24",
+    bgColor: "rgba(251, 191, 36, 0.25)",
+  },
+  HYBRID: {
+    label: "Hybrid",
+    color: "#34d399",
+    bgColor: "rgba(52, 211, 153, 0.25)",
+  },
+};
+
+export function getMeetingTypeConfig(type: MeetingType) {
+  return MEETING_TYPE_CONFIG[type] || MEETING_TYPE_CONFIG.PHYSICAL;
+}
 
 const STATUS_CONFIG: Record<
   MeetingStatus,

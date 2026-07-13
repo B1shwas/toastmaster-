@@ -58,6 +58,9 @@ const meetingSessionSchema = z.object({
   venue: z.string().min(1, "venue is required"),
   // isDeleted: z.boolean(),
   status: z.string(),
+  meetingType: z.enum(["ONLINE", "PHYSICAL", "HYBRID"], {
+    message: "Meeting type is required",
+  }),
   time: z.string().regex(/^\d{2}:\d{2}:\d{2}$/, "Invalid time format"),
   notes: z.string().nullable(),
   agendas: z
@@ -124,6 +127,7 @@ const TemplatePreview = ({
       meetingNo: "",
       // isDeleted: false,
       status: "SCHEDULED",
+      meetingType: "PHYSICAL",
       agendas: session.agendas
         .sort((a, b) => a.sequence - b.sequence)
         .map((agenda) => ({
@@ -373,6 +377,26 @@ const TemplatePreview = ({
                   {errors.venue && (
                     <p className="text-xs text-red-600 mt-1">
                       {errors.venue.message}
+                    </p>
+                  )}
+                </div>
+
+                {/* Meeting Type Field */}
+                <div>
+                  <label className="text-sm font-medium text-gray-700 mb-1 block">
+                    Meeting Type *
+                  </label>
+                  <select
+                    {...register("meetingType")}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-gray-900 focus:border-transparent bg-white text-black"
+                  >
+                    <option value="ONLINE">Online</option>
+                    <option value="PHYSICAL">Physical</option>
+                    <option value="HYBRID">Hybrid</option>
+                  </select>
+                  {errors.meetingType && (
+                    <p className="text-xs text-red-600 mt-1">
+                      {errors.meetingType.message}
                     </p>
                   )}
                 </div>

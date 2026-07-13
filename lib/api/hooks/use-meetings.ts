@@ -9,6 +9,7 @@ import type {
   Meeting,
   MeetingResponse,
   MeetingsResponse,
+  MeetingType,
   Template,
 } from "@/lib/types/meeting";
 import { MeetingSessionForm } from "@/components/meeting/DuplicateAgenda";
@@ -71,6 +72,7 @@ export interface CreateMeetingInput {
   time: string; // HH:MM:SS
   venue: string;
   clubId: string;
+  meetingType: MeetingType;
 }
 
 export function useCreateMeeting() {
