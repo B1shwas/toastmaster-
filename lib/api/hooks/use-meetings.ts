@@ -45,11 +45,13 @@ export function useMeetings(
     enabled: !!clubId,
   });
 }
-export function useUpcomingMeetings() {
+export function useUpcomingMeetings(startDate?: string) {
   return useQuery({
-    queryKey: meetingKeys.lists(),
+    queryKey: [...meetingKeys.lists(), { startDate }],
     queryFn: async () => {
-      const { data } = await api.get<{ data: Meeting[] }>(`/meetings/upcoming`);
+      const { data } = await api.get<{ data: Meeting[] }>(`/meetings/upcoming`, {
+        params: startDate ? { startDate } : undefined,
+      });
       return data.data;
     },
   });

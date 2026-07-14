@@ -17,6 +17,7 @@ import { getErrorMessage } from "@/lib/api";
 import useAuthStore from "@/lib/stores/useAuthStore";
 import { ListAllAgendas } from "@/components/agendaReport/ListAllAgendas";
 import { PendingRequest } from "@/components/dashboard/PendingRequest";
+import { isMeetingUpcoming } from "@/lib/utils/meeting";
 
 export default function DashboardPage() {
 	const [isMounted, setIsMounted] = useState(false);
@@ -25,7 +26,16 @@ export default function DashboardPage() {
 
 	const { user, isAuthenticated, isLoading: isAuthLoading } = useAuth();
 	const { data: clubs = [], isLoading: isUserClubsLoading } = useUserClub();
-	const { data: meetings = [], isLoading: isMeetingsLoading } = useUpcomingMeetings();
+	const { data: allMeetings = [], isLoading: isMeetingsLoading } = useUpcomingMeetings("1970-01-01");
+
+	const meetings = [...allMeetings].sort((a, b) => {
+		const aUpcoming = isMeetingUpcoming(a.date);
+		const bUpcoming = isMeetingUpcoming(b.date);
+		if (aUpcoming !== bUpcoming) return aUpcoming ? -1 : 1;
+		const aTime = new Date(a.date).getTime();
+		const bTime = new Date(b.date).getTime();
+		return aUpcoming ? aTime - bTime : bTime - aTime;
+	});
 	const { toast } = useToast();
 	const createClubMutation = useCreateClub();
   const joinClubMutation = useJoinClub();

@@ -23,6 +23,7 @@ import {
 } from "@/lib/api";
 import { useCreateMeeting, useMeetings } from "@/lib/api/hooks/use-meetings";
 import type { CreateMeetingInput } from "@/lib/api/hooks/use-meetings";
+import { filterUpcomingMeetings } from "@/lib/utils/meeting";
 import { useAuth } from "@/lib/hooks/useAuth";
 import type { AddMemberInput, ClubSettingsInput, JoinClubInput } from "@/lib/schemas/club.schema";
 import { useRouter } from "next/navigation";
@@ -145,6 +146,11 @@ export default function ClubPage({ params }: ClubPageProps) {
     return Math.max(...meetings.map((m) => m.meetingNo)) + 1;
   }, [meetings]);
 
+  const upcomingMeetings = useMemo(
+    () => filterUpcomingMeetings(meetings ?? []),
+    [meetings],
+  );
+
   // const upcomingMeetings = useMemo(
   //   () => sortMeetingsByDate(filterUpcomingMeetings(meetings ?? [])),
   //   [meetings]
@@ -252,7 +258,7 @@ export default function ClubPage({ params }: ClubPageProps) {
         {/* Upcoming Meetings */}
         <motion.div variants={ANIMATION_CONFIG.item}>
           <MeetingListSection
-            meetings={meetings ?? []}
+            meetings={upcomingMeetings}
             clubId={club.id}
             maxDisplay={3}
             onScheduleMeeting={
