@@ -50,7 +50,7 @@ function AgendaItem({
   members,
 }: AgendaItemProps) {
   const displayName = item.memberId
-    ? (members?.find((m) => m.member_id === item.memberId)?.member_member_name ?? item.memberName)
+    ? (members?.find((m) => m.member_id === item.memberId)?.memberName ?? item.memberName)
     : item.memberName;
   const controls = useDragControls();
   const isDeleting = isDeletingId === item.id;
@@ -189,7 +189,7 @@ export default function AgendaList({
   const handleMemberClick = (memberId: string, memberName: string) => {
     const member = members.find((m) => m.member_id === memberId);
     setPopupMember({
-      name: member?.member_member_name ?? memberName,
+      name: member?.memberName ?? memberName,
       introduction: member?.user_introduction ?? null,
     });
   };

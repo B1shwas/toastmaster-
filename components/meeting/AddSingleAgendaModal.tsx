@@ -54,7 +54,7 @@ export function AddSingleAgendaModal({
     { value: "", label: "Select member" },
     ...members.map((member) => ({
       value: member.member_id,
-      label: member.member_member_name,
+      label: member.memberName,
     })),
   ];
 

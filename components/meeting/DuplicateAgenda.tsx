@@ -104,7 +104,7 @@ const TemplatePreview = ({
     { value: "", label: "Select member" },
     ...(membersData || []).map((member) => ({
       value: member.member_id,
-      label: member.member_member_name,
+      label: member.memberName,
     })),
   ];
 

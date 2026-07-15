@@ -115,20 +115,11 @@ export default function ClubPage({ params }: ClubPageProps) {
 
   const { data: pendingMembersList } = useClubPendingMembers(clubId, canManageMembers);
 
-  const existingEmails = useMemo(
-    () =>
-      Array.isArray(clubMembers)
-        ? clubMembers.map((m) => m.member_member_email)
-        : [],
-    [clubMembers],
-  );
-
   const pendingMembersForClub = useMemo(() => {
     if (!pendingMembersList || !canManageMembers) return [];
     return pendingMembersList.map((m: any) => ({
       member_id: m.id,
-      member_member_name: m.memberName,
-      member_member_email: m.memberEmail,
+      memberName: m.memberName,
       member_date_joined: m.dateJoined,
       member_role: "Member" as const,
       isRegisteredUser: false,
@@ -289,7 +280,6 @@ export default function ClubPage({ params }: ClubPageProps) {
           onClose={() => setIsAddMemberOpen(false)}
           onSubmit={handleAddMember}
           isLoading={addMemberMutation.isPending}
-          existingEmails={existingEmails}
         />
       )}
 

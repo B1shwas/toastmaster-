@@ -34,7 +34,7 @@ export function MemberRoleReportModal({
     const memberRoles = useMemo(() => {
         if (!roleCountsResponse?.data || !member) return [];
         return roleCountsResponse.data.filter(
-            (rc) => rc.memberName === member.member_member_name && rc.role
+            (rc) => rc.memberName === member.memberName && rc.role
         );
     }, [roleCountsResponse, member]);
 
@@ -79,7 +79,7 @@ export function MemberRoleReportModal({
                             </div>
                             <div>
                                 <h3 className="text-white font-semibold text-lg">
-                                    {member.member_member_name}
+                                    {member.memberName}
                                 </h3>
                                 <p className="text-slate-400 text-sm italic">
                                     {member.member_role}

@@ -8,7 +8,7 @@ import {
   getInitials,
   isLinkedMember,
 } from "@/lib/utils/club";
-import { UserCheck, Mail, Calendar, MoreVertical, Trash2 } from "lucide-react";
+import { UserCheck, Calendar, MoreVertical, Trash2 } from "lucide-react";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -22,10 +22,8 @@ function MemberCardComponent({
   onEdit,
   onClick,
   isOwner = false,
-  canViewEmail = false,
 }: MemberCardProps & { onClick?: (member: any) => void }) {
   const isLinked = member.isRegisteredUser;
-  console.log("memememe", member.member_date_joined);
 
   return (
     <motion.div
@@ -44,14 +42,14 @@ function MemberCardComponent({
             : "bg-slate-600"
             }`}
         >
-          {getInitials(member.member_member_name)}
+          {getInitials(member.memberName)}
         </div>
 
         {/* Info */}
         <div className="flex-1 min-w-0">
           <div className="flex items-center gap-2">
             <h4 className="text-white font-semibold truncate">
-              {member.member_member_name}
+              {member.memberName}
             </h4>
             {isLinked && !member.isPending && (
               <UserCheck className="w-4 h-4 text-emerald-400 shrink-0" />
@@ -66,12 +64,6 @@ function MemberCardComponent({
               </span>
             )}
           </div>
-          {canViewEmail && (
-            <div className="flex items-center gap-1 text-slate-400 text-sm">
-              <Mail className="w-3 h-3 shrink-0" />
-              <span className="truncate">{member.member_member_email}</span>
-            </div>
-          )}
         </div>
 
         {/* Joined Date */}

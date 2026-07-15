@@ -70,7 +70,7 @@ export function useClubMembers(clubId: string) {
 			const { data } = await api.get<{ data: ClubMember[] }>(
 				`/club/${clubId}/members`
 			);
-			return data.data;
+			return data.data ?? [];
 		},
 		enabled: !!clubId,
 	});

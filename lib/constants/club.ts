@@ -22,5 +22,4 @@ export {
 	filterMembers,
 	copyToClipboard,
 	isLinkedMember,
-	isDuplicateMember,
 } from "../utils/club";

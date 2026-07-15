@@ -43,7 +43,7 @@ export function AssignmentSelector({
           <option value="">Select member</option>
           {members.map((member) => (
             <option key={member.member_id} value={member.member_id}>
-              {member.member_member_name}
+              {member.memberName}
             </option>
           ))}
         </select>

@@ -6,8 +6,7 @@ export enum ClubMeetingFrequency {
 
 export interface ClubMember {
 	member_id: string;
-	member_member_name: string;
-	member_member_email: string;
+	memberName: string;
 	member_date_joined: string;
 	member_role: "Immediate Past President" | "President" | "VP Education" | "Associate - VPE" | "VP Membership" | "Associate - VPM" | "VP Public Relations" | "Associate - VPPR" | "Secretary" | "Treasurer" | "Sergeant at Arms" | "Member";
 	isRegisteredUser: boolean;

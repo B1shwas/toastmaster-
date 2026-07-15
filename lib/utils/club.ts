@@ -90,10 +90,8 @@ export function filterMembers(
 
   const normalizedQuery = query.toLowerCase().trim();
 
-  return members.filter(
-    (member) =>
-      member.member_member_name.toLowerCase().includes(normalizedQuery) ||
-      member.member_member_email.toLowerCase().includes(normalizedQuery)
+  return members.filter((member) =>
+    member.memberName.toLowerCase().includes(normalizedQuery)
   );
 }
 
@@ -137,11 +135,4 @@ export function isValidEmail(email: string): boolean {
   return emailRegex.test(email);
 }
 
-export function isDuplicateMember(
-  members: ClubMember[],
-  email: string
-): boolean {
-  return members.some(
-    (m) => m.member_member_email.toLowerCase() === email.toLowerCase()
-  );
-}
+
