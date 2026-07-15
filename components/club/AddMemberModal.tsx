@@ -170,8 +170,7 @@ export function AddMemberModal({
                 htmlFor="toastmasterId"
                 className="block text-slate-300 text-sm font-medium mb-2"
               >
-                Toastmasters Member ID{" "}
-                <span className="text-slate-500 font-normal">(optional)</span>
+                Toastmasters Member ID
               </label>
               <input
                 id="toastmasterId"
