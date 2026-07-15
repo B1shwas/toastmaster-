@@ -299,7 +299,7 @@ function RoleAssignmentCard({
               >
                 <option value="">Select member...</option>
                 {members.map((member) => (
-                  <option key={member.member_id} value={member.member_id}>
+                  <option key={member.member_id} value={member.user_id ?? ""}>
                     {member.memberName}
                   </option>
                 ))}

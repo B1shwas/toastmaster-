@@ -53,7 +53,7 @@ export function EditAgendaModal({
   const memberOptions = [
     { value: "", label: "Select member" },
     ...members.map((member) => ({
-      value: member.member_id,
+      value: member.user_id ?? "",
       label: member.memberName,
     })),
   ];
