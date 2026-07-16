@@ -222,7 +222,9 @@ export function useClubRole(clubId: string, userId: string) {
 			const { data } = await api.get<{
 				data: {
 					member: boolean;
-					role: "OWNER" | "ADMIN" | "MEMBER";
+					role: "OWNER" | "ADMIN" | "MEMBER" | null;
+					roleKey: string | null;
+					roleName: string | null;
 				};
 			}>("/club/member/role", {
 				params: { clubId, userId },
