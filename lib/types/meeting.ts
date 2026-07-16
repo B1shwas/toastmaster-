@@ -38,6 +38,8 @@ export interface Meeting {
   venue: string;
   notes: string | null;
   socialLinks: string[] | null;
+  wordOfTheDay: string | null;
+  idiomOfTheDay: string | null;
   status: MeetingStatus;
   meetingType: MeetingType;
   isDeleted: boolean;

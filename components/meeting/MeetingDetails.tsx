@@ -104,6 +104,14 @@ const editMeetingSchema = z.object({
     )
     .max(3, "Maximum 3 social media links allowed")
     .optional(),
+  wordOfTheDay: z
+    .string()
+    .max(255, "Word of the day must be less than 255 characters")
+    .optional(),
+  idiomOfTheDay: z
+    .string()
+    .max(255, "Idiom of the day must be less than 255 characters")
+    .optional(),
 });
 
 type EditMeetingInput = z.infer<typeof editMeetingSchema>;
@@ -153,6 +161,8 @@ function EditMeetingModal({
       time: `${timeParts[0] || "00"}:${timeParts[1] || "00"}`,
       venue: meeting.venue || "",
       socialLinks: meeting.socialLinks ?? [],
+      wordOfTheDay: meeting.wordOfTheDay ?? "",
+      idiomOfTheDay: meeting.idiomOfTheDay ?? "",
     },
   });
 
@@ -165,6 +175,12 @@ function EditMeetingModal({
         time: `${data.time}:00`,
         venue: data.venue,
         socialLinks: filteredLinks.length > 0 ? filteredLinks : [],
+        wordOfTheDay: data.wordOfTheDay?.trim()
+          ? data.wordOfTheDay.trim()
+          : null,
+        idiomOfTheDay: data.idiomOfTheDay?.trim()
+          ? data.idiomOfTheDay.trim()
+          : null,
       },
       { onSuccess: onClose }
     );
@@ -427,6 +443,46 @@ function EditMeetingModal({
             </div>
           </div>
 
+          {/* Word of the Day */}
+          <div>
+            <label className="block text-slate-300 text-sm font-medium mb-2">
+              Word of the Day
+            </label>
+            <input
+              {...register("wordOfTheDay")}
+              disabled={isDisabled}
+              placeholder="e.g., Serendipity"
+              className={`w-full px-4 py-3 bg-slate-800/50 border rounded-xl text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-cyan-500 disabled:opacity-50 disabled:cursor-not-allowed ${
+                errors.wordOfTheDay ? "border-red-500" : "border-slate-700"
+              }`}
+            />
+            {errors.wordOfTheDay && (
+              <p className="mt-1 text-sm text-red-400">
+                {errors.wordOfTheDay.message}
+              </p>
+            )}
+          </div>
+
+          {/* Idiom of the Day */}
+          <div>
+            <label className="block text-slate-300 text-sm font-medium mb-2">
+              Idiom of the Day
+            </label>
+            <input
+              {...register("idiomOfTheDay")}
+              disabled={isDisabled}
+              placeholder="e.g., Break the ice"
+              className={`w-full px-4 py-3 bg-slate-800/50 border rounded-xl text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-cyan-500 disabled:opacity-50 disabled:cursor-not-allowed ${
+                errors.idiomOfTheDay ? "border-red-500" : "border-slate-700"
+              }`}
+            />
+            {errors.idiomOfTheDay && (
+              <p className="mt-1 text-sm text-red-400">
+                {errors.idiomOfTheDay.message}
+              </p>
+            )}
+          </div>
+
           {/* Actions */}
           <div className="flex gap-3 pt-4">
             <button
@@ -526,6 +582,12 @@ function MeetingDetailsCardComponent({
           },
           { icon: MapPin, label: "Venue", value: meeting.venue || "TBD" },
           { icon: Activity, label: "Status", value: statusConfig.label },
+          ...(meeting.wordOfTheDay
+            ? [{ icon: FileText, label: "Word of the Day", value: meeting.wordOfTheDay }]
+            : []),
+          ...(meeting.idiomOfTheDay
+            ? [{ icon: FileText, label: "Idiom of the Day", value: meeting.idiomOfTheDay }]
+            : []),
         ].map((item) => (
           <InfoItem
             key={item.label}

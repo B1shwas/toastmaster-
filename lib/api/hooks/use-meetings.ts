@@ -75,6 +75,8 @@ export interface CreateMeetingInput {
   venue: string;
   clubId: string;
   meetingType: MeetingType;
+  wordOfTheDay?: string;
+  idiomOfTheDay?: string;
 }
 
 export function useCreateMeeting() {

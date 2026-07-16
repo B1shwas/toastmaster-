@@ -44,6 +44,14 @@ const scheduleMeetingSchema = z.object({
   meetingType: z.nativeEnum(MeetingType, {
     message: "Meeting type is required",
   }),
+  wordOfTheDay: z
+    .string()
+    .max(255, "Word of the day must be less than 255 characters")
+    .optional(),
+  idiomOfTheDay: z
+    .string()
+    .max(255, "Idiom of the day must be less than 255 characters")
+    .optional(),
 });
 
 export type ScheduleMeetingInput = z.infer<typeof scheduleMeetingSchema>;
@@ -86,6 +94,8 @@ export function ScheduleMeetingModal({
       venue: "",
       socialLinks: [],
       meetingType: MeetingType.PHYSICAL,
+      wordOfTheDay: "",
+      idiomOfTheDay: "",
     },
   });
 
@@ -105,6 +115,8 @@ export function ScheduleMeetingModal({
         venue: "",
         socialLinks: [],
         meetingType: MeetingType.PHYSICAL,
+        wordOfTheDay: "",
+        idiomOfTheDay: "",
       });
       setSelectedDate(undefined);
       setSelectedTime({ hours: 14, minutes: 0 });
@@ -119,6 +131,12 @@ export function ScheduleMeetingModal({
         ...data,
         time: `${data.time}:00`,
         socialLinks: filteredLinks.length > 0 ? filteredLinks : undefined,
+        wordOfTheDay: data.wordOfTheDay?.trim()
+          ? data.wordOfTheDay.trim()
+          : undefined,
+        idiomOfTheDay: data.idiomOfTheDay?.trim()
+          ? data.idiomOfTheDay.trim()
+          : undefined,
       };
       await onSubmit(submitData);
       reset();
@@ -445,6 +463,56 @@ export function ScheduleMeetingModal({
               {errors.meetingType && (
                 <p className="mt-1 text-sm text-red-400">
                   {errors.meetingType.message}
+                </p>
+              )}
+            </div>
+
+            {/* Word of the Day */}
+            <div>
+              <label
+                htmlFor="wordOfTheDay"
+                className="block text-slate-300 text-sm font-medium mb-2"
+              >
+                Word of the Day
+              </label>
+              <input
+                id="wordOfTheDay"
+                type="text"
+                {...register("wordOfTheDay")}
+                placeholder="e.g., Serendipity"
+                disabled={isDisabled}
+                className={`w-full px-4 py-3 bg-slate-800/50 border rounded-xl text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-cyan-500 disabled:opacity-50 disabled:cursor-not-allowed ${
+                  errors.wordOfTheDay ? "border-red-500" : "border-slate-700"
+                }`}
+              />
+              {errors.wordOfTheDay && (
+                <p className="mt-1 text-sm text-red-400">
+                  {errors.wordOfTheDay.message}
+                </p>
+              )}
+            </div>
+
+            {/* Idiom of the Day */}
+            <div>
+              <label
+                htmlFor="idiomOfTheDay"
+                className="block text-slate-300 text-sm font-medium mb-2"
+              >
+                Idiom of the Day
+              </label>
+              <input
+                id="idiomOfTheDay"
+                type="text"
+                {...register("idiomOfTheDay")}
+                placeholder="e.g., Break the ice"
+                disabled={isDisabled}
+                className={`w-full px-4 py-3 bg-slate-800/50 border rounded-xl text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-cyan-500 disabled:opacity-50 disabled:cursor-not-allowed ${
+                  errors.idiomOfTheDay ? "border-red-500" : "border-slate-700"
+                }`}
+              />
+              {errors.idiomOfTheDay && (
+                <p className="mt-1 text-sm text-red-400">
+                  {errors.idiomOfTheDay.message}
                 </p>
               )}
             </div>
