@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { Reorder, useDragControls, motion } from "framer-motion";
-import { GripVertical, Clock, User, Trash2, Edit2, Save, Copy } from "lucide-react";
+import { GripVertical, Clock, User, Trash2, Edit2, Save, Copy, FileText } from "lucide-react";
 import { toast } from "@/hooks/use-toast";
 import { useDeleteAgenda, useReorderAgendas, useCreateAgenda } from "@/lib/api/hooks/use-agenda";
 import type { Agenda } from "@/lib/types/agenda";
@@ -98,6 +98,15 @@ function AgendaItem({
             </div>
           )}
         </div>
+
+        {item.notes && (
+          <div className="mt-3 pt-3 border-t border-slate-700/50">
+            <p className="text-slate-400 text-sm leading-relaxed flex items-start gap-2">
+              <FileText size={14} className="text-cyan-400/70 mt-0.5 shrink-0" />
+              <span>{item.notes}</span>
+            </p>
+          </div>
+        )}
       </motion.div>
     );
   }
