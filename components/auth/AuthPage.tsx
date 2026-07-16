@@ -32,6 +32,7 @@ export default function AuthPage() {
         fullName: data.fullName,
         email: data.email,
         password: data.password,
+        toastmasterId: data.toastmasterId,
       });
 
       await login.mutateAsync({ email: data.email, password: data.password });

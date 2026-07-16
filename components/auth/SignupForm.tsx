@@ -53,6 +53,14 @@ export function SignupForm({ onSubmit, serverError }: SignupFormProps) {
         {...register("confirmPassword")}
       />
 
+      <FormInput
+        label="Member ID"
+        type="text"
+        placeholder="PN-67598269"
+        error={errors.toastmasterId?.message}
+        {...register("toastmasterId")}
+      />
+
       <FormCheckbox
         label={
           <>

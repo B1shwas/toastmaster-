@@ -36,7 +36,7 @@ export function useSignup() {
   return useMutation({
     mutationFn: async (
       input: Omit<SignupFormData, "confirmPassword" | "agreeToTerms">
-    ) => {
+    ): Promise<boolean> => {
       await api.post("/user/register", input);
       return true;
     },
