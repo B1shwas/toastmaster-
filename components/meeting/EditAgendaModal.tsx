@@ -290,11 +290,11 @@ export function EditAgendaModal({
                   {assignmentType === "toastmaster" && (
                     <div className="ml-8 mt-2">
                       <ToastmasterAutocomplete
-                        members={members}
+                        clubId={clubId}
                         value={watch("toastmasterId") ?? ""}
-                        onChange={(toastmasterId, memberId) => {
+                        onChange={(toastmasterId, _memberId, userId) => {
                           setValue("toastmasterId", toastmasterId);
-                          setValue("memberId", memberId);
+                          setValue("memberId", userId);
                         }}
                         focusColor="emerald"
                       />

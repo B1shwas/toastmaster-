@@ -1,13 +1,21 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useState } from "react";
 import { cn } from "@/lib/utils/cn";
 import type { ClubMember } from "@/lib/types/club";
+import { useSearchToastmasters } from "@/lib/api/hooks/use-clubs";
+
+export interface ToastmasterSuggestion {
+  memberId: string;
+  userId: string;
+  memberName: string;
+  toastmasterId: string | null;
+}
 
 interface ToastmasterAutocompleteProps {
-  members: ClubMember[];
+  clubId: string;
   value: string;
-  onChange: (toastmasterId: string, memberId: string) => void;
+  onChange: (toastmasterId: string, memberId: string, userId: string) => void;
   error?: boolean;
   focusColor?: "blue" | "emerald";
   placeholder?: string;
@@ -32,25 +40,26 @@ function formatToastmasterId(id?: string | null) {
 }
 
 export function ToastmasterAutocomplete({
-  members,
+  clubId,
   value,
   onChange,
   error,
   focusColor = "emerald",
-  placeholder = "Search by Toastmasters ID or name",
+  placeholder = "Search by Toastmasters ID",
 }: ToastmasterAutocompleteProps) {
   const [query, setQuery] = useState("");
   const [open, setOpen] = useState(false);
+  const [debounced, setDebounced] = useState("");
 
-  const suggestions = useMemo(() => {
-    const q = query.trim().toLowerCase();
-    if (!q) return members;
-    return members.filter((member) => {
-      const tmId = (member.member_toastmaster_id ?? "").toLowerCase();
-      const name = (member.memberName ?? "").toLowerCase();
-      return tmId.includes(q) || name.includes(q);
-    });
-  }, [members, query]);
+  useEffect(() => {
+    const timer = setTimeout(() => setDebounced(query), 350);
+    return () => clearTimeout(timer);
+  }, [query]);
+
+  const { data: suggestions = [], isFetching } = useSearchToastmasters(
+    clubId,
+    debounced
+  );
 
   return (
     <div className="relative">
@@ -66,34 +75,38 @@ export function ToastmasterAutocomplete({
         onFocus={() => setOpen(true)}
         onBlur={() => setTimeout(() => setOpen(false), 150)}
       />
-      {open && suggestions.length > 0 && (
+      {open && (
         <ul className="absolute z-20 mt-1 w-full max-h-56 overflow-y-auto rounded-lg border border-slate-700 bg-slate-900 shadow-lg">
-          {suggestions.map((member) => (
-            <li key={member.member_id}>
-              <button
-                type="button"
-                className="flex w-full items-center justify-between gap-2 px-4 py-2 text-left text-sm text-slate-200 hover:bg-slate-700/60"
-                onMouseDown={(e) => {
-                  e.preventDefault();
-                  setQuery(
-                    `${member.memberName} (${formatToastmasterId(
-                      member.member_toastmaster_id
-                    )})`
-                  );
-                  setOpen(false);
-                  onChange(
-                    member.member_toastmaster_id ?? "",
-                    member.userId ?? ""
-                  );
-                }}
-              >
-                <span>{member.memberName}</span>
-                <span className="text-xs text-slate-400">
-                  {formatToastmasterId(member.member_toastmaster_id)}
-                </span>
-              </button>
+          {isFetching && (
+            <li className="px-4 py-2 text-sm text-slate-400">Searching…</li>
+          )}
+          {!isFetching && suggestions.length === 0 && (
+            <li className="px-4 py-2 text-sm text-slate-400">
+              No matching Toastmasters found
             </li>
-          ))}
+          )}
+          {!isFetching &&
+            suggestions.map((s) => (
+              <li key={s.memberId}>
+                <button
+                  type="button"
+                  className="flex w-full items-center justify-between gap-2 px-4 py-2 text-left text-sm text-slate-200 hover:bg-slate-700/60"
+                  onMouseDown={(e) => {
+                    e.preventDefault();
+                    setQuery(
+                      `${s.memberName} (${formatToastmasterId(s.toastmasterId)})`
+                    );
+                    setOpen(false);
+                    onChange(s.toastmasterId ?? "", s.memberId, s.userId);
+                  }}
+                >
+                  <span>{s.memberName}</span>
+                  <span className="text-xs text-slate-400">
+                    {formatToastmasterId(s.toastmasterId)}
+                  </span>
+                </button>
+              </li>
+            ))}
         </ul>
       )}
       {value && (

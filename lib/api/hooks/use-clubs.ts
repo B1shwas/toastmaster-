@@ -383,11 +383,32 @@ export function useUpdateToastmasterId(clubId: string) {
 }
 
 export function useUserClubStatus() {
-	return useQuery({
-		queryKey: ['user-club-status'],
-		queryFn: async () => {
-			const { data } = await api.get<{data:{clubId:string,status:string}[]}>(`/club/user-status`);
-			return data.data;
-		},
-	});
+  return useQuery({
+    queryKey: ['user-club-status'],
+    queryFn: async () => {
+      const { data } = await api.get<{data:{clubId:string,status:string}[]}>(`/club/user-status`);
+      return data.data;
+    },
+  });
+}
+
+export function useSearchToastmasters(clubId: string, toastmasterId: string) {
+  return useQuery({
+    queryKey: ["toastmaster-search", clubId, toastmasterId],
+    queryFn: async () => {
+      const { data } = await api.get<{
+        data: {
+          memberId: string;
+          userId: string;
+          memberName: string;
+          toastmasterId: string | null;
+        }[];
+      }>(`/club/${clubId}/members/search/toastmaster`, {
+        params: { toastmasterId },
+      });
+      return data.data ?? [];
+    },
+    enabled: !!clubId && toastmasterId.trim().length > 0,
+    staleTime: 30 * 1000,
+  });
 }
