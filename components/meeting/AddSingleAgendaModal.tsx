@@ -19,6 +19,7 @@ import {
   SelectInput,
   Textarea,
 } from "../ui/form-elements";
+import { ToastmasterAutocomplete } from "../ui/toastmaster-autocomplete";
 
 interface AddSingleAgendaModalProps {
   isOpen: boolean;
@@ -65,6 +66,7 @@ export function AddSingleAgendaModal({
     reset,
     trigger,
     getValues,
+    setValue,
     formState: { errors },
   } = useForm<CreateSingleAgendaForm>({
     resolver: zodResolver(createSingleAgendaSchema),
@@ -78,6 +80,7 @@ export function AddSingleAgendaModal({
       assignmentType: "unassigned",
       memberId: "",
       memberName: "",
+      toastmasterId: "",
       notes: "",
     },
   });
@@ -91,6 +94,7 @@ export function AddSingleAgendaModal({
       assignmentType: "unassigned",
       memberId: "",
       memberName: "",
+      toastmasterId: "",
       notes: "",
     });
   }, [isOpen, nextSequence, reset]);
@@ -149,9 +153,16 @@ export function AddSingleAgendaModal({
         duration: data.duration,
         sequence: data.sequence,
         meetingId,
-        memberId: data.assignmentType === "member" ? data.memberId : undefined,
+        memberId:
+          data.assignmentType === "member" || data.assignmentType === "toastmaster"
+            ? data.memberId
+            : undefined,
         memberName:
           data.assignmentType === "guest" ? data.memberName : undefined,
+        toastmasterId:
+          data.assignmentType === "toastmaster"
+            ? data.toastmasterId
+            : undefined,
         notes: data.notes,
         clubId: clubId,
       });
@@ -284,6 +295,40 @@ export function AddSingleAgendaModal({
                     </div>
                   )}
 
+                  <label className="flex items-center gap-3 p-3 rounded-lg cursor-pointer group hover:bg-slate-700/30 transition-all duration-200 border border-transparent hover:border-emerald-500/30">
+                    <div className="relative flex items-center justify-center">
+                      <input
+                        type="radio"
+                        value="toastmaster"
+                        {...register("assignmentType")}
+                        className="w-5 h-5 appearance-none border-2 border-slate-600 rounded-full cursor-pointer transition-all duration-200 checked:border-emerald-500 checked:border-[6px] hover:border-emerald-400/50 focus:outline-none focus:ring-2 focus:ring-emerald-500/30 focus:ring-offset-2 focus:ring-offset-slate-800"
+                      />
+                    </div>
+                    <span className="text-slate-200 text-sm font-medium group-hover:text-emerald-400 transition-colors">
+                      Toastmaster
+                    </span>
+                  </label>
+
+                  {assignmentType === "toastmaster" && (
+                    <div className="ml-8 mt-2">
+                      <ToastmasterAutocomplete
+                        members={members}
+                        value={watch("toastmasterId") ?? ""}
+                        onChange={(toastmasterId, memberId) => {
+                          setValue("toastmasterId", toastmasterId);
+                          setValue("memberId", memberId);
+                        }}
+                        focusColor="emerald"
+                      />
+                      {errors.assignmentType?.message &&
+                        (errors.assignmentType.message.includes("Toastmasters") ||
+                          errors.assignmentType.message.includes("toastmaster")) && (
+                          <p className="mt-2 text-sm text-red-400">
+                            {errors.assignmentType.message}
+                          </p>
+                        )}
+                    </div>
+                  )}
                 </div>
               </div>
 

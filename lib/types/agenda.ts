@@ -65,6 +65,7 @@ export interface CreateAgendaPayload {
   meetingId: string;
   memberId?: string;
   memberName?: string;
+  toastmasterId?: string;
   notes?: string;
   clubId: string;
 }

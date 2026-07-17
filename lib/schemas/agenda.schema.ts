@@ -9,9 +9,10 @@ export const createSingleAgendaSchema = z
       .min(1, "Duration must be at least 1 minute")
       .max(300, "Duration is too long"),
     sequence: z.number().min(1, "Sequence must be at least 1"),
-    assignmentType: z.enum(["member", "guest", "unassigned"]),
+    assignmentType: z.enum(["member", "guest", "toastmaster", "unassigned"]),
     memberId: z.string().optional(),
     memberName: z.string().optional(),
+    toastmasterId: z.string().optional(),
     notes: z.string().optional(),
   })
   .refine(
@@ -19,10 +20,13 @@ export const createSingleAgendaSchema = z
       if (data.assignmentType === "guest" && !data.memberName) {
         return false;
       }
+      if (data.assignmentType === "toastmaster" && !data.toastmasterId) {
+        return false;
+      }
       return true;
     },
     {
-      message: "Please enter a guest name",
+      message: "Please complete the selected assignment details",
       path: ["assignmentType"],
     }
   );
