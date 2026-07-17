@@ -57,6 +57,7 @@ export default function ProfilePage() {
         email: profileData.user_email,
         introduction: profileData.user_introduction ?? "",
         toastmasterId: profileData.user_member_id ?? "",
+        phone: profileData.user_phone ?? "",
       });
     }
   }, [profileData, resetProfile]);
@@ -119,6 +120,20 @@ export default function ProfilePage() {
               error={profileErrors.toastmasterId?.message}
               {...registerProfile("toastmasterId")}
             />
+            <div className="flex flex-col gap-1.5">
+              <label className="text-sm font-medium text-slate-300">
+                Phone number
+              </label>
+              <input
+                type="tel"
+                placeholder="Enter your phone number"
+                className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-xl text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                {...registerProfile("phone")}
+              />
+              {profileErrors.phone && (
+                <p className="text-red-400 text-sm">{profileErrors.phone.message}</p>
+              )}
+            </div>
             <div className="flex flex-col gap-1.5">
               <label className="text-sm font-medium text-slate-300">
                 Introduction

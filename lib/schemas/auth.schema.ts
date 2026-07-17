@@ -33,6 +33,7 @@ export const profileSchema = z.object({
   user_full_name: z.string(),
   user_introduction: z.string().nullable().optional(),
   user_member_id: z.string().nullable().optional(),
+  user_phone: z.string().nullable().optional(),
   member_of: z.array(z.object({ id: z.string(), name: z.string() })).optional(),
   admin_of: z.array(z.object({ id: z.string(), name: z.string() })).optional(),
   owned_clubs: z
@@ -48,6 +49,11 @@ export const updateProfileSchema = z.object({
   toastmasterId: z
     .string()
     .regex(/^[A-Z]{2}-\d{8}$/, "Enter a valid Member ID (e.g. PN-67598269)")
+    .optional()
+    .or(z.literal("")),
+  phone: z
+    .string()
+    .max(11, "Phone number must be under 10 characters")
     .optional()
     .or(z.literal("")),
 });
