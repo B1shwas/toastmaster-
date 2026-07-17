@@ -13,7 +13,7 @@ export const signupSchema = z
     confirmPassword: z.string(),
     toastmasterId: z
       .string()
-      .regex(/^PN-\d{8}$/, "Enter a valid Member ID (e.g. PN-67598269)"),
+      .regex(/^[A-Z]{2}-\d{8}$/, "Enter a valid Member ID (e.g. PN-67598269)"),
     agreeToTerms: z.boolean().refine((val) => val === true, {
       message: "You must agree to the terms and conditions",
     }),
@@ -47,7 +47,7 @@ export const updateProfileSchema = z.object({
   introduction: z.string().max(500, "Introduction must be under 500 characters").optional().or(z.literal("")),
   toastmasterId: z
     .string()
-    .regex(/^PN-\d{8}$/, "Enter a valid Member ID (e.g. PN-67598269)")
+    .regex(/^[A-Z]{2}-\d{8}$/, "Enter a valid Member ID (e.g. PN-67598269)")
     .optional()
     .or(z.literal("")),
 });
