@@ -7,6 +7,7 @@ import type {
   RoleCount,
 } from "@/lib/types/agenda";
 import type { ApiResponse } from "@/lib/types/meeting";
+import type { AgendaRole } from "@/lib/types/agenda";
 
 export function useSystemTemplates() {
   return useQuery<ApiResponse<AgendaTemplate[]>>({
@@ -163,5 +164,19 @@ export function useRoleCounts(clubId: string) {
       return response.data;
     },
     enabled: !!clubId,
+  });
+}
+
+export function useAgendaRoles() {
+  return useQuery<ApiResponse<AgendaRole[]>>({
+    queryKey: ["agenda-roles"],
+    queryFn: async () => {
+      const response = await api.get<ApiResponse<AgendaRole[]>>("/roles", {
+        params: { category: "AGENDA" },
+      });
+      return response.data;
+    },
+    staleTime: 10 * 60 * 1000,
+    gcTime: 30 * 60 * 1000,
   });
 }

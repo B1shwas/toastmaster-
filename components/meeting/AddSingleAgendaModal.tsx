@@ -9,9 +9,8 @@ import {
   createSingleAgendaSchema,
   type CreateSingleAgendaForm,
 } from "@/lib/schemas/agenda.schema";
-import { useCreateAgenda } from "@/lib/api/hooks/use-agenda";
+import { useCreateAgenda, useAgendaRoles } from "@/lib/api/hooks/use-agenda";
 import type { ClubMember } from "@/lib/types/club";
-import { SystemRole, ROLE_LABELS } from "@/lib/types/agenda";
 import { ModalHeader, ModalWrapper } from "../ui/modal-components";
 import {
   FormField,
@@ -42,12 +41,14 @@ export function AddSingleAgendaModal({
   onSuccess,
 }: AddSingleAgendaModalProps) {
   const createMutation = useCreateAgenda();
+  const { data: agendaRolesResponse } = useAgendaRoles();
+  const agendaRoles = agendaRolesResponse?.data ?? [];
 
   const roleOptions = [
     { value: "", label: "Select a role" },
-    ...Object.values(SystemRole).map((role) => ({
-      value: ROLE_LABELS[role],
-      label: ROLE_LABELS[role],
+    ...agendaRoles.map((role) => ({
+      value: role.id,
+      label: role.type,
     })),
   ];
 
@@ -75,6 +76,7 @@ export function AddSingleAgendaModal({
     defaultValues: {
       title: "",
       roleName: "",
+      roleId: "",
       duration: 0,
       sequence: nextSequence,
       assignmentType: "unassigned",
@@ -89,6 +91,7 @@ export function AddSingleAgendaModal({
     reset({
       title: "",
       roleName: "",
+      roleId: "",
       duration: 0,
       sequence: nextSequence,
       assignmentType: "unassigned",
@@ -120,6 +123,7 @@ export function AddSingleAgendaModal({
       await createMutation.mutateAsync({
         title: data.title,
         roleName: data.roleName,
+        roleId: data.roleId,
         duration: data.duration,
         sequence: data.sequence,
         meetingId,
@@ -150,6 +154,7 @@ export function AddSingleAgendaModal({
         title: data.title,
         // date: meetingDate,
         roleName: data.roleName,
+        roleId: data.roleId,
         duration: data.duration,
         sequence: data.sequence,
         meetingId,
@@ -214,9 +219,9 @@ export function AddSingleAgendaModal({
                 error={errors.roleName?.message}
               >
                 <SelectInput
-                  {...register("roleName")}
+                  {...register("roleId")}
                   options={roleOptions}
-                  error={!!errors.roleName}
+                  error={!!errors.roleId}
                   focusColor="emerald"
                 />
               </FormField>

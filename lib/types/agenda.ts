@@ -9,6 +9,14 @@ export interface AgendaTemplate {
   updatedAt: string;
 }
 
+export interface AgendaRole {
+  id: string;
+  key: string;
+  type: string;
+  category?: string;
+  isAdmin?: boolean;
+}
+
 export interface AgendaTemplateItem {
   id: string;
   title: string;
@@ -45,6 +53,7 @@ export interface Agenda {
   description: string | null;
   date: string;
   roleName: string | null;
+  roleId?: string | null;
   duration: number;
   sequence: number;
   meetingId: string;
@@ -60,6 +69,7 @@ export interface CreateAgendaPayload {
   // description?: string;
   // date: string;
   roleName?: string;
+  roleId?: string;
   duration: number;
   sequence: number;
   meetingId: string;

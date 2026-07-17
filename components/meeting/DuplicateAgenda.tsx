@@ -22,8 +22,7 @@ import { Popover, PopoverContent, PopoverTrigger } from "../ui/popover";
 import { format } from "date-fns";
 import { Calendar } from "../ui/calendar";
 import { SelectInput } from "../ui/form-elements";
-import { ROLE_LABELS, SystemRole } from "@/lib/types/agenda";
-import { useClubMembers, useCreateMeetingWithTemplate } from "@/lib/api";
+import { useClubMembers, useCreateMeetingWithTemplate, useAgendaRoles } from "@/lib/api";
 import { useParams } from "next/navigation";
 
 const agendaItemSchema = z
@@ -85,6 +84,8 @@ const TemplatePreview = ({
   const clubId = params.id;
 
   const { data: membersData } = useClubMembers(clubId);
+  const { data: agendaRolesResponse } = useAgendaRoles();
+  const agendaRoles = agendaRolesResponse?.data ?? [];
 
   const [selectedDate, setSelectedDate] = useState<Date | undefined>(undefined);
   const [selectedTime, setSelectedTime] = useState({
@@ -94,9 +95,9 @@ const TemplatePreview = ({
 
   const roleOptions = [
     { value: "", label: "Select a role" },
-    ...Object.values(SystemRole).map((role) => ({
-      value: ROLE_LABELS[role],
-      label: ROLE_LABELS[role],
+    ...agendaRoles.map((role) => ({
+      value: role.type,
+      label: role.type,
     })),
   ];
 

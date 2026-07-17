@@ -1,5 +1,6 @@
 "use client";
 
+import React from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { X, Users, Clock, User, UserPlus, Loader2 } from "lucide-react";
 import { useForm, useFieldArray } from "react-hook-form";
@@ -9,14 +10,20 @@ import {
   createFromTemplateSchema,
   type CreateFromTemplateForm,
 } from "@/lib/schemas/agenda.schema";
-import { useCreateAgendasBulk } from "@/lib/api/hooks/use-agenda";
+import { useCreateAgendasBulk, useAgendaRoles } from "@/lib/api/hooks/use-agenda";
 import {
-  ROLE_LABELS,
   type AgendaTemplate,
   type CreateAgendaPayload,
 } from "@/lib/types/agenda";
 import type { ClubMember } from "@/lib/types/club";
 import { ModalHeader, ModalWrapper } from "../ui/modal-components";
+
+function getRoleLabel(
+  item: AgendaTemplate["items"][0],
+  roleLabelByKey: Record<string, string>,
+): string {
+  return item.customRole || roleLabelByKey[item.systemRole] || item.systemRole;
+}
 
 interface RoleAssignmentModalProps {
   isOpen: boolean;
@@ -40,6 +47,16 @@ export function RoleAssignmentModal({
   onSuccess,
 }: RoleAssignmentModalProps) {
   const createMutation = useCreateAgendasBulk();
+  const { data: agendaRolesResponse } = useAgendaRoles();
+  const agendaRoles = agendaRolesResponse?.data ?? [];
+
+  const roleLabelByKey = React.useMemo(() => {
+    const map: Record<string, string> = {};
+    for (const role of agendaRoles) {
+      map[role.key] = role.type;
+    }
+    return map;
+  }, [agendaRoles]);
 
   const {
     register,
@@ -69,7 +86,7 @@ export function RoleAssignmentModal({
     try {
       const agendas: CreateAgendaPayload[] = template.items.map((item) => ({
         title: item.title,
-        roleName: item.customRole || ROLE_LABELS[item.systemRole],
+        roleName: getRoleLabel(item, roleLabelByKey),
         duration: item.duration,
         sequence: item.sequence,
         meetingId,
@@ -101,7 +118,7 @@ export function RoleAssignmentModal({
           const assignment = data.roleAssignments[index];
           return {
             title: item.title,
-            roleName: item.customRole || ROLE_LABELS[item.systemRole],
+            roleName: getRoleLabel(item, roleLabelByKey),
             duration: item.duration,
             sequence: item.sequence,
             meetingId,
@@ -170,6 +187,7 @@ export function RoleAssignmentModal({
                     item={item}
                     index={index}
                     members={members}
+                    roleLabelByKey={roleLabelByKey}
                     register={register}
                     watch={watch}
                   />
@@ -221,6 +239,7 @@ interface RoleAssignmentRowProps {
   item: AgendaTemplate["items"][0];
   index: number;
   members: ClubMember[];
+  roleLabelByKey: Record<string, string>;
   register: any;
   watch: any;
 }
@@ -229,6 +248,7 @@ function RoleAssignmentRow({
   item,
   index,
   members,
+  roleLabelByKey,
   register,
   watch,
 }: RoleAssignmentRowProps) {
@@ -246,7 +266,7 @@ function RoleAssignmentRow({
           <h4 className="text-white font-medium">{item.title}</h4>
           <div className="flex items-center gap-3 mt-1">
             <span className="text-cyan-400 text-xs px-2 py-1 bg-cyan-500/10 rounded">
-              {ROLE_LABELS[item.systemRole]}
+              {getRoleLabel(item, roleLabelByKey)}
             </span>
             {item.customRole && (
               <span className="text-slate-400 text-xs">{item.customRole}</span>
