@@ -53,7 +53,7 @@ export const updateProfileSchema = z.object({
     .or(z.literal("")),
   phone: z
     .string()
-    .max(11, "Phone number must be under 10 characters")
+    .regex(/^\d{10}$/, "Phone number must be exactly 10 digits")
     .optional()
     .or(z.literal("")),
 });
