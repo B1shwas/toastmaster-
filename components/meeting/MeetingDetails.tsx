@@ -100,8 +100,7 @@ const editMeetingSchema = z.object({
     .min(3, "Venue must be at least 3 characters")
     .max(200, "Venue must be less than 200 characters"),
   meetingType: z.nativeEnum(MeetingType, {
-    required_error: "Meeting type is required",
-    invalid_type_error: "Meeting type is required",
+    message: "Meeting type is required",
   }),
   socialLinks: z
     .array(
