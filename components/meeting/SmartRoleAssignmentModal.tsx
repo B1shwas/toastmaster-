@@ -1,12 +1,11 @@
 "use client";
 
-import React, { useState } from "react";
+import { useState, useMemo } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Users, Clock, User, Loader2, ChevronRight } from "lucide-react";
 import { toast } from "@/hooks/use-toast";
-import { useCreateAgendasBulk } from "@/lib/api/hooks/use-agenda";
+import { useCreateAgendasBulk, useAgendaRoles } from "@/lib/api/hooks/use-agenda";
 import {
-  ROLE_LABELS,
   type AgendaTemplate,
   type CreateAgendaPayload,
 } from "@/lib/types/agenda";
@@ -54,12 +53,24 @@ export function SmartRoleAssignmentModal({
   onSuccess,
 }: SmartRoleAssignmentModalProps) {
   const createMutation = useCreateAgendasBulk();
+  const { data: agendaRoles = [] } = useAgendaRoles();
 
-  const uniqueRoles = React.useMemo(() => {
+  const roleLabelByKey = useMemo(() => {
+    const map: Record<string, string> = {};
+    for (const role of agendaRoles) {
+      map[role.key] = role.type;
+    }
+    return map;
+  }, [agendaRoles]);
+
+  const uniqueRoles = (() => {
     const roleMap = new Map<string, UniqueRole>();
 
+    const getRoleLabel = (item: AgendaTemplate["items"][0]): string =>
+      item.customRole || roleLabelByKey[item.systemRole] || item.systemRole;
+
     template.items.forEach((item) => {
-      const roleName = item.customRole || ROLE_LABELS[item.systemRole];
+      const roleName = getRoleLabel(item);
 
       if (!roleMap.has(roleName)) {
         roleMap.set(roleName, {
@@ -78,16 +89,14 @@ export function SmartRoleAssignmentModal({
 
     return Array.from(roleMap.values()).sort((a, b) => {
       const aIndex = template.items.findIndex(
-        (item) =>
-          (item.customRole || ROLE_LABELS[item.systemRole]) === a.roleName
+        (item) => getRoleLabel(item) === a.roleName,
       );
       const bIndex = template.items.findIndex(
-        (item) =>
-          (item.customRole || ROLE_LABELS[item.systemRole]) === b.roleName
+        (item) => getRoleLabel(item) === b.roleName,
       );
       return aIndex - bIndex;
     });
-  }, [template]);
+  })();
 
   const [roleAssignments, setRoleAssignments] = useState<RoleAssignment[]>(
     uniqueRoles.map((role) => ({
@@ -127,7 +136,8 @@ export function SmartRoleAssignmentModal({
     try {
       // Build agendas by mapping role assignments to template items
       const agendas: CreateAgendaPayload[] = template.items.map((item) => {
-        const roleName = item.customRole || ROLE_LABELS[item.systemRole];
+        const roleName =
+          item.customRole || roleLabelByKey[item.systemRole] || item.systemRole;
         const assignment = roleAssignments.find((a) => a.roleName === roleName);
 
         return {

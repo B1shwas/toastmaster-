@@ -9,10 +9,9 @@ import {
   createSingleAgendaSchema,
   type CreateSingleAgendaForm,
 } from "@/lib/schemas/agenda.schema";
-import { useUpdateAgenda } from "@/lib/api/hooks/use-agenda";
+import { useUpdateAgenda, useAgendaRoles } from "@/lib/api/hooks/use-agenda";
 import type { ClubMember } from "@/lib/types/club";
 import type { Agenda } from "@/lib/types/agenda";
-import { SystemRole, ROLE_LABELS } from "@/lib/types/agenda";
 import { ModalFooter, ModalHeader, ModalWrapper } from "../ui/modal-components";
 import {
   FormField,
@@ -41,12 +40,13 @@ export function EditAgendaModal({
   onSuccess,
 }: EditAgendaModalProps) {
   const updateMutation = useUpdateAgenda(meetingId);
+  const { data: agendaRoles = [] } = useAgendaRoles();
 
   const roleOptions = [
     { value: "", label: "Select a role" },
-    ...Object.values(SystemRole).map((role) => ({
-      value: ROLE_LABELS[role],
-      label: ROLE_LABELS[role],
+    ...agendaRoles.map((role) => ({
+      value: role.id,
+      label: role.type,
     })),
   ];
 
@@ -75,9 +75,14 @@ export function EditAgendaModal({
   // Pre-fill form when agenda changes
   useEffect(() => {
     if (agenda) {
+      const roleId =
+        agenda.roleId ||
+        agendaRoles.find((r) => r.type === agenda.roleName)?.id ||
+        "";
       reset({
         title: agenda.title,
         roleName: agenda.roleName ?? undefined,
+        roleId,
         duration: agenda.duration,
         sequence: agenda.sequence,
         assignmentType: agenda.memberId
@@ -90,7 +95,7 @@ export function EditAgendaModal({
         notes: agenda.notes || "",
       });
     }
-  }, [agenda, reset]);
+  }, [agenda, agendaRoles, reset]);
 
   const onSubmit = async (data: CreateSingleAgendaForm) => {
     if (!agenda) return;
@@ -101,6 +106,7 @@ export function EditAgendaModal({
         data: {
           title: data.title,
           roleName: data.roleName,
+          roleId: data.roleId,
           duration: data.duration,
           sequence: data.sequence,
           meetingId,
@@ -157,12 +163,12 @@ export function EditAgendaModal({
               {/* Role Name */}
               <FormField
                 label="Role Name"
-                error={errors.roleName?.message}
+                error={errors.roleId?.message}
               >
                 <SelectInput
-                  {...register("roleName")}
+                  {...register("roleId")}
                   options={roleOptions}
-                  error={!!errors.roleName}
+                  error={!!errors.roleId}
                   focusColor="emerald"
                 />
               </FormField>

@@ -4,6 +4,7 @@ export const createSingleAgendaSchema = z
   .object({
     title: z.string().min(1, "Title is required").max(200, "Title is too long"),
     roleName: z.string().optional(),
+    roleId: z.string().optional(),
     duration: z
       .number()
       .min(1, "Duration must be at least 1 minute")
