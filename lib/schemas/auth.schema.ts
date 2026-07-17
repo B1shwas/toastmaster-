@@ -45,7 +45,7 @@ export const updateProfileSchema = z.object({
   fullName: z.string().min(7, "Name must be at least 7 characters"),
   email: z.string().email("Please enter a valid email address"),
   introduction: z.string().max(500, "Introduction must be under 500 characters").optional().or(z.literal("")),
-  memberId: z
+  toastmasterId: z
     .string()
     .regex(/^PN-\d{8}$/, "Enter a valid Member ID (e.g. PN-67598269)")
     .optional()

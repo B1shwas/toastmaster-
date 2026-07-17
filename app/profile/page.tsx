@@ -56,7 +56,7 @@ export default function ProfilePage() {
         fullName: profileData.user_full_name,
         email: profileData.user_email,
         introduction: profileData.user_introduction ?? "",
-        memberId: profileData.user_member_id ?? "",
+        toastmasterId: profileData.user_member_id ?? "",
       });
     }
   }, [profileData, resetProfile]);
@@ -116,8 +116,8 @@ export default function ProfilePage() {
               label="Member ID"
               type="text"
               placeholder="PN-67598269"
-              error={profileErrors.memberId?.message}
-              {...registerProfile("memberId")}
+              error={profileErrors.toastmasterId?.message}
+              {...registerProfile("toastmasterId")}
             />
             <div className="flex flex-col gap-1.5">
               <label className="text-sm font-medium text-slate-300">
