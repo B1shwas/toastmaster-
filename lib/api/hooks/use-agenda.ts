@@ -168,10 +168,10 @@ export function useRoleCounts(clubId: string) {
 }
 
 export function useAgendaRoles() {
-  return useQuery<AgendaRole[]>({
+  return useQuery<ApiResponse<AgendaRole[]>>({
     queryKey: ["agenda-roles"],
     queryFn: async () => {
-      const response = await api.get<AgendaRole[]>("/roles", {
+      const response = await api.get<ApiResponse<AgendaRole[]>>("/roles", {
         params: { category: "AGENDA" },
       });
       return response.data;

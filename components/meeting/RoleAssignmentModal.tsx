@@ -47,7 +47,8 @@ export function RoleAssignmentModal({
   onSuccess,
 }: RoleAssignmentModalProps) {
   const createMutation = useCreateAgendasBulk();
-  const { data: agendaRoles = [] } = useAgendaRoles();
+  const { data: agendaRolesResponse } = useAgendaRoles();
+  const agendaRoles = agendaRolesResponse?.data ?? [];
 
   const roleLabelByKey = React.useMemo(() => {
     const map: Record<string, string> = {};

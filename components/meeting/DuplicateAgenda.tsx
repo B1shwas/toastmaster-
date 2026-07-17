@@ -84,7 +84,8 @@ const TemplatePreview = ({
   const clubId = params.id;
 
   const { data: membersData } = useClubMembers(clubId);
-  const { data: agendaRoles = [] } = useAgendaRoles();
+  const { data: agendaRolesResponse } = useAgendaRoles();
+  const agendaRoles = agendaRolesResponse?.data ?? [];
 
   const [selectedDate, setSelectedDate] = useState<Date | undefined>(undefined);
   const [selectedTime, setSelectedTime] = useState({

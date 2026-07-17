@@ -40,7 +40,8 @@ export function AddSingleAgendaModal({
   onSuccess,
 }: AddSingleAgendaModalProps) {
   const createMutation = useCreateAgenda();
-  const { data: agendaRoles = [] } = useAgendaRoles();
+  const { data: agendaRolesResponse } = useAgendaRoles();
+  const agendaRoles = agendaRolesResponse?.data ?? [];
 
   const roleOptions = [
     { value: "", label: "Select a role" },

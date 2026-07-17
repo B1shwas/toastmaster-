@@ -53,7 +53,8 @@ export function SmartRoleAssignmentModal({
   onSuccess,
 }: SmartRoleAssignmentModalProps) {
   const createMutation = useCreateAgendasBulk();
-  const { data: agendaRoles = [] } = useAgendaRoles();
+  const { data: agendaRolesResponse } = useAgendaRoles();
+  const agendaRoles = agendaRolesResponse?.data ?? [];
 
   const roleLabelByKey = useMemo(() => {
     const map: Record<string, string> = {};
