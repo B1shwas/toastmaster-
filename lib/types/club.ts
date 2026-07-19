@@ -4,6 +4,12 @@ export enum ClubMeetingFrequency {
 	MONTHLY = "MONTHLY",
 }
 
+export enum ClubMeetingMode {
+	ONLINE = "ONLINE",
+	OFFLINE = "OFFLINE",
+	HYBRID = "HYBRID",
+}
+
 export interface ClubMember {
 	member_id: string;
 	userId?: string;
@@ -26,6 +32,7 @@ export interface Club {
 	division: string | null;
 	ownerId: string;
 	meetingFrequency: ClubMeetingFrequency;
+	meetingMode: ClubMeetingMode;
 	charterDate?: string | null;
 	socialLinks?: string[] | null;
 	createdAt?: string;

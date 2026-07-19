@@ -56,6 +56,9 @@ export const clubSettingsSchema = z.object({
   meetingFrequency: z.enum(["WEEKLY", "BIWEEKLY", "MONTHLY"], {
     message: "Please select a valid meeting frequency",
   }),
+  meetingMode: z.enum(["ONLINE", "OFFLINE", "HYBRID"], {
+    message: "Please select a valid meeting mode",
+  }),
   charterDate: z.string().optional(),
   socialLinks: z
     .array(
@@ -92,6 +95,9 @@ export const createClubSchema = z.object({
     .default(""),
   meetingFrequency: z.enum(["WEEKLY", "BIWEEKLY", "MONTHLY"], {
     message: "Please select a valid meeting frequency",
+  }),
+  meetingMode: z.enum(["ONLINE", "OFFLINE", "HYBRID"], {
+    message: "Please select a valid meeting mode",
   }),
   charterDate: z.string().optional(),
 });

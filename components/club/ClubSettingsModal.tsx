@@ -13,7 +13,7 @@ import {
   SelectInput,
 } from "@/components/ui/form-elements";
 import { clubSettingsSchema, type ClubSettingsInput } from "@/lib/schemas/club.schema";
-import { ClubMeetingFrequency, type Club } from "@/lib/types/club";
+import { ClubMeetingFrequency, ClubMeetingMode, type Club } from "@/lib/types/club";
 
 interface ClubSettingsModalProps {
   isOpen: boolean;
@@ -27,6 +27,12 @@ const MEETING_FREQUENCY_OPTIONS = [
   { value: ClubMeetingFrequency.WEEKLY, label: "Weekly" },
   { value: ClubMeetingFrequency.BIWEEKLY, label: "Bi-weekly" },
   { value: ClubMeetingFrequency.MONTHLY, label: "Monthly" },
+];
+
+const MEETING_MODE_OPTIONS = [
+  { value: ClubMeetingMode.OFFLINE, label: "Offline" },
+  { value: ClubMeetingMode.ONLINE, label: "Online" },
+  { value: ClubMeetingMode.HYBRID, label: "Hybrid" },
 ];
 
 export function ClubSettingsModal({
@@ -59,6 +65,7 @@ export function ClubSettingsModal({
         area: club.area ?? "",
         division: club.division ?? "",
         meetingFrequency: club.meetingFrequency,
+        meetingMode: club.meetingMode,
         charterDate: club.charterDate
           ? new Date(club.charterDate).toISOString().split("T")[0]
           : "",
@@ -131,6 +138,16 @@ export function ClubSettingsModal({
             {...register("meetingFrequency")}
             options={MEETING_FREQUENCY_OPTIONS}
             error={!!errors.meetingFrequency}
+            focusColor="blue"
+            disabled={isLoading}
+          />
+        </FormField>
+
+        <FormField label="Meeting Mode" error={errors.meetingMode?.message}>
+          <SelectInput
+            {...register("meetingMode")}
+            options={MEETING_MODE_OPTIONS}
+            error={!!errors.meetingMode}
             focusColor="blue"
             disabled={isLoading}
           />

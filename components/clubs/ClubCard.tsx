@@ -4,7 +4,7 @@ import Link from "next/link";
 import { motion } from "framer-motion";
 import { MapPin, Calendar, Users, ArrowRight } from "lucide-react";
 import type { Club } from "@/lib/types/club";
-import { formatMeetingFrequency } from "@/lib/utils/club";
+import { formatMeetingFrequency, formatMeetingMode } from "@/lib/utils/club";
 
 interface ClubCardProps {
   club: Club;
@@ -42,6 +42,18 @@ export function ClubCard({ club }: ClubCardProps) {
             <div className="flex items-center gap-2 text-sm text-slate-500">
               <Calendar className="h-3 w-3" />
               <span>{formatMeetingFrequency(club.meetingFrequency)}</span>
+            </div>
+            <div className="flex items-center gap-2 text-sm text-slate-500">
+              <span
+                className={`inline-block h-2 w-2 rounded-full ${
+                  club.meetingMode === "ONLINE"
+                    ? "bg-green-400"
+                    : club.meetingMode === "HYBRID"
+                      ? "bg-amber-400"
+                      : "bg-slate-400"
+                }`}
+              />
+              <span>{formatMeetingMode(club.meetingMode)}</span>
             </div>
           </div>
         </div>

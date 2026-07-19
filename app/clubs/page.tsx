@@ -6,6 +6,7 @@ import { Search, Loader2 } from "lucide-react";
 import { ClubCard } from "@/components/clubs";
 import type { Club } from "@/lib/types/club";
 import { useClubs, useClubFilterOptions } from "@/lib/api";
+import { ClubMeetingMode } from "@/lib/types/club";
 
 // Per-card entrance animation is defined inline on each `motion.div` card.
 // We intentionally do NOT rely on parent-driven `staggerChildren`/variant
@@ -24,6 +25,7 @@ export default function ClubsPage() {
   const [district, setDistrict] = useState("");
   const [area, setArea] = useState("");
   const [division, setDivision] = useState("");
+  const [meetingMode, setMeetingMode] = useState("");
 
   const {
     data,
@@ -36,6 +38,7 @@ export default function ClubsPage() {
     district: district || undefined,
     area: area || undefined,
     division: division || undefined,
+    meetingMode: (meetingMode || undefined) as ClubMeetingMode | undefined,
   });
 
   const { data: filterOptions } = useClubFilterOptions();
@@ -56,15 +59,23 @@ export default function ClubsPage() {
   const districtOptions = filterOptions?.districts ?? [];
   const areaOptions = filterOptions?.areas ?? [];
   const divisionOptions = filterOptions?.divisions ?? [];
+  const meetingModeOptions = filterOptions?.meetingModes ?? [];
+
+  const meetingModeLabels: Record<string, string> = {
+    ONLINE: "Online",
+    OFFLINE: "Offline",
+    HYBRID: "Hybrid",
+  };
 
   const hasActiveFilters = Boolean(
-    district || area || division || searchQuery,
+    district || area || division || meetingMode || searchQuery,
   );
 
   const clearFilters = () => {
     setDistrict("");
     setArea("");
     setDivision("");
+    setMeetingMode("");
     setSearchQuery("");
   };
 
@@ -156,6 +167,14 @@ export default function ClubsPage() {
             placeholder="All Areas"
             onChange={setArea}
           />
+          <FilterSelect
+            label="Meeting Mode"
+            value={meetingMode}
+            options={meetingModeOptions}
+            placeholder="All Modes"
+            displayLabels={meetingModeLabels}
+            onChange={setMeetingMode}
+          />
           {hasActiveFilters && (
             <button
               onClick={clearFilters}
@@ -213,6 +232,7 @@ interface FilterSelectProps {
   value: string;
   options: string[];
   placeholder: string;
+  displayLabels?: Record<string, string>;
   onChange: (value: string) => void;
 }
 
@@ -221,6 +241,7 @@ function FilterSelect({
   value,
   options,
   placeholder,
+  displayLabels,
   onChange,
 }: FilterSelectProps) {
   return (
@@ -234,7 +255,7 @@ function FilterSelect({
         <option value="">{placeholder}</option>
         {options.map((option) => (
           <option key={option} value={option}>
-            {option}
+            {displayLabels?.[option] ?? option}
           </option>
         ))}
       </select>

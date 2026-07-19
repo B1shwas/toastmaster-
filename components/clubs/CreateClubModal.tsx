@@ -12,7 +12,7 @@ import {
   Textarea,
   SelectInput,
 } from "@/components/ui/form-elements";
-import { ClubMeetingFrequency } from "@/lib/types/club";
+import { ClubMeetingFrequency, ClubMeetingMode } from "@/lib/types/club";
 
 const formSchema = z.object({
   name: z
@@ -26,6 +26,7 @@ const formSchema = z.object({
   area: z.string().max(100, "Area must be less than 100 characters"),
   division: z.string().max(100, "Division must be less than 100 characters"),
   meetingFrequency: z.enum(["WEEKLY", "BIWEEKLY", "MONTHLY"]),
+  meetingMode: z.enum(["ONLINE", "OFFLINE", "HYBRID"]),
   charterDate: z.string().optional(),
 });
 
@@ -44,6 +45,12 @@ const MEETING_FREQUENCY_OPTIONS = [
   { value: ClubMeetingFrequency.WEEKLY, label: "Weekly" },
   { value: ClubMeetingFrequency.BIWEEKLY, label: "Bi-weekly" },
   { value: ClubMeetingFrequency.MONTHLY, label: "Monthly" },
+];
+
+const MEETING_MODE_OPTIONS = [
+  { value: ClubMeetingMode.OFFLINE, label: "Offline" },
+  { value: ClubMeetingMode.ONLINE, label: "Online" },
+  { value: ClubMeetingMode.HYBRID, label: "Hybrid" },
 ];
 
 export function CreateClubModal({
@@ -67,6 +74,7 @@ export function CreateClubModal({
       area: "",
       division: "",
       meetingFrequency: ClubMeetingFrequency.WEEKLY,
+      meetingMode: ClubMeetingMode.OFFLINE,
     },
   });
 
@@ -158,6 +166,20 @@ export function CreateClubModal({
             {...register("meetingFrequency")}
             options={MEETING_FREQUENCY_OPTIONS}
             error={!!errors.meetingFrequency}
+            focusColor="emerald"
+            disabled={isLoading}
+          />
+        </FormField>
+
+        {/* Meeting Mode */}
+        <FormField
+          label="Meeting Mode"
+          error={errors.meetingMode?.message}
+        >
+          <SelectInput
+            {...register("meetingMode")}
+            options={MEETING_MODE_OPTIONS}
+            error={!!errors.meetingMode}
             focusColor="emerald"
             disabled={isLoading}
           />

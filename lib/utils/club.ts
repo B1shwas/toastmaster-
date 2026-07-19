@@ -2,6 +2,7 @@ import type {
   Club,
   ClubMember,
   ClubMeetingFrequency,
+  ClubMeetingMode,
   ClubStats,
 } from "../types/club";
 
@@ -15,6 +16,16 @@ export function formatMeetingFrequency(
   frequency: ClubMeetingFrequency
 ): string {
   return MEETING_FREQUENCY_LABELS[frequency] || frequency;
+}
+
+const MEETING_MODE_LABELS: Record<ClubMeetingMode, string> = {
+  ONLINE: "Online",
+  OFFLINE: "Offline",
+  HYBRID: "Hybrid",
+};
+
+export function formatMeetingMode(mode: ClubMeetingMode): string {
+  return MEETING_MODE_LABELS[mode] || mode;
 }
 
 export function formatMemberDate(dateString: string): string {

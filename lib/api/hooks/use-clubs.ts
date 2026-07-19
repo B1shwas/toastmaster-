@@ -15,6 +15,7 @@ import type {
 	ClubStats,
   PendingClubGroup,
   ApiResponsePendingClubGroup,
+  ClubMeetingMode,
 } from "@/lib/types/club";
 import type {
 	AddMemberInput,
@@ -41,7 +42,7 @@ export const clubKeys = {
 
 export function useClubs(
 	limit = 16,
-	filters?: { district?: string; area?: string; division?: string },
+	filters?: { district?: string; area?: string; division?: string; meetingMode?: ClubMeetingMode },
 ) {
 	return useInfiniteQuery({
 		queryKey: [...clubKeys.lists(), "infinite", filters ?? {}],
@@ -54,6 +55,7 @@ export function useClubs(
 					district: filters?.district,
 					area: filters?.area,
 					division: filters?.division,
+					meetingMode: filters?.meetingMode,
 				},
 			});
 			return data.data ?? [];
@@ -69,7 +71,12 @@ export function useClubFilterOptions() {
 		queryKey: ["club-filter-options"],
 		queryFn: async () => {
 			const { data } = await api.get<{
-				data: { districts: string[]; divisions: string[]; areas: string[] };
+				data: {
+					districts: string[];
+					divisions: string[];
+					areas: string[];
+					meetingModes: ClubMeetingMode[];
+				};
 			}>("/club/all/filters");
 			return data.data;
 		},

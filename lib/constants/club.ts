@@ -1,4 +1,4 @@
-import { Club, ClubMeetingFrequency } from "../types/club";
+import { Club, ClubMeetingFrequency, ClubMeetingMode } from "../types/club";
 
 export const SAMPLE_CLUB: Club = {
 	id: "1",
@@ -11,6 +11,7 @@ export const SAMPLE_CLUB: Club = {
 	division: "Division B",
 	ownerId: "user-1",
 	meetingFrequency: ClubMeetingFrequency.WEEKLY,
+	meetingMode: ClubMeetingMode.OFFLINE,
 	createdAt: "2024-01-01",
 	updatedAt: "2024-12-01",
 };
