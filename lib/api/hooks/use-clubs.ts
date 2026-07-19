@@ -430,10 +430,11 @@ export function useSearchToastmasters(clubId: string, toastmasterId: string) {
     queryFn: async () => {
       const { data } = await api.get<{
         data: {
-          memberId: string;
+          memberId: string | null;
           userId: string;
           memberName: string;
           toastmasterId: string | null;
+          isClubMember: boolean;
         }[];
       }>(`/club/${clubId}/members/search/toastmaster`, {
         params: { toastmasterId },
