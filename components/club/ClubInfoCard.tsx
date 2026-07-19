@@ -2,9 +2,28 @@
 
 import { motion } from "framer-motion";
 import { Settings, MapPin, Users, Calendar, ExternalLink, Link } from "lucide-react";
-import type { Club } from "@/lib/types/club";
+import type { Club, ClubMeetingMode } from "@/lib/types/club";
 import { ClubCodeBadge } from "./ClubCodeBadge";
 import { useClubCode, useRegenerateClubCode, useUserClubStatus } from "@/lib/api";
+
+const MEETING_MODE_STYLES: Record<
+	ClubMeetingMode,
+	{ label: string; dot: string }
+> = {
+	ONLINE: { label: "Online", dot: "bg-green-400" },
+	OFFLINE: { label: "Offline", dot: "bg-slate-400" },
+	HYBRID: { label: "Hybrid", dot: "bg-amber-400" },
+};
+
+function meetingModeLabel(mode?: ClubMeetingMode): string {
+	if (!mode) return "";
+	return MEETING_MODE_STYLES[mode]?.label ?? mode;
+}
+
+function meetingModeDot(mode?: ClubMeetingMode): string {
+	if (!mode) return "bg-slate-400";
+	return MEETING_MODE_STYLES[mode]?.dot ?? "bg-slate-400";
+}
 
 interface ClubInfoCardProps {
 	club: Club;
@@ -137,6 +156,12 @@ export function ClubInfoCard({
 							<button onClick={onPendingClick} className="text-orange-400 font-medium hover:underline cursor-pointer">· {pendingMembers} Pending</button>
 						)}
 					</div>
+					{club.meetingMode && (
+						<div className="flex items-center gap-2">
+							<span className={`inline-block h-2 w-2 rounded-full ${meetingModeDot(club.meetingMode)} shrink-0`} />
+							<span className="truncate">{meetingModeLabel(club.meetingMode)}</span>
+						</div>
+					)}
 					{club.socialLinks && club.socialLinks.filter((l) => l.trim() !== "").length > 0 && (
 						<div className="pt-1 space-y-1">
 							{club.socialLinks.filter((l) => l.trim() !== "").map((url, i) => (
@@ -207,13 +232,19 @@ export function ClubInfoCard({
 					<Calendar className="w-4 h-4 text-cyan-400 shrink-0" />
 					<span>Charter Date: {formatCharterDate(club.charterDate)}</span>
 				</div>
+			<div className="flex items-center gap-2">
+				<Users className="w-4 h-4 text-cyan-400 shrink-0" />
+				<span className="font-medium text-white">{totalMembers} Members</span>
+				{pendingMembers > 0 && (
+					<span className="text-orange-400 font-medium">· {pendingMembers} Pending</span>
+				)}
+			</div>
+			{club.meetingMode && (
 				<div className="flex items-center gap-2">
-					<Users className="w-4 h-4 text-cyan-400 shrink-0" />
-					<span className="font-medium text-white">{totalMembers} Members</span>
-					{pendingMembers > 0 && (
-						<span className="text-orange-400 font-medium">· {pendingMembers} Pending</span>
-					)}
+					<span className={`inline-block h-2 w-2 rounded-full ${meetingModeDot(club.meetingMode)} shrink-0`} />
+					<span>{meetingModeLabel(club.meetingMode)}</span>
 				</div>
+			)}
 			</div>
 
 			{/* Club Code Section */}
