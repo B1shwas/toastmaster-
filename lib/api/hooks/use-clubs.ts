@@ -38,12 +38,22 @@ export const clubKeys = {
 	code: (clubId: string) => ["club-code", clubId] as const,
 };
 
-export function useClubs(page = 1, limit = 8) {
+export function useClubs(
+	page = 1,
+	limit = 8,
+	filters?: { district?: string; area?: string; division?: string },
+) {
 	return useQuery({
-		queryKey: clubKeys.list(page, limit),
+		queryKey: [...clubKeys.list(page, limit), filters ?? {}],
 		queryFn: async () => {
 			const { data } = await api.get<{ data: Club[] }>("/club/all/list", {
-				params: { page, limit },
+				params: {
+					page,
+					limit,
+					district: filters?.district,
+					area: filters?.area,
+					division: filters?.division,
+				},
 			});
 			return data.data;
 		},

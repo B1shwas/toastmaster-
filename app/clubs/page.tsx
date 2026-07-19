@@ -28,8 +28,15 @@ export default function ClubsPage() {
   const [page, setPage] = useState(1);
   const limit = 16;
   const [searchQuery, setSearchQuery] = useState("");
+  const [district, setDistrict] = useState("");
+  const [area, setArea] = useState("");
+  const [division, setDivision] = useState("");
 
-  const { data, isLoading, isError, isFetching } = useClubs(page, limit);
+  const { data, isLoading, isError, isFetching } = useClubs(page, limit, {
+    district: district || undefined,
+    area: area || undefined,
+    division: division || undefined,
+  });
 
   const clubs: Club[] = Array.isArray(data) ? data : [];
 
@@ -43,6 +50,29 @@ export default function ClubsPage() {
       club.area?.toLowerCase().includes(query)
     );
   });
+
+  const uniqueValues = (key: keyof Club) =>
+    Array.from(
+      new Set(
+        clubs
+          .map((club) => club[key])
+          .filter((value): value is string => typeof value === "string" && value.length > 0),
+      ),
+    ).sort();
+
+  const districtOptions = uniqueValues("district");
+  const areaOptions = uniqueValues("area");
+  const divisionOptions = uniqueValues("division");
+
+  const hasActiveFilters = Boolean(district || area || division || searchQuery);
+
+  const clearFilters = () => {
+    setDistrict("");
+    setArea("");
+    setDivision("");
+    setSearchQuery("");
+    setPage(1);
+  };
 
   if (isLoading) {
     return (
@@ -79,15 +109,60 @@ export default function ClubsPage() {
         </motion.div>
 
         {/* Search */}
-        <div className="relative mb-8">
+        <div className="relative mb-4">
           <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-slate-500" />
           <input
             type="text"
             value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
+            onChange={(e) => {
+              setSearchQuery(e.target.value);
+              setPage(1);
+            }}
             placeholder="Search clubs by name, district, or location..."
             className="w-full h-12 pl-12 pr-4 bg-slate-800/50 border border-slate-700 rounded-xl text-white placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-blue-500"
           />
+        </div>
+
+        {/* Filters */}
+        <div className="flex flex-wrap items-end gap-3 mb-8">
+          <FilterSelect
+            label="District"
+            value={district}
+            options={districtOptions}
+            placeholder="All Districts"
+            onChange={(value) => {
+              setDistrict(value);
+              setPage(1);
+            }}
+          />
+          <FilterSelect
+            label="Division"
+            value={division}
+            options={divisionOptions}
+            placeholder="All Divisions"
+            onChange={(value) => {
+              setDivision(value);
+              setPage(1);
+            }}
+          />
+          <FilterSelect
+            label="Area"
+            value={area}
+            options={areaOptions}
+            placeholder="All Areas"
+            onChange={(value) => {
+              setArea(value);
+              setPage(1);
+            }}
+          />
+          {hasActiveFilters && (
+            <button
+              onClick={clearFilters}
+              className="h-10 px-4 rounded-lg bg-slate-700 text-white hover:bg-slate-600 transition-colors"
+            >
+              Clear Filters
+            </button>
+          )}
         </div>
 
         {/* Grid */}
@@ -132,5 +207,39 @@ export default function ClubsPage() {
         </div>
       </div>
     </div>
+  );
+}
+
+interface FilterSelectProps {
+  label: string;
+  value: string;
+  options: string[];
+  placeholder: string;
+  onChange: (value: string) => void;
+}
+
+function FilterSelect({
+  label,
+  value,
+  options,
+  placeholder,
+  onChange,
+}: FilterSelectProps) {
+  return (
+    <label className="flex flex-col gap-1">
+      <span className="text-xs font-medium text-slate-400">{label}</span>
+      <select
+        value={value}
+        onChange={(e) => onChange(e.target.value)}
+        className="h-10 min-w-[150px] px-3 bg-slate-800/50 border border-slate-700 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+      >
+        <option value="">{placeholder}</option>
+        {options.map((option) => (
+          <option key={option} value={option}>
+            {option}
+          </option>
+        ))}
+      </select>
+    </label>
   );
 }
