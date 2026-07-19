@@ -3,7 +3,14 @@ import { Calendar, MapPin, ArrowRight } from "lucide-react";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { formatMeetingFrequency } from "@/lib/utils/club";
-import type { Club } from "@/lib/types/club";
+import { formatMeetingMode } from "@/lib/utils/club";
+import type { Club, ClubMeetingMode } from "@/lib/types/club";
+
+const MEETING_MODE_DOT: Record<ClubMeetingMode, string> = {
+  ONLINE: "bg-green-400",
+  OFFLINE: "bg-slate-400",
+  HYBRID: "bg-amber-400",
+};
 
 interface WelcomeSectionProps {
   name: string;
@@ -74,6 +81,16 @@ export function WelcomeSection({ name, clubs = [] }: WelcomeSectionProps) {
                         <Calendar className="h-3 w-3 shrink-0 text-emerald-400" />
                         <span>{formatMeetingFrequency(club.meetingFrequency)}</span>
                       </div>
+                      {club.meetingMode && (
+                        <div className="flex items-center gap-1 text-xs text-slate-400">
+                          <span
+                            className={`inline-block h-2 w-2 rounded-full shrink-0 ${
+                              MEETING_MODE_DOT[club.meetingMode] ?? "bg-slate-400"
+                            }`}
+                          />
+                          <span>{formatMeetingMode(club.meetingMode)}</span>
+                        </div>
+                      )}
                     </div>
                     <Link
                       href={`/club/${club.id}`}
