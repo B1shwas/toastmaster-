@@ -1,37 +1,46 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { motion } from "framer-motion";
-import { Search } from "lucide-react";
+import { Search, Loader2 } from "lucide-react";
 import { ClubCard } from "@/components/clubs";
 import type { Club } from "@/lib/types/club";
-import { useClubs } from "@/lib/api";
+import { useClubs, useClubFilterOptions } from "@/lib/api";
 
-const containerVariants = {
-  hidden: { opacity: 0 },
-  visible: {
-    opacity: 1,
-    transition: { staggerChildren: 0.1 },
-  },
-};
+// Per-card entrance animation is defined inline on each `motion.div` card.
+// We intentionally do NOT rely on parent-driven `staggerChildren`/variant
+// inheritance: when the result set grows (e.g. clearing a filter or picking
+// "All" while the unfiltered query is cached), newly-added cards would inherit
+// an already-completed parent stagger and never receive an "animate" trigger,
+// leaving them invisible (opacity: 0) while still occupying grid space —
+// showing the previously-filtered clubs plus empty boxes for the rest.
+// Explicit `initial`/`animate` on every card guarantees it animates to visible
+// on mount, regardless of when it is added (filter change, search, infinite scroll).
 
-const itemVariants = {
-  hidden: { opacity: 0, y: 20 },
-  visible: {
-    opacity: 1,
-    y: 0,
-    transition: { duration: 0.5 },
-  },
-};
+const LIMIT = 16;
 
 export default function ClubsPage() {
-  const [page, setPage] = useState(1);
-  const limit = 16;
   const [searchQuery, setSearchQuery] = useState("");
+  const [district, setDistrict] = useState("");
+  const [area, setArea] = useState("");
+  const [division, setDivision] = useState("");
 
-  const { data, isLoading, isError, isFetching } = useClubs(page, limit);
+  const {
+    data,
+    isLoading,
+    isError,
+    isFetchingNextPage,
+    hasNextPage,
+    fetchNextPage,
+  } = useClubs(LIMIT, {
+    district: district || undefined,
+    area: area || undefined,
+    division: division || undefined,
+  });
 
-  const clubs: Club[] = Array.isArray(data) ? data : [];
+  const { data: filterOptions } = useClubFilterOptions();
+
+  const clubs: Club[] = data?.pages.flat() ?? [];
 
   const filteredClubs = clubs.filter((club) => {
     const query = searchQuery.toLowerCase();
@@ -43,6 +52,40 @@ export default function ClubsPage() {
       club.area?.toLowerCase().includes(query)
     );
   });
+
+  const districtOptions = filterOptions?.districts ?? [];
+  const areaOptions = filterOptions?.areas ?? [];
+  const divisionOptions = filterOptions?.divisions ?? [];
+
+  const hasActiveFilters = Boolean(
+    district || area || division || searchQuery,
+  );
+
+  const clearFilters = () => {
+    setDistrict("");
+    setArea("");
+    setDivision("");
+    setSearchQuery("");
+  };
+
+  const sentinelRef = useRef<HTMLDivElement | null>(null);
+
+  useEffect(() => {
+    const node = sentinelRef.current;
+    if (!node) return;
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        if (entries[0].isIntersecting && hasNextPage && !isFetchingNextPage) {
+          fetchNextPage();
+        }
+      },
+      { rootMargin: "200px" },
+    );
+
+    observer.observe(node);
+    return () => observer.disconnect();
+  }, [hasNextPage, isFetchingNextPage, fetchNextPage]);
 
   if (isLoading) {
     return (
@@ -79,7 +122,7 @@ export default function ClubsPage() {
         </motion.div>
 
         {/* Search */}
-        <div className="relative mb-8">
+        <div className="relative mb-4">
           <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-slate-500" />
           <input
             type="text"
@@ -90,16 +133,54 @@ export default function ClubsPage() {
           />
         </div>
 
+        {/* Filters */}
+        <div className="flex flex-wrap items-end gap-3 mb-8">
+          <FilterSelect
+            label="District"
+            value={district}
+            options={districtOptions}
+            placeholder="All Districts"
+            onChange={setDistrict}
+          />
+          <FilterSelect
+            label="Division"
+            value={division}
+            options={divisionOptions}
+            placeholder="All Divisions"
+            onChange={setDivision}
+          />
+          <FilterSelect
+            label="Area"
+            value={area}
+            options={areaOptions}
+            placeholder="All Areas"
+            onChange={setArea}
+          />
+          {hasActiveFilters && (
+            <button
+              onClick={clearFilters}
+              className="h-10 px-4 rounded-lg bg-slate-700 text-white hover:bg-slate-600 transition-colors"
+            >
+              Clear Filters
+            </button>
+          )}
+        </div>
+
         {/* Grid */}
         {filteredClubs.length > 0 ? (
           <motion.div
-            variants={containerVariants}
-            initial="hidden"
-            animate="visible"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ duration: 0.4 }}
             className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4"
           >
-            {filteredClubs.map((club) => (
-              <motion.div key={club.id} variants={itemVariants}>
+            {filteredClubs.map((club, index) => (
+              <motion.div
+                key={club.id}
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.4, delay: Math.min(index * 0.05, 0.4) }}
+              >
                 <ClubCard club={club} />
               </motion.div>
             ))}
@@ -108,29 +189,55 @@ export default function ClubsPage() {
           <div className="text-center py-16 text-slate-400">No clubs found</div>
         )}
 
-        {/* Pagination */}
-        <div className="flex justify-center items-center gap-4 mt-12">
-          <button
-            disabled={page === 1}
-            onClick={() => setPage((p) => p - 1)}
-            className="px-4 py-2 rounded-lg bg-slate-700 text-white disabled:opacity-40"
-          >
-            Previous
-          </button>
-
-          <span className="text-slate-400">
-            Page {page} {isFetching && "(Loading...)"}
-          </span>
-
-          <button
-            disabled={clubs.length < limit}
-            onClick={() => setPage((p) => p + 1)}
-            className="px-4 py-2 rounded-lg bg-slate-700 text-white disabled:opacity-40"
-          >
-            Next
-          </button>
+        {/* Infinite scroll sentinel */}
+        <div
+          ref={sentinelRef}
+          className="flex justify-center items-center py-10"
+        >
+          {isFetchingNextPage && (
+            <Loader2 className="h-6 w-6 animate-spin text-slate-400" />
+          )}
+          {!hasNextPage && filteredClubs.length > 0 && (
+            <span className="text-slate-500 text-sm">
+              You&apos;ve reached the end
+            </span>
+          )}
         </div>
       </div>
     </div>
+  );
+}
+
+interface FilterSelectProps {
+  label: string;
+  value: string;
+  options: string[];
+  placeholder: string;
+  onChange: (value: string) => void;
+}
+
+function FilterSelect({
+  label,
+  value,
+  options,
+  placeholder,
+  onChange,
+}: FilterSelectProps) {
+  return (
+    <label className="flex flex-col gap-1">
+      <span className="text-xs font-medium text-slate-400">{label}</span>
+      <select
+        value={value}
+        onChange={(e) => onChange(e.target.value)}
+        className="h-10 min-w-[150px] px-3 bg-slate-800/50 border border-slate-700 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+      >
+        <option value="">{placeholder}</option>
+        {options.map((option) => (
+          <option key={option} value={option}>
+            {option}
+          </option>
+        ))}
+      </select>
+    </label>
   );
 }

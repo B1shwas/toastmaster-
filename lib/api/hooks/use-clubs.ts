@@ -1,6 +1,7 @@
 import useAuthStore from "@/lib/stores/useAuthStore";
 import {
 	useQuery,
+	useInfiniteQuery,
 	useMutation,
 	useQueryClient,
 	keepPreviousData,
@@ -38,17 +39,41 @@ export const clubKeys = {
 	code: (clubId: string) => ["club-code", clubId] as const,
 };
 
-export function useClubs(page = 1, limit = 8) {
-	return useQuery({
-		queryKey: clubKeys.list(page, limit),
-		queryFn: async () => {
+export function useClubs(
+	limit = 16,
+	filters?: { district?: string; area?: string; division?: string },
+) {
+	return useInfiniteQuery({
+		queryKey: [...clubKeys.lists(), "infinite", filters ?? {}],
+		initialPageParam: 1,
+		queryFn: async ({ pageParam }) => {
 			const { data } = await api.get<{ data: Club[] }>("/club/all/list", {
-				params: { page, limit },
+				params: {
+					page: pageParam,
+					limit,
+					district: filters?.district,
+					area: filters?.area,
+					division: filters?.division,
+				},
 			});
+			return data.data ?? [];
+		},
+		getNextPageParam: (lastPage, allPages) =>
+			lastPage.length < limit ? undefined : allPages.length + 1,
+		staleTime: 5 * 60 * 1000,
+	});
+}
+
+export function useClubFilterOptions() {
+	return useQuery({
+		queryKey: ["club-filter-options"],
+		queryFn: async () => {
+			const { data } = await api.get<{
+				data: { districts: string[]; divisions: string[]; areas: string[] };
+			}>("/club/all/filters");
 			return data.data;
 		},
-		placeholderData: keepPreviousData,
-		staleTime: 5 * 60 * 1000,
+		staleTime: 10 * 60 * 1000,
 	});
 }
 
