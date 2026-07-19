@@ -7,22 +7,15 @@ import { ClubCard } from "@/components/clubs";
 import type { Club } from "@/lib/types/club";
 import { useClubs, useClubFilterOptions } from "@/lib/api";
 
-const containerVariants = {
-  hidden: { opacity: 0 },
-  visible: {
-    opacity: 1,
-    transition: { staggerChildren: 0.1 },
-  },
-};
-
-const itemVariants = {
-  hidden: { opacity: 0, y: 20 },
-  visible: {
-    opacity: 1,
-    y: 0,
-    transition: { duration: 0.5 },
-  },
-};
+// Per-card entrance animation is defined inline on each `motion.div` card.
+// We intentionally do NOT rely on parent-driven `staggerChildren`/variant
+// inheritance: when the result set grows (e.g. clearing a filter or picking
+// "All" while the unfiltered query is cached), newly-added cards would inherit
+// an already-completed parent stagger and never receive an "animate" trigger,
+// leaving them invisible (opacity: 0) while still occupying grid space —
+// showing the previously-filtered clubs plus empty boxes for the rest.
+// Explicit `initial`/`animate` on every card guarantees it animates to visible
+// on mount, regardless of when it is added (filter change, search, infinite scroll).
 
 const LIMIT = 16;
 
@@ -176,13 +169,18 @@ export default function ClubsPage() {
         {/* Grid */}
         {filteredClubs.length > 0 ? (
           <motion.div
-            variants={containerVariants}
-            initial="hidden"
-            animate="visible"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ duration: 0.4 }}
             className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4"
           >
-            {filteredClubs.map((club) => (
-              <motion.div key={club.id} variants={itemVariants}>
+            {filteredClubs.map((club, index) => (
+              <motion.div
+                key={club.id}
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.4, delay: Math.min(index * 0.05, 0.4) }}
+              >
                 <ClubCard club={club} />
               </motion.div>
             ))}
