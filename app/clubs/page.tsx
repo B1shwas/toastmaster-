@@ -1,11 +1,11 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { motion } from "framer-motion";
-import { Search } from "lucide-react";
+import { Search, Loader2 } from "lucide-react";
 import { ClubCard } from "@/components/clubs";
 import type { Club } from "@/lib/types/club";
-import { useClubs } from "@/lib/api";
+import { useClubs, useClubFilterOptions } from "@/lib/api";
 
 const containerVariants = {
   hidden: { opacity: 0 },
@@ -24,21 +24,30 @@ const itemVariants = {
   },
 };
 
+const LIMIT = 16;
+
 export default function ClubsPage() {
-  const [page, setPage] = useState(1);
-  const limit = 16;
   const [searchQuery, setSearchQuery] = useState("");
   const [district, setDistrict] = useState("");
   const [area, setArea] = useState("");
   const [division, setDivision] = useState("");
 
-  const { data, isLoading, isError, isFetching } = useClubs(page, limit, {
+  const {
+    data,
+    isLoading,
+    isError,
+    isFetchingNextPage,
+    hasNextPage,
+    fetchNextPage,
+  } = useClubs(LIMIT, {
     district: district || undefined,
     area: area || undefined,
     division: division || undefined,
   });
 
-  const clubs: Club[] = Array.isArray(data) ? data : [];
+  const { data: filterOptions } = useClubFilterOptions();
+
+  const clubs: Club[] = data?.pages.flat() ?? [];
 
   const filteredClubs = clubs.filter((club) => {
     const query = searchQuery.toLowerCase();
@@ -51,28 +60,39 @@ export default function ClubsPage() {
     );
   });
 
-  const uniqueValues = (key: keyof Club) =>
-    Array.from(
-      new Set(
-        clubs
-          .map((club) => club[key])
-          .filter((value): value is string => typeof value === "string" && value.length > 0),
-      ),
-    ).sort();
+  const districtOptions = filterOptions?.districts ?? [];
+  const areaOptions = filterOptions?.areas ?? [];
+  const divisionOptions = filterOptions?.divisions ?? [];
 
-  const districtOptions = uniqueValues("district");
-  const areaOptions = uniqueValues("area");
-  const divisionOptions = uniqueValues("division");
-
-  const hasActiveFilters = Boolean(district || area || division || searchQuery);
+  const hasActiveFilters = Boolean(
+    district || area || division || searchQuery,
+  );
 
   const clearFilters = () => {
     setDistrict("");
     setArea("");
     setDivision("");
     setSearchQuery("");
-    setPage(1);
   };
+
+  const sentinelRef = useRef<HTMLDivElement | null>(null);
+
+  useEffect(() => {
+    const node = sentinelRef.current;
+    if (!node) return;
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        if (entries[0].isIntersecting && hasNextPage && !isFetchingNextPage) {
+          fetchNextPage();
+        }
+      },
+      { rootMargin: "200px" },
+    );
+
+    observer.observe(node);
+    return () => observer.disconnect();
+  }, [hasNextPage, isFetchingNextPage, fetchNextPage]);
 
   if (isLoading) {
     return (
@@ -114,10 +134,7 @@ export default function ClubsPage() {
           <input
             type="text"
             value={searchQuery}
-            onChange={(e) => {
-              setSearchQuery(e.target.value);
-              setPage(1);
-            }}
+            onChange={(e) => setSearchQuery(e.target.value)}
             placeholder="Search clubs by name, district, or location..."
             className="w-full h-12 pl-12 pr-4 bg-slate-800/50 border border-slate-700 rounded-xl text-white placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-blue-500"
           />
@@ -130,30 +147,21 @@ export default function ClubsPage() {
             value={district}
             options={districtOptions}
             placeholder="All Districts"
-            onChange={(value) => {
-              setDistrict(value);
-              setPage(1);
-            }}
+            onChange={setDistrict}
           />
           <FilterSelect
             label="Division"
             value={division}
             options={divisionOptions}
             placeholder="All Divisions"
-            onChange={(value) => {
-              setDivision(value);
-              setPage(1);
-            }}
+            onChange={setDivision}
           />
           <FilterSelect
             label="Area"
             value={area}
             options={areaOptions}
             placeholder="All Areas"
-            onChange={(value) => {
-              setArea(value);
-              setPage(1);
-            }}
+            onChange={setArea}
           />
           {hasActiveFilters && (
             <button
@@ -183,27 +191,19 @@ export default function ClubsPage() {
           <div className="text-center py-16 text-slate-400">No clubs found</div>
         )}
 
-        {/* Pagination */}
-        <div className="flex justify-center items-center gap-4 mt-12">
-          <button
-            disabled={page === 1}
-            onClick={() => setPage((p) => p - 1)}
-            className="px-4 py-2 rounded-lg bg-slate-700 text-white disabled:opacity-40"
-          >
-            Previous
-          </button>
-
-          <span className="text-slate-400">
-            Page {page} {isFetching && "(Loading...)"}
-          </span>
-
-          <button
-            disabled={clubs.length < limit}
-            onClick={() => setPage((p) => p + 1)}
-            className="px-4 py-2 rounded-lg bg-slate-700 text-white disabled:opacity-40"
-          >
-            Next
-          </button>
+        {/* Infinite scroll sentinel */}
+        <div
+          ref={sentinelRef}
+          className="flex justify-center items-center py-10"
+        >
+          {isFetchingNextPage && (
+            <Loader2 className="h-6 w-6 animate-spin text-slate-400" />
+          )}
+          {!hasNextPage && filteredClubs.length > 0 && (
+            <span className="text-slate-500 text-sm">
+              You&apos;ve reached the end
+            </span>
+          )}
         </div>
       </div>
     </div>
