@@ -6,10 +6,11 @@ import type { ClubMember } from "@/lib/types/club";
 import { useSearchToastmasters } from "@/lib/api/hooks/use-clubs";
 
 export interface ToastmasterSuggestion {
-  memberId: string;
+  memberId: string | null;
   userId: string;
   memberName: string;
   toastmasterId: string | null;
+  isClubMember: boolean;
 }
 
 interface ToastmasterAutocompleteProps {
@@ -97,12 +98,19 @@ export function ToastmasterAutocomplete({
                       `${s.memberName} (${formatToastmasterId(s.toastmasterId)})`
                     );
                     setOpen(false);
-                    onChange(s.toastmasterId ?? "", s.memberId, s.userId);
+                    onChange(s.toastmasterId ?? "", s.memberId ?? "", s.userId);
                   }}
                 >
                   <span>{s.memberName}</span>
-                  <span className="text-xs text-slate-400">
-                    {formatToastmasterId(s.toastmasterId)}
+                  <span className="flex items-center gap-2">
+                    <span className="text-xs text-slate-400">
+                      {formatToastmasterId(s.toastmasterId)}
+                    </span>
+                    {!s.isClubMember && (
+                      <span className="rounded bg-amber-500/20 px-1.5 py-0.5 text-[10px] font-medium text-amber-300">
+                        Add to club
+                      </span>
+                    )}
                   </span>
                 </button>
               </li>
