@@ -16,6 +16,8 @@ export interface ClubMember {
 	memberName: string;
 	member_date_joined: string;
 	member_role: "Immediate Past President" | "President" | "VP Education" | "Associate - VPE" | "VP Membership" | "Associate - VPM" | "VP Public Relations" | "Associate - VPPR" | "Secretary" | "Treasurer" | "Sergeant at Arms" | "Member";
+	role?: string;
+	roleId?: string;
 	isRegisteredUser: boolean;
 	user_introduction?: string | null;
 	isPending?: boolean;
@@ -71,6 +73,7 @@ export interface MemberCardProps {
 	member: ClubMember;
 	onRemove?: (memberId: string) => void;
 	onEdit?: (member: ClubMember) => void;
+	onEditRole?: (member: ClubMember) => void;
 	isOwner?: boolean;
 	canViewEmail?: boolean;
 }

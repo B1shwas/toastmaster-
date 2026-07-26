@@ -2,13 +2,13 @@
 
 import { memo } from "react";
 import { motion } from "framer-motion";
-import type { MemberCardProps } from "@/lib/types/club";
+import type { ClubMember, MemberCardProps } from "@/lib/types/club";
 import {
   formatMemberDate,
   getInitials,
   isLinkedMember,
 } from "@/lib/utils/club";
-import { UserCheck, Calendar, MoreVertical, Trash2 } from "lucide-react";
+import { UserCheck, Calendar, MoreVertical, Trash2, ShieldCheck } from "lucide-react";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -20,9 +20,10 @@ function MemberCardComponent({
   member,
   onRemove,
   onEdit,
+  onEditRole,
   onClick,
   isOwner = false,
-}: MemberCardProps & { onClick?: (member: any) => void }) {
+}: MemberCardProps & { onClick?: (member: ClubMember) => void }) {
   const isLinked = member.isRegisteredUser;
 
   return (
@@ -73,7 +74,7 @@ function MemberCardComponent({
         </div>
 
         {/* Actions Dropdown */}
-        {(onRemove || onEdit) && (
+        {(onRemove || onEditRole) && (
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <button
@@ -88,6 +89,18 @@ function MemberCardComponent({
               onClick={(event) => event.stopPropagation()}
               className="bg-slate-800 border-slate-700"
             >
+              {onEditRole && !member.isPending && !isOwner && (
+                <DropdownMenuItem
+                  onClick={(event) => {
+                    event.stopPropagation();
+                    onEditRole(member);
+                  }}
+                  className="text-cyan-400 focus:text-cyan-400 focus:bg-cyan-500/10 cursor-pointer"
+                >
+                  <ShieldCheck className="w-4 h-4 mr-2" />
+                  Change Role
+                </DropdownMenuItem>
+              )}
               {onRemove && (
                 <DropdownMenuItem
                   onClick={(event) => {

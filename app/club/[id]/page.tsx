@@ -26,9 +26,10 @@ import type { CreateMeetingInput } from "@/lib/api/hooks/use-meetings";
 import { filterUpcomingMeetings } from "@/lib/utils/meeting";
 import { useAuth } from "@/lib/hooks/useAuth";
 import type { AddMemberInput, ClubSettingsInput, JoinClubInput } from "@/lib/schemas/club.schema";
+import type { ClubMember } from "@/lib/types/club";
 import { useRouter } from "next/navigation";
 import { JoinClubModal } from "@/components/clubs/JoinClubModal";
-import { useClubPendingMembers, useJoinClub, usePendingRequestDecision, useRemoveMember, useRequestJoinClub, useUpdateClub, useUserClubStatus } from "@/lib/api/hooks/use-clubs";
+import { useClubPendingMembers, useJoinClub, usePendingRequestDecision, useRemoveMember, useRequestJoinClub, useUpdateClub, useUserClubStatus, useUpdateMemberRole, useClubMemberRoles } from "@/lib/api/hooks/use-clubs";
 import { useToast } from "@/hooks/use-toast";
 import { ListAllAgendas } from "@/components/agendaReport/ListAllAgendas";
 
@@ -95,6 +96,8 @@ export default function ClubPage({ params }: ClubPageProps) {
   const requestJoinClubMutation = useRequestJoinClub();
   const pendingDecisionMutation = usePendingRequestDecision();
   const createMeetingMutation = useCreateMeeting();
+  const updateMemberRoleMutation = useUpdateMemberRole(clubId);
+  const { data: clubMemberRoles } = useClubMemberRoles();
 
   const router = useRouter();
   const { toast } = useToast();
@@ -202,6 +205,21 @@ export default function ClubPage({ params }: ClubPageProps) {
     setSelectedMemberForReport(null);
   };
 
+  const handleUpdateRole = async (memberId: string, newRole: string) => {
+    await updateMemberRoleMutation.mutateAsync(
+      { memberId, newRole },
+      {
+        onSuccess: () => {
+          setSelectedMemberForReport(null);
+        },
+      }
+    );
+  };
+
+  const handleEditRole = (member: ClubMember) => {
+    setSelectedMemberForReport(member);
+  };
+
   if (isClubError) {
     return (
       <div className="min-h-screen flex flex-col justify-center items-center text-white bg-linear-to-b from-slate-950 to-slate-900">
@@ -266,6 +284,7 @@ export default function ClubPage({ params }: ClubPageProps) {
             onSearchChange={setSearchQuery}
             onAddMember={() => setIsAddMemberOpen(true)}
             onRemoveMember={handleRemoveMember}
+            onEditRole={canManageMembers ? handleEditRole : undefined}
             onMemberClick={setSelectedMemberForReport}
             ownerId={club.ownerId}
             canManageMembers={canManageMembers}
@@ -310,6 +329,7 @@ export default function ClubPage({ params }: ClubPageProps) {
         onClose={() => setSelectedMemberForReport(null)}
         member={selectedMemberForReport}
         clubId={clubId}
+        ownerId={club.ownerId}
         onRemoveMember={async (memberId) => {
           if (selectedMemberForReport?.isPending) {
             pendingDecisionMutation.mutate({ clubId, memberId, decision: false });
@@ -319,9 +339,13 @@ export default function ClubPage({ params }: ClubPageProps) {
           setSelectedMemberForReport(null);
         }}
         onAcceptMember={canManageMembers ? handleAcceptMember : undefined}
+        onUpdateRole={canManageMembers ? handleUpdateRole : undefined}
         canRemoveMember={canManageMembers}
+        canManageRole={canManageMembers}
         isRemovingMember={removeMemberMutation.isPending || pendingDecisionMutation.isPending}
         isAcceptingMember={pendingDecisionMutation.isPending}
+        isUpdatingRole={updateMemberRoleMutation.isPending}
+        roles={clubMemberRoles ?? []}
       />
     </div>
   );

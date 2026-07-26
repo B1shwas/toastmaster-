@@ -13,6 +13,7 @@ interface MemberListSectionProps {
 	onSearchChange: (query: string) => void;
 	onAddMember: () => void;
 	onRemoveMember?: (memberId: string) => void;
+	onEditRole?: (member: ClubMember) => void;
 	ownerId?: string;
 	isLoading?: boolean;
 	canManageMembers?: boolean;
@@ -24,6 +25,7 @@ function MemberListSectionComponent({
 	onSearchChange,
 	onAddMember,
 	onRemoveMember,
+	onEditRole,
 	ownerId,
 	isLoading = false,
 	canManageMembers = false,
@@ -89,7 +91,9 @@ function MemberListSectionComponent({
 								key={member.member_id}
 								member={member}
 								onRemove={canManageMembers ? onRemoveMember : undefined}
+								onEditRole={canManageMembers ? onEditRole : undefined}
 								onClick={onMemberClick}
+								isOwner={member.userId === ownerId}
 								canViewEmail={canManageMembers}
 							/>
 						))

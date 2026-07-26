@@ -17,6 +17,7 @@ import type {
   ApiResponsePendingClubGroup,
   ClubMeetingMode,
 } from "@/lib/types/club";
+import type { AgendaRole } from "@/lib/types/agenda";
 import type {
 	AddMemberInput,
 	ClubSettingsInput,
@@ -264,6 +265,56 @@ export function useClubRole(clubId: string, userId: string) {
 			return data.data;
 		},
 		enabled: !!clubId && !!userId,
+	});
+}
+
+export function useClubMemberRoles() {
+	return useQuery({
+		queryKey: ["club-member-roles"],
+		queryFn: async () => {
+			const { data } = await api.get<{ data: AgendaRole[] }>("/roles", {
+				params: { category: "CLUB_MEMBER" },
+			});
+			return data.data ?? [];
+		},
+		staleTime: 10 * 60 * 1000,
+		gcTime: 30 * 60 * 1000,
+	});
+}
+
+export function useUpdateMemberRole(clubId: string) {
+	const queryClient = useQueryClient();
+	const { user } = useAuthStore.getState();
+
+	return useMutation({
+		mutationFn: async (input: { memberId: string; newRole: string }) => {
+			const { data } = await api.patch<{ data: { message: string } }>(
+				"/club/member/role/update",
+				{
+					memberId: input.memberId,
+					clubId,
+					newRole: input.newRole,
+				}
+			);
+			return data.data;
+		},
+		onSuccess: () => {
+			queryClient.invalidateQueries({ queryKey: clubKeys.members(clubId) });
+			queryClient.invalidateQueries({ queryKey: clubKeys.detail(clubId) });
+			if (user?.id) {
+				queryClient.invalidateQueries({
+					queryKey: clubKeys.role(clubId, user.id),
+				});
+			}
+			reactToast.success("Member role updated successfully");
+		},
+		onError: (error) => {
+			const axiosError = error as AxiosError<any>;
+			const message =
+				axiosError.response?.data?.error?.message ??
+				"Failed to update member role. Please try again.";
+			reactToast.error(message);
+		},
 	});
 }
 

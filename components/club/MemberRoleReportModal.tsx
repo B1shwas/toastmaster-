@@ -1,21 +1,27 @@
 "use client";
 
 import { motion, AnimatePresence } from "framer-motion";
-import { X, Award, Loader2, User, Trash2, CheckCircle } from "lucide-react";
+import { X, Award, Loader2, User, Trash2, CheckCircle, ShieldCheck } from "lucide-react";
 import { useRoleCounts } from "@/lib/api/hooks/use-agenda";
 import type { ClubMember } from "@/lib/types/club";
-import { useMemo } from "react";
+import type { AgendaRole } from "@/lib/types/agenda";
+import { useMemo, useState } from "react";
 
 interface MemberRoleReportModalProps {
     isOpen: boolean;
     onClose: () => void;
     member: ClubMember | null;
     clubId: string;
+    ownerId?: string;
     onRemoveMember?: (memberId: string) => Promise<void> | void;
     onAcceptMember?: (memberId: string) => Promise<void> | void;
+    onUpdateRole?: (memberId: string, newRole: string) => Promise<void> | void;
     canRemoveMember?: boolean;
+    canManageRole?: boolean;
     isRemovingMember?: boolean;
     isAcceptingMember?: boolean;
+    isUpdatingRole?: boolean;
+    roles?: AgendaRole[];
 }
 
 export function MemberRoleReportModal({
@@ -23,13 +29,34 @@ export function MemberRoleReportModal({
     onClose,
     member,
     clubId,
+    ownerId,
     onRemoveMember,
     onAcceptMember,
+    onUpdateRole,
     canRemoveMember = false,
+    canManageRole = false,
     isRemovingMember = false,
     isAcceptingMember = false,
+    isUpdatingRole = false,
+    roles = [],
 }: MemberRoleReportModalProps) {
     const { data: roleCountsResponse, isLoading } = useRoleCounts(clubId);
+    const [selectedRoleKey, setSelectedRoleKey] = useState<string>(member?.role ?? "");
+
+    const currentRoleLabel = useMemo(() => {
+        if (!member) return "";
+        return roles.find((r) => r.key === selectedRoleKey)?.type ?? member.member_role;
+    }, [member, roles, selectedRoleKey]);
+
+    const hasRoleChanged = useMemo(() => {
+        if (!member) return false;
+        return selectedRoleKey && selectedRoleKey !== (member.role ?? "");
+    }, [member, selectedRoleKey]);
+
+    const isOwner = useMemo(() => {
+        if (!member || !ownerId) return false;
+        return member.userId === ownerId;
+    }, [member, ownerId]);
 
     const memberRoles = useMemo(() => {
         if (!roleCountsResponse?.data || !member) return [];
@@ -77,12 +104,12 @@ export function MemberRoleReportModal({
                             <div className="w-12 h-12 rounded-full bg-slate-700 flex items-center justify-center text-white font-bold text-lg">
                                 <User className="w-6 h-6" />
                             </div>
-                            <div>
-                                <h3 className="text-white font-semibold text-lg">
+                            <div className="flex-1 min-w-0">
+                                <h3 className="text-white font-semibold text-lg truncate">
                                     {member.memberName}
                                 </h3>
                                 <p className="text-slate-400 text-sm italic">
-                                    {member.member_role}
+                                    {currentRoleLabel}
                                 </p>
                                 {member.member_toastmaster_id && (
                                     <p className="text-slate-500 text-xs font-mono mt-0.5">
@@ -91,6 +118,43 @@ export function MemberRoleReportModal({
                                 )}
                             </div>
                         </div>
+
+                        {canManageRole && !member.isPending && !isOwner && roles.length > 0 && (
+                            <div className="mt-4 p-3 bg-slate-800/50 border border-slate-700/50 rounded-xl space-y-3">
+                                <div className="flex items-center gap-2">
+                                    <ShieldCheck className="w-4 h-4 text-cyan-400" />
+                                    <p className="text-xs text-slate-400 uppercase tracking-wider">Reassign Role</p>
+                                </div>
+                                <div className="flex items-center gap-2">
+                                    <select
+                                        value={selectedRoleKey}
+                                        onChange={(e) => setSelectedRoleKey(e.target.value)}
+                                        disabled={isUpdatingRole}
+                                        className="flex-1 px-3 py-2 bg-slate-800 border border-slate-700 rounded-lg text-white text-sm focus:outline-none focus:ring-2 focus:ring-cyan-500 disabled:opacity-60 disabled:cursor-not-allowed"
+                                    >
+                                        {roles.map((role) => (
+                                            <option key={role.key} value={role.key} className="bg-slate-800">
+                                                {role.type}
+                                            </option>
+                                        ))}
+                                    </select>
+                                    <button
+                                        onClick={() => onUpdateRole?.(member.member_id, selectedRoleKey)}
+                                        disabled={!hasRoleChanged || isUpdatingRole}
+                                        className="px-4 py-2 bg-linear-to-br from-cyan-500 to-blue-600 hover:from-cyan-400 hover:to-blue-500 text-white text-sm font-semibold rounded-lg transition disabled:opacity-60 disabled:cursor-not-allowed flex items-center gap-2"
+                                    >
+                                        {isUpdatingRole ? (
+                                            <>
+                                                <Loader2 className="w-4 h-4 animate-spin" />
+                                                Saving...
+                                            </>
+                                        ) : (
+                                            "Update"
+                                        )}
+                                    </button>
+                                </div>
+                            </div>
+                        )}
 
                         {member.user_introduction?.trim() ? (
                             <div className="mt-4 p-3 bg-slate-800/50 border border-slate-700/50 rounded-xl">
