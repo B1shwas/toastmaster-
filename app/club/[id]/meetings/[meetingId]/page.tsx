@@ -48,12 +48,14 @@ function MeetingContent({
     meeting,
     clubId,
     canManageNotes,
+    canManageMeeting,
     userRole,
     isMember,
 }: {
     meeting: Meeting;
     clubId: string;
     canManageNotes: boolean;
+    canManageMeeting: boolean;
     userRole: "OWNER" | "ADMIN" | "MEMBER";
     isMember: boolean;
 }) {
@@ -82,7 +84,7 @@ function MeetingContent({
                     <MeetingDetailsCard
                         meeting={meeting}
                         totalDuration={totalDuration}
-                        canEdit={isMember}
+                        canEdit={canManageMeeting}
                         meetingId={meeting.id}
                         clubId={clubId}
                     />
@@ -142,6 +144,7 @@ export default function MeetingPage() {
 
     const canManageNotes =
         roleData?.role === "OWNER" || roleData?.role === "ADMIN";
+    const canManageMeeting = canManageNotes;
     const userRole = (roleData?.role || "MEMBER") as
         | "OWNER"
         | "ADMIN"
@@ -174,6 +177,7 @@ export default function MeetingPage() {
             meeting={meeting}
             clubId={params.id}
             canManageNotes={canManageNotes}
+            canManageMeeting={canManageMeeting}
             userRole={userRole}
             isMember={roleData?.member === true}
         />
